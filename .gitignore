@@ -1,0 +1,85 @@
+####################################
+# 🔹 Sistema Operativo / Editor
+####################################
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+Thumbs.db
+Desktop.ini
+
+####################################
+# 🔹 .NET / Visual Studio
+####################################
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+# EF Core
+Migrations/*.Designer.cs
+Migrations/*.resx
+
+####################################
+# 🔹 ASP.NET Core
+####################################
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.Local.json
+secrets.json
+
+####################################
+# 🔹 Publicaciones / Deploy
+####################################
+publish/
+out/
+artifacts/
+
+####################################
+# 🔹 Frontend (React / Vite)
+####################################
+node_modules/
+dist/
+build/
+.eslintcache
+.vite/
+
+####################################
+# 🔹 Variables de entorno
+####################################
+.env
+.env.*
+!.env.example
+
+####################################
+# 🔹 Logs y archivos temporales
+####################################
+logs/
+*.log
+*.tmp
+
+####################################
+# 🔹 Base de datos / Backups
+####################################
+*.mdf
+*.ldf
+*.bak
+*.sql
+
+####################################
+# 🔹 Archivos generados por IIS
+####################################
+web.config
+
+####################################
+# 🔹 Otros
+####################################
+*.zip
+*.rar
+*.7z
