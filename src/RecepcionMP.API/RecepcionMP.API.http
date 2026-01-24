@@ -1,0 +1,6 @@
+@RecepcionMP.API_HostAddress = http://localhost:5129
+
+GET {{RecepcionMP.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
