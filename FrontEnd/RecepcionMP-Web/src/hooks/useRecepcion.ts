@@ -35,6 +35,11 @@ export function useRecepcion() {
     setLotes(prev => [...prev, lote]);
   }
 
+  function eliminarLote(id: string) {
+    setLotes(prev => prev.filter(l => l.id !== id));
+  }
+
+
   function actualizarChecklist(items: any[]) {
     setChecklist(items);
   }
@@ -87,6 +92,7 @@ export function useRecepcion() {
     seleccionarOrdenCompra,
     registrarFactura,
     agregarLote,
+    eliminarLote,
     actualizarChecklist,
     definirResultado,
     enviarRecepcion

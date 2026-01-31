@@ -2,7 +2,7 @@ import { useRecepcion } from "../hooks/useRecepcion";
 
 import OrdenCompraSearch from "../components/recepcion/OrdenCompraSearch";
 import FacturaForm from "../components/recepcion/FacturaForm";
-import LotesTable from "../components/recepcion/LotesTable";
+import LotesTable from "../components/recepcion/lotes/LotesTable";
 import ResultadoRecepcionSelect from "../components/recepcion/ResultadoRecepcionSelect";
 import RecepcionActions from "../components/recepcion/RecepcionActions";
 
