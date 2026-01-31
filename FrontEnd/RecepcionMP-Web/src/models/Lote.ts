@@ -1,8 +1,9 @@
 export interface Lote {
+  id: string;
   itemId: number;
+  nombreItem: string;
   numeroLote: string;
-  fechaFabricacion?: string;
   fechaVencimiento: string;
-  cantidad: number;
-  unidadMedida: string;
+  cantidadRecibida: number;
+  observaciones?: string;
 }
