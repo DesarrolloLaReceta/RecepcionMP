@@ -1,0 +1,56 @@
+.sidebar {
+  width: 240px;
+  background-color: #1f2937;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+
+/* Navegación */
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 32px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.navItem {
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.navItem:hover {
+  background-color: #374151;
+}
+
+.active {
+  background-color: #2563eb;
+}
+
+/* ===== Responsive ===== */
+
+/* Tablets y menores */
+@media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    top: 64px; /* altura del header */
+    left: 0;
+    height: calc(100vh - 64px);
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+
+  .open {
+    transform: translateX(0);
+  }
+}

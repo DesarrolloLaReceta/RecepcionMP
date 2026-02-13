@@ -1,15 +1,32 @@
+import { NavLink } from "react-router-dom";
+import styles from "./Sidebar.module.css";
+
 const Sidebar = () => {
   return (
-    <aside className="sidebar">
-      <h2>Recepción MP</h2>
+    <aside className={styles.sidebar}>
 
-      <nav>
-        <ul>
-          <li>Recepción</li>
-          <li>Calidad</li>
-          <li>Trazabilidad</li>
-          <li>Maestros</li>
-        </ul>
+      <nav className={styles.nav}>
+        <NavLink
+          to="/recepcion"
+          className={({ isActive }) =>
+            isActive
+              ? `${styles.navItem} ${styles.active}`
+              : styles.navItem
+          }
+        >
+          Recepción
+        </NavLink>
+
+        <NavLink
+          to="/calidad"
+          className={({ isActive }) =>
+            isActive
+              ? `${styles.navItem} ${styles.active}`
+              : styles.navItem
+          }
+        >
+          Calidad
+        </NavLink>
       </nav>
     </aside>
   );
