@@ -1,0 +1,16 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+}
+
+.pageContent {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
