@@ -1,0 +1,46 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.searchBox {
+  display: flex;
+  gap: 12px;
+}
+
+.input {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+
+.button {
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--color-accent);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.resultCard {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.continueButton {
+  margin-top: 16px;
+  padding: 12px;
+  width: 100%;
+  border-radius: 8px;
+  border: none;
+  background-color: #16a34a;
+  color: white;
+  font-size: 16px;
+}

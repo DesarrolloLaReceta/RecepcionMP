@@ -1,34 +1,22 @@
-import { NavLink } from "react-router-dom";
 import styles from "./Sidebar.module.css";
 
-const Sidebar = () => {
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const Sidebar = ({ isOpen, onClose }: Props) => {
   return (
-    <aside className={styles.sidebar}>
+    <>
+      {isOpen && <div className={styles.overlay} onClick={onClose} />}
 
-      <nav className={styles.nav}>
-        <NavLink
-          to="/recepcion"
-          className={({ isActive }) =>
-            isActive
-              ? `${styles.navItem} ${styles.active}`
-              : styles.navItem
-          }
-        >
-          Recepción
-        </NavLink>
-
-        <NavLink
-          to="/calidad"
-          className={({ isActive }) =>
-            isActive
-              ? `${styles.navItem} ${styles.active}`
-              : styles.navItem
-          }
-        >
-          Calidad
-        </NavLink>
-      </nav>
-    </aside>
+      <aside
+        className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}
+      >
+        <h2>Módulos</h2>
+        {/* navegación */}
+      </aside>
+    </>
   );
 };
 

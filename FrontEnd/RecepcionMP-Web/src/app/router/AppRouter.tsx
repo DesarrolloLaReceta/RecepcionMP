@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
 
 // Pages (por ahora placeholders)
-import RecepcionPage from "../../modules/recepcion/pages/Recepcionpage";
+import RecepcionPage from "../../modules/recepcion/pages/RecepcionPage";
 // import CalidadPage ...
 // import TrazabilidadPage ...
 
