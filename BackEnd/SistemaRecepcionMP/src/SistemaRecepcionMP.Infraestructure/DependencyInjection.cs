@@ -1,0 +1,57 @@
+using SistemaRecepcionMP.Application.Common.Interfaces;
+using SistemaRecepcionMP.Domain.Interfaces;
+using SistemaRecepcionMP.Infrastructure.ExternalServices;
+using SistemaRecepcionMP.Infrastructure.FileStorage;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using SistemaRecepcionMP.Infraestructure.Persistence;
+using Infrastructure.Identity;
+using Infrastructure.ExternalServices;
+
+namespace SistemaRecepcionMP.Infraestructure;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddInfraestructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
+    {
+        // ── Base de datos ─────────────────────────────────────────────────────
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                sql =>
+                {
+                    sql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                    // Reintentos automáticos ante fallos transitorios de SQL Server / Azure SQL
+                    sql.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                }));
+
+        // ── Unit of Work y Repositorios ───────────────────────────────────────
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // ── Identity — resolución del usuario local ───────────────────────────
+        services.AddHttpContextAccessor();
+        services.AddScoped<CurrentUserService>();
+        services.AddScoped<ICurrentUserService>(sp => sp.GetRequiredService<CurrentUserService>());
+
+        // ── File Storage — Azure en producción, local en desarrollo ───────────
+        if (environment.IsProduction())
+            services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+        else
+            services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
+        // ── Servicios externos ────────────────────────────────────────────────
+        services.AddScoped<IQrCodeService, QrCodeService>();
+        services.AddScoped<IEmailService, EmailService>();
+
+        return services;
+    }
+}
