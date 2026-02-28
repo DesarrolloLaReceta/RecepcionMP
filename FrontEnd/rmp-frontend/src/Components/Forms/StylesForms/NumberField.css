@@ -1,0 +1,111 @@
+/* ============================================================
+   NUMBERFIELD — overrides sobre .field-input base (Fields.css)
+   ============================================================ */
+
+
+/* ===== INPUT NUMÉRICO ===== */
+
+/* Ocultar flechas nativas del browser */
+.field-number {
+  font-family: var(--font-mono);
+  appearance:  textfield;   /* Firefox */
+}
+.field-number::-webkit-outer-spin-button,
+.field-number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/*
+   Padding derecho según presencia de unit y/o stepper.
+   Se controla con data-attributes en el <input>:
+     data-has-unit="true"
+     data-has-stepper="true"
+*/
+.field-number[data-has-unit="true"]                               { padding-right: 3.5rem;  }   /* pr-14 */
+.field-number[data-has-stepper="true"]                            { padding-right: 3.5rem;  }   /* pr-14 */
+.field-number[data-has-unit="true"][data-has-stepper="true"]      { padding-right: 5rem;    }   /* pr-20 */
+
+
+/* ===== ADDON DERECHO — wrapper ===== */
+/*
+   Contiene el badge de unidad y/o los botones stepper.
+   Posicionado absolutamente sobre el borde derecho del input.
+*/
+.field-number-addon {
+  position:      absolute;
+  right:         0;
+  top:           0;
+  height:        100%;
+  display:       flex;
+  align-items:   stretch;
+  overflow:      hidden;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+
+/* ===== BADGE DE UNIDAD ===== */
+.field-unit {
+  display:         flex;
+  align-items:     center;
+  padding:         0 0.625rem;   /* px-2.5 */
+  font-size:       var(--text-sm);   /* 11px */
+  font-family:     var(--font-mono);
+  user-select:     none;
+  flex-shrink:     0;
+  background:      rgba(255, 255, 255, 0.04);
+  border-left:     1px solid rgba(255, 255, 255, 0.07);
+  color:           var(--text-muted);   /* #64748B */
+  transition:      color var(--transition-fast);
+}
+
+/* Fuera de rango — color cambia a error */
+.field-unit[data-out-of-range="true"] {
+  color: #FCA5A5;
+}
+
+
+/* ===== STEPPER — contenedor de botones +/- ===== */
+.field-stepper {
+  display:      flex;
+  flex-direction: column;
+  flex-shrink:  0;
+  border-left:  1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Cuando va junto a unit, no tiene border-left propio (ya lo tiene el unit) */
+.field-unit + .field-stepper {
+  border-left: none;
+}
+
+/* Botón individual (+) y (-) */
+.field-stepper-btn {
+  flex:            1;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         0 0.5rem;   /* px-2 */
+  background:      transparent;
+  border:          none;
+  cursor:          pointer;
+  transition:      background var(--transition-fast);
+}
+
+.field-stepper-btn:hover {
+  background: rgba(245, 158, 11, 0.10);
+}
+
+/* Separador entre + y - */
+.field-stepper-btn:first-child {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Ícono dentro del botón */
+.field-stepper-icon {
+  fill:           none;
+  stroke:         var(--text-muted);
+  stroke-width:   2.5;
+  stroke-linecap: round;
+  flex-shrink:    0;
+  pointer-events: none;
+}

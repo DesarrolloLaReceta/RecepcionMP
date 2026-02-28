@@ -1,0 +1,117 @@
+/* ============================================================
+   FIELDS — Estilos base compartidos
+   Importado desde TextField.tsx; disponible para todos los
+   campos que importen FieldWrapper desde TextField.
+   ============================================================ */
+
+
+/* ===== WRAPPER DEL CAMPO (label + input + error/hint) ===== */
+.field-wrapper {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.375rem;   /* gap-1.5 */
+}
+
+.field-wrapper-full {
+  width: 100%;
+}
+
+
+/* ===== LABEL ===== */
+.field-label {
+  font-size:      var(--text-sm);    /* 11px */
+  font-weight:    600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family:    var(--font-mono);
+  color:          var(--text-muted); /* #64748B */
+}
+
+.field-required-mark {
+  color:       #FCA5A5;
+  margin-left: 0.125rem;
+}
+
+
+/* ===== INPUT BASE ===== */
+/*
+   Aplica a: <input>, <select>, <textarea>
+   Estados de borde manejados por CSS:
+     :focus          → borde amber (focus normal)
+     [data-error]    → borde rojo (error)
+     [data-error]:focus → borde rojo (error persiste en focus)
+*/
+.field-input {
+  width:         100%;
+  padding:       0.625rem 0.875rem;   /* py-2.5 px-3.5 */
+  border-radius: var(--radius-md);
+  font-size:     var(--text-md);      /* 13px */
+  font-family:   var(--font-sans);
+  outline:       none;
+  background:    rgba(255, 255, 255, 0.03);
+  border:        1px solid rgba(255, 255, 255, 0.08);
+  color:         var(--text-faintest);   /* #CBD5E1 */
+  transition:    border-color var(--transition-fast);
+}
+
+.field-input::placeholder {
+  color: var(--text-tertiary);   /* #334155 */
+}
+
+/* Focus normal */
+.field-input:focus {
+  border-color: rgba(245, 158, 11, 0.30);
+}
+
+/* Estado error */
+.field-input[data-error="true"] {
+  border-color: rgba(239, 68, 68, 0.40);
+}
+
+/* Focus en estado error — mantiene el borde rojo */
+.field-input[data-error="true"]:focus {
+  border-color: rgba(239, 68, 68, 0.40);
+}
+
+
+/* ===== CONTENEDOR RELATIVO (para íconos y addons) ===== */
+.field-input-wrapper {
+  position: relative;
+}
+
+
+/* ===== ÍCONO IZQUIERDO (leadingIcon) ===== */
+.field-icon-left {
+  position:        absolute;
+  left:            0.75rem;
+  top:             50%;
+  transform:       translateY(-50%);
+  pointer-events:  none;
+  fill:            none;
+  stroke:          var(--text-muted);
+  stroke-width:    2;
+  stroke-linecap:  round;
+  flex-shrink:     0;
+}
+
+/* Input con ícono izquierdo — padding extra */
+.field-input-with-icon {
+  padding-left: 2.25rem;   /* pl-9 */
+}
+
+
+/* ===== ERROR ===== */
+.field-error-msg {
+  font-size:   var(--text-sm);   /* 11px */
+  font-family: var(--font-mono);
+  color:       #FCA5A5;
+}
+
+
+/* ===== HINT ===== */
+.field-hint {
+  font-size:   var(--text-xs);        /* 10px */
+  color:       var(--text-tertiary);  /* #334155 */
+  font-family: var(--font-mono);
+  line-height: 1.6;
+}

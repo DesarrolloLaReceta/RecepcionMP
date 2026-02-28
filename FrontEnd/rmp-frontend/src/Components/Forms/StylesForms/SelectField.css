@@ -1,0 +1,36 @@
+/* ============================================================
+   SELECTFIELD — overrides sobre .field-input base (Fields.css)
+   ============================================================ */
+
+
+/* ===== SELECT NATIVO ===== */
+.field-select {
+  appearance:  none;          /* quita la flecha nativa del SO */
+  cursor:      pointer;
+  padding-right: 2.25rem;     /* pr-9 — espacio para el chevron custom */
+}
+
+/* Color del placeholder (opción vacía seleccionada) */
+.field-select[data-empty="true"] {
+  color: var(--text-muted);   /* #475569 */
+}
+
+/* Color del valor seleccionado real */
+.field-select:not([data-empty="true"]) {
+  color: var(--text-faintest); /* #CBD5E1 — igual que los inputs de texto */
+}
+
+
+/* ===== CHEVRON DERECHO ===== */
+.field-select-chevron {
+  position:        absolute;
+  right:           0.75rem;    /* right-3 */
+  top:             50%;
+  transform:       translateY(-50%);
+  pointer-events:  none;
+  fill:            none;
+  stroke:          var(--text-muted);
+  stroke-width:    2.5;
+  stroke-linecap:  round;
+  flex-shrink:     0;
+}

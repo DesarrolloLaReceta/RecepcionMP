@@ -1,0 +1,36 @@
+/* ============================================================
+   DATEFIELD — overrides sobre .field-input base (Fields.css)
+   ============================================================ */
+
+
+/* ===== PICKER NATIVO ===== */
+/*
+   Fuerza el calendario/reloj nativo a tema oscuro
+   para que contraste con el fondo de la app.
+*/
+.field-date {
+  color-scheme: dark;
+}
+
+
+/* ===== COUNTDOWN BADGE ===== */
+.field-countdown {
+  display:     flex;
+  align-items: center;
+  gap:         0.375rem;   /* gap-1.5 */
+  margin-top:  0.125rem;   /* mt-0.5  */
+}
+
+.field-countdown-dot {
+  width:         0.375rem;   /* w-1.5 */
+  height:        0.375rem;
+  border-radius: var(--radius-full);
+  flex-shrink:   0;
+  /* background llega inline — color dinámico según días restantes */
+}
+
+.field-countdown-label {
+  font-size:   var(--text-xs);    /* 10px */
+  font-family: var(--font-mono);
+  /* color llega inline — dinámico */
+}

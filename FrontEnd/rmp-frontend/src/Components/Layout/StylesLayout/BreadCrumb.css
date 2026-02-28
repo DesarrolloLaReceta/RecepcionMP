@@ -1,0 +1,133 @@
+/* ============================================================
+   BREADCRUMB — usa tokens del tema
+   ============================================================ */
+
+
+/* ===== CONTENEDOR NAV ===== */
+.bc-nav {
+  display:     flex;
+  align-items: center;
+  gap:         0.375rem;   /* gap-1.5 */
+  min-width:   0;
+}
+
+
+/* ===== LINK HOME ===== */
+.bc-home-link {
+  display:     flex;
+  align-items: center;
+  gap:         0.375rem;
+  flex-shrink: 0;
+  color:       var(--text-muted);
+  transition:  color var(--transition-fast);
+  text-decoration: none;
+}
+
+.bc-home-link:hover {
+  color: var(--text-ghost);
+}
+
+/* Home en modo raíz (Dashboard) — resaltado con color primario */
+.bc-home-link-active {
+  color: var(--primary);
+}
+
+.bc-home-link-active:hover {
+  color: var(--primary);
+}
+
+/* Label junto al home en modo raíz */
+.bc-home-label {
+  font-size:   var(--text-md);   /* ~13px */
+  font-weight: 600;
+  color:        var(--text-primary);
+}
+
+
+/* ===== ELIPSIS (modo compacto truncado) ===== */
+.bc-ellipsis {
+  font-size:   var(--text-sm);   /* 11px */
+  font-family: var(--font-mono);
+  user-select: none;
+  color:       var(--text-faintest);
+}
+
+
+/* ===== WRAPPER DE CADA CRUMB ===== */
+.bc-item {
+  display:     flex;
+  align-items: center;
+  gap:         0.375rem;
+  min-width:   0;
+}
+
+
+/* ===== CRUMB ACTIVO (último — no navegable) ===== */
+.bc-active {
+  display:     flex;
+  align-items: center;
+  gap:         0.375rem;
+  min-width:   0;
+}
+
+/* Wrapper del ícono de sección en crumb activo */
+.bc-section-icon-wrap {
+  display:     flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color:       var(--primary);
+}
+
+/* Label del crumb activo */
+.bc-active-label {
+  font-size:     var(--text-md);
+  font-weight:   600;
+  color:         var(--text-primary);
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+  max-width:     180px;
+}
+
+/* Variante dinámica (ID de URL sin mapear) — fuente mono, tamaño menor */
+.bc-active-label[data-dynamic="true"] {
+  color:       var(--text-ghost);
+  font-family: var(--font-mono);
+  font-size:   var(--text-sm);   /* 11px */
+}
+
+
+/* ===== CRUMB NAVEGABLE (intermedios) ===== */
+.bc-link {
+  display:         flex;
+  align-items:     center;
+  gap:             0.375rem;
+  min-width:       0;
+  color:           var(--text-muted);
+  text-decoration: none;
+  transition:      color var(--transition-fast);
+}
+
+.bc-link:hover {
+  color: var(--text-ghost);
+}
+
+/* Ícono de sección dentro del link navegable */
+.bc-link-icon {
+  flex-shrink: 0;
+  transition:  color var(--transition-fast);
+}
+
+.bc-link:hover .bc-link-icon {
+  color: var(--text-muted);   /* #64748B */
+}
+
+/* Label del link navegable */
+.bc-link-label {
+  font-size:     var(--text-md);
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+  max-width:     140px;
+}

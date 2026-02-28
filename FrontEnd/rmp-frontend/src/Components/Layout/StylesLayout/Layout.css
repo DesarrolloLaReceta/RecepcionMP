@@ -1,0 +1,533 @@
+/* ============================================================
+   LAYOUT — AppShell · Header · Sidebar
+   ============================================================ */
+
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+
+.app-shell {
+  height:     100vh;
+  overflow:   hidden;
+  background: var(--bg-app);
+}
+
+/* Área bajo el header — ocupa el espacio restante */
+.app-body {
+  display:    flex;
+  position:   relative;
+  height:     calc(100vh - var(--header-height));
+  margin-top: var(--header-height);
+}
+
+/* Contenido principal */
+.app-main {
+  flex:         1;
+  overflow-y:   auto;
+  min-width:    0;
+  background:   var(--bg-app);
+  transition:   none;   /* sin transición — el sidebar anima su propio width */
+}
+
+.app-main-inner {
+  padding: 1.5rem;   /* p-6 */
+}
+
+/* Backdrop móvil — cubre el contenido al abrir sidebar en pantallas pequeñas */
+.app-backdrop {
+  position:   fixed;
+  inset:      0;
+  z-index:    30;
+  background: var(--bg-overlay);
+  top:        var(--header-height);
+  display:    none;   /* visible solo en móvil via media query */
+}
+
+@media (max-width: 768px) {
+  .app-backdrop {
+    display: block;
+  }
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.app-header {
+  position:      fixed;
+  top:           0;
+  left:          0;
+  right:         0;
+  z-index:       50;
+  display:       flex;
+  align-items:   center;
+  justify-content: space-between;
+  padding:       0 1rem;
+  height:        var(--header-height);
+  flex-shrink:   0;
+  background:    var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+  box-shadow:    var(--shadow-sm);
+}
+
+/* Lado izquierdo: hamburguesa + logo + breadcrumb */
+.header-left {
+  display:     flex;
+  align-items: center;
+  gap:         0.75rem;
+  min-width:   0;
+}
+
+/* Lado derecho: fecha + indicador + usuario */
+.header-right {
+  display:     flex;
+  align-items: center;
+  gap:         0.75rem;
+  flex-shrink: 0;
+}
+
+/* Divisor vertical */
+.header-divider {
+  width:      1px;
+  height:     1rem;
+  background: var(--border-default);
+  flex-shrink: 0;
+}
+
+.header-divider-lg {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .header-divider-lg {
+    display: block;
+  }
+}
+
+/* ── Botón hamburguesa ── */
+.header-hamburger {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           2rem;
+  height:          2rem;
+  border-radius:   var(--radius-md);
+  flex-shrink:     0;
+  background:      transparent;
+  border:          none;
+  cursor:          pointer;
+  color:           var(--text-muted);
+  transition:      background var(--transition-fast),
+                   color      var(--transition-fast);
+}
+
+.header-hamburger:hover {
+  background: var(--bg-item);
+  color:      var(--text-primary);
+}
+
+.header-hamburger-icon {
+  fill:           none;
+  stroke:         currentColor;
+  stroke-width:   2;
+  stroke-linecap: round;
+  transition:     transform var(--transition-base);
+}
+
+/* ── Logo compacto ── */
+.header-logo {
+  width:           1.75rem;
+  height:          1.75rem;
+  border-radius:   var(--radius-md);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  flex-shrink:     0;
+  background:      var(--primary-10);
+  border:          1px solid var(--primary-20);
+}
+
+/* ── Fecha ── */
+.header-date {
+  font-size:   var(--text-sm);
+  font-family: var(--font-mono);
+  color:       var(--text-ghost);
+  text-transform: capitalize;
+  display:     none;
+}
+
+@media (min-width: 1024px) {
+  .header-date { display: block; }
+}
+
+/* ── Indicador online ── */
+.header-online {
+  display:     flex;
+  align-items: center;
+  gap:         0.375rem;
+}
+
+.header-online-dot {
+  width:         0.375rem;
+  height:        0.375rem;
+  border-radius: var(--radius-full);
+  background:    var(--success);
+  animation:     pulse 2.5s ease-in-out infinite;
+}
+
+.header-online-label {
+  font-size:   var(--text-xs);
+  font-family: var(--font-mono);
+  color:       var(--text-ghost);
+  display:     none;
+}
+
+@media (min-width: 640px) {
+  .header-online-label { display: block; }
+}
+
+
+/* ── Botón de usuario ── */
+.header-user-btn {
+  display:       flex;
+  align-items:   center;
+  gap:           0.5rem;
+  border-radius: var(--radius-md);
+  padding:       0.375rem 0.5rem;
+  background:    transparent;
+  border:        1px solid transparent;
+  cursor:        pointer;
+  transition:    background      var(--transition-fast),
+                 border-color    var(--transition-fast);
+}
+
+.header-user-btn:hover,
+.header-user-btn[data-open="true"] {
+  background:   var(--bg-item);
+  border-color: var(--border-default);
+}
+
+/* Avatar circular con iniciales */
+.header-avatar {
+  width:           1.75rem;
+  height:          1.75rem;
+  border-radius:   var(--radius-md);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       var(--text-xs);
+  font-weight:     700;
+  font-family:     var(--font-mono);
+  flex-shrink:     0;
+  background:      var(--primary-10);
+  border:          1px solid var(--primary-20);
+  color:           var(--primary);
+}
+
+/* Info de nombre + rol junto al avatar */
+.header-user-info {
+  text-align: left;
+  display:    none;
+}
+
+@media (min-width: 640px) {
+  .header-user-info { display: block; }
+}
+
+.header-user-name {
+  font-size:     var(--text-base);
+  font-weight:   600;
+  line-height:   1;
+  margin-bottom: 0.125rem;
+  white-space:   nowrap;
+  max-width:     110px;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+  color:         var(--text-primary);
+}
+
+.header-user-role {
+  font-size:   var(--text-xs);
+  line-height: 1;
+  color:       var(--text-muted);
+}
+
+/* Chevron del dropdown */
+.header-user-chevron {
+  fill:           none;
+  stroke:         var(--text-ghost);
+  stroke-width:   2.5;
+  stroke-linecap: round;
+  transition:     transform var(--transition-base);
+}
+
+.header-user-chevron[data-open="true"] {
+  transform: rotate(180deg);
+}
+
+
+/* ── Dropdown de usuario ── */
+.header-dropdown {
+  position:    absolute;
+  right:       0;
+  top:         calc(100% + 0.5rem);
+  width:       14rem;
+  border-radius: var(--radius-lg);
+  overflow:    hidden;
+  z-index:     50;
+  background:  var(--bg-modal);
+  border:      1px solid var(--border-default);
+  box-shadow:  var(--shadow-dropdown);
+  animation:   fadeSlideUp 0.15s ease both;
+}
+
+.header-dropdown-info {
+  padding:       0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.header-dropdown-name {
+  font-size:     var(--text-md);
+  font-weight:   600;
+  color:         var(--text-primary);
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.header-dropdown-email {
+  font-size:   var(--text-xs);
+  font-family: var(--font-mono);
+  color:       var(--text-muted);
+  margin-top:  0.125rem;
+  white-space: nowrap;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+}
+
+.header-dropdown-roles {
+  display:    flex;
+  gap:        0.25rem;
+  margin-top: 0.5rem;
+  flex-wrap:  wrap;
+}
+
+/* Pastilla de rol */
+.header-role-badge {
+  font-size:     9px;
+  font-family:   var(--font-mono);
+  padding:       0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  background:    var(--primary-8);
+  color:         var(--primary);
+  border:        1px solid var(--primary-15);
+}
+
+/* Sección del dropdown */
+.header-dropdown-section {
+  padding: 0.25rem 0;
+}
+
+.header-dropdown-section + .header-dropdown-section {
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Ítem del dropdown */
+.header-dropdown-item {
+  width:       100%;
+  display:     flex;
+  align-items: center;
+  gap:         0.75rem;
+  padding:     0.625rem 1rem;
+  font-size:   var(--text-md);
+  background:  transparent;
+  border:      none;
+  cursor:      pointer;
+  color:       var(--text-muted);
+  transition:  background var(--transition-fast),
+               color      var(--transition-fast);
+}
+
+.header-dropdown-item:hover {
+  background: var(--bg-item);
+  color:      var(--text-secondary);
+}
+
+/* Ítem de cierre de sesión — rojo en hover */
+.header-dropdown-item-danger:hover {
+  background: var(--danger-bg);
+  color:      var(--danger-text);
+}
+
+.header-dropdown-icon {
+  fill:           none;
+  stroke:         currentColor;
+  stroke-width:   1.8;
+  stroke-linecap: round;
+  flex-shrink:    0;
+}
+
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+.app-sidebar {
+  display:        flex;
+  flex-direction: column;
+  height:         100%;
+  flex-shrink:    0;
+  overflow:       hidden;
+  background:     var(--bg-surface);
+  transition:     width           var(--transition-slow),
+                  border-color    var(--transition-slow),
+                  box-shadow      var(--transition-slow);
+}
+
+.app-sidebar[data-open="true"] {
+  width:        var(--sidebar-width);
+  border-right: 1px solid var(--border-default);
+  box-shadow:   var(--shadow-sidebar);
+}
+
+.app-sidebar[data-open="false"] {
+  width:        0;
+  border-right: none;
+  box-shadow:   none;
+}
+
+/* Wrapper interno con ancho fijo para que el contenido no se comprima */
+.sidebar-inner {
+  display:        flex;
+  flex-direction: column;
+  height:         100%;
+  overflow:       hidden;
+  width:          var(--sidebar-width);
+  min-width:      var(--sidebar-width);
+}
+
+/* ── Navegación ── */
+.sidebar-nav {
+  flex:       1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding:    0.75rem 0;
+  scrollbar-width: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* Grupo de navegación */
+.sidebar-group {
+  margin-bottom: 0.25rem;
+}
+
+/* Etiqueta del grupo */
+.sidebar-group-label {
+  padding:        0.75rem 1rem 0.25rem;
+  font-size:      9px;
+  font-weight:    700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-family:    var(--font-mono);
+  color:          var(--text-ghost);
+}
+
+/* Nav item — NavLink */
+.sidebar-nav-item {
+  position:      relative;
+  display:       flex;
+  align-items:   center;
+  gap:           0.625rem;
+  margin:        0.125rem 0.5rem;
+  padding:       0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size:     var(--text-md);
+  font-weight:   400;
+  white-space:   nowrap;
+  text-decoration: none;
+  transition:    background var(--transition-fast),
+                 color      var(--transition-fast),
+                 font-weight var(--transition-fast);
+  background:    transparent;
+  color:         var(--text-muted);
+}
+
+.sidebar-nav-item:hover {
+  background: var(--bg-row-hover);
+  color:      var(--text-ghost);
+}
+
+/* Estado activo */
+.sidebar-nav-item[data-active="true"] {
+  background:  var(--primary-8);
+  color:       var(--primary);
+  font-weight: 600;
+}
+
+.sidebar-nav-item[data-active="true"]:hover {
+  background: var(--primary-8);
+  color:      var(--primary);
+}
+
+/* Barra indicadora izquierda — solo en activo */
+.sidebar-nav-indicator {
+  position:      absolute;
+  left:          0;
+  top:           50%;
+  transform:     translateY(-50%);
+  width:         0.125rem;
+  height:        1.25rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background:    var(--primary);
+}
+
+/* Ícono del item */
+.sidebar-nav-icon {
+  flex-shrink: 0;
+}
+
+/* Texto del item */
+.sidebar-nav-label {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ── Perfil activo (pie del sidebar) ── */
+.sidebar-profile {
+  margin:        0 0.75rem 1rem;
+  padding:       0.625rem 0.75rem;
+  border-radius: var(--radius-md);
+  background:    var(--bg-item);
+  border:        1px solid var(--border-subtle);
+}
+
+.sidebar-profile-label {
+  font-size:      9px;
+  font-family:    var(--font-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-ghost);
+  margin-bottom:  0.375rem;
+}
+
+.sidebar-profile-roles {
+  display:  flex;
+  flex-wrap: wrap;
+  gap:      0.25rem;
+}
+
+/* Pastilla de rol en el sidebar */
+.sidebar-role-badge {
+  font-size:     var(--text-xs);
+  font-family:   var(--font-mono);
+  padding:       0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  background:    var(--primary-8);
+  color:         var(--primary);
+  border:        1px solid var(--primary-15);
+}
