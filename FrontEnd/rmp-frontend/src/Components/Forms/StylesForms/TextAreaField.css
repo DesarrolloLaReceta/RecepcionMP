@@ -1,0 +1,41 @@
+/* ============================================================
+   TEXTAREAFIELD — overrides sobre .field-input base (Fields.css)
+   ============================================================ */
+
+
+/* ===== TEXTAREA ===== */
+.field-textarea {
+  line-height:    1.6;       /* leading-relaxed */
+  resize:         none;      /* default — se sobreescribe con data-resize */
+  min-height:     4.5rem;    /* altura mínima razonable sin rows explícito */
+}
+
+/* Variantes de resize via data-attribute */
+.field-textarea[data-resize="vertical"] { resize: vertical; }
+.field-textarea[data-resize="both"]     { resize: both;     }
+.field-textarea[data-resize="none"]     { resize: none;     }
+
+
+/* ===== WRAPPER RELATIVO (para el contador) ===== */
+.field-textarea-wrapper {
+  position: relative;
+}
+
+
+/* ===== CONTADOR DE CARACTERES ===== */
+.field-char-counter {
+  position:       absolute;
+  bottom:         0.5rem;    /* bottom-2 */
+  right:          0.75rem;   /* right-3  */
+  font-size:      var(--text-xs);    /* 10px */
+  font-family:    var(--font-mono);
+  pointer-events: none;
+  user-select:    none;
+  transition:     color var(--transition-fast);
+  /* color llega inline — dinámico según cercanía al límite */
+}
+
+/* Espacio extra abajo del textarea cuando hay contador */
+.field-textarea-with-counter {
+  padding-bottom: 1.75rem;   /* pb-7 — evita que el texto tape el contador */
+}

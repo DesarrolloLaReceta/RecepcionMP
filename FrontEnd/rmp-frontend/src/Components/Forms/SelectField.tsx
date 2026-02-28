@@ -1,21 +1,18 @@
 import { forwardRef, type SelectHTMLAttributes } from "react";
-import {
-  type FieldBaseProps, FieldWrapper,
-  fieldInputBase, fieldInputStyle,
-  fieldInputFocusColor, fieldInputErrorColor, fieldInputNormalColor,
-} from "./TextField";
+import { type FieldBaseProps, FieldWrapper } from "./TextField";
+import "./StylesForms/Fields.css";
+import "./StylesForms/SelectField.css";
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
 export interface SelectOption {
-  value: string | number;
-  label: string;
-  /** Deshabilita la opción individualmente */
+  value:     string | number;
+  label:     string;
   disabled?: boolean;
 }
 
 export interface SelectOptionGroup {
-  group: string;
+  group:   string;
   options: SelectOption[];
 }
 
@@ -28,17 +25,17 @@ function isGrouped(opts: SelectOptions): opts is SelectOptionGroup[] {
 export interface SelectFieldProps
   extends FieldBaseProps,
     Omit<SelectHTMLAttributes<HTMLSelectElement>, "className"> {
-  options: SelectOptions;
+  options:      SelectOptions;
   /**
    * Texto del placeholder (opción vacía al inicio).
    * Si no se pasa, no se agrega la opción vacía.
    */
   placeholder?: string;
   /** Muestra un indicador de carga en lugar de las opciones */
-  loading?: boolean;
+  loading?:     boolean;
 }
 
-// ─── SELECTFIELD ──────────────────────────────────────────────────────────────
+// ─── SELECT FIELD ─────────────────────────────────────────────────────────────
 
 /**
  * Select estilizado del sistema, compatible con opciones planas y agrupadas.
@@ -58,67 +55,73 @@ export interface SelectFieldProps
  * <SelectField
  *   label="Estado"
  *   options={[
- *     { group: "Activos", options: [{ value: 0, label: "Abierta" }] },
- *     { group: "Cerrados", options: [{ value: 3, label: "Cerrada" }] },
+ *     { group: "Activos",   options: [{ value: 0, label: "Abierta"  }] },
+ *     { group: "Cerrados",  options: [{ value: 3, label: "Cerrada"  }] },
  *   ]}
  * />
  */
 export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
   function SelectField(
-    { label, error, hint, required, fullWidth = true, className = "",
-      options, placeholder, loading, value, onFocus, onBlur, style, ...rest },
+    {
+      label,
+      error,
+      hint,
+      required,
+      fullWidth = true,
+      className = "",
+      options,
+      placeholder,
+      loading,
+      value,
+      style,
+      ...rest
+    },
     ref
   ) {
-    const handleFocus = (e: React.FocusEvent<HTMLSelectElement>) => {
-      e.currentTarget.style.borderColor = error ? fieldInputErrorColor : fieldInputFocusColor;
-      onFocus?.(e);
-    };
-    const handleBlur = (e: React.FocusEvent<HTMLSelectElement>) => {
-      e.currentTarget.style.borderColor = error ? fieldInputErrorColor : fieldInputNormalColor;
-      onBlur?.(e);
-    };
+    // Determina si el select está en estado "sin valor" (placeholder visible)
+    const isEmpty = value === "" || value === undefined || value === null;
 
     const renderOptions = () => {
       if (loading) {
         return <option disabled value="">Cargando…</option>;
       }
-      const grouped = isGrouped(options);
-      return grouped
-        ? (options as SelectOptionGroup[]).map(g => (
-            <optgroup key={g.group} label={g.group}>
-              {g.options.map(o => (
-                <option key={o.value} value={o.value} disabled={o.disabled}>
-                  {o.label}
-                </option>
-              ))}
-            </optgroup>
-          ))
-        : (options as SelectOption[]).map(o => (
-            <option key={o.value} value={o.value} disabled={o.disabled}>
-              {o.label}
-            </option>
-          ));
+
+      if (isGrouped(options)) {
+        return (options as SelectOptionGroup[]).map(g => (
+          <optgroup key={g.group} label={g.group}>
+            {g.options.map(o => (
+              <option key={o.value} value={o.value} disabled={o.disabled}>
+                {o.label}
+              </option>
+            ))}
+          </optgroup>
+        ));
+      }
+
+      return (options as SelectOption[]).map(o => (
+        <option key={o.value} value={o.value} disabled={o.disabled}>
+          {o.label}
+        </option>
+      ));
     };
 
     return (
       <FieldWrapper
-        label={label} error={error} hint={hint}
-        required={required} fullWidth={fullWidth} className={className}
+        label={label}
+        error={error}
+        hint={hint}
+        required={required}
+        fullWidth={fullWidth}
+        className={className}
       >
-        <div className="relative">
+        <div className="field-input-wrapper">
           <select
             ref={ref}
             value={value}
-            className={`${fieldInputBase} pr-9 appearance-none cursor-pointer`}
-            style={{
-              ...fieldInputStyle,
-              // El color del placeholder (opción vacía) lo manejamos con CSS
-              color: value === "" || value === undefined ? "#475569" : "#CBD5E1",
-              ...(error ? { borderColor: fieldInputErrorColor } : {}),
-              ...style,
-            }}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
+            data-error={error    ? true      : undefined}
+            data-empty={isEmpty  ? true      : undefined}
+            className="field-input field-select"
+            style={style}
             {...rest}
           >
             {placeholder !== undefined && (
@@ -129,11 +132,13 @@ export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
             {renderOptions()}
           </select>
 
-          {/* Chevron derecho */}
+          {/* Chevron custom — reemplaza la flecha nativa del SO */}
           <svg
-            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            width="12" height="12" viewBox="0 0 24 24"
-            fill="none" stroke="#475569" strokeWidth="2.5" strokeLinecap="round"
+            className="field-select-chevron"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path d="M6 9l6 6 6-6" />
           </svg>

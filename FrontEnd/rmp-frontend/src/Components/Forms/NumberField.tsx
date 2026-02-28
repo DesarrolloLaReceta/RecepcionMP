@@ -1,31 +1,29 @@
 import { forwardRef, type InputHTMLAttributes, useRef } from "react";
-import {
-  type FieldBaseProps, FieldWrapper,
-  fieldInputBase, fieldInputStyle,
-  fieldInputFocusColor, fieldInputErrorColor, fieldInputNormalColor,
-} from "./TextField";
+import { type FieldBaseProps, FieldWrapper } from "./TextField";
+import "./StylesForms/Fields.css";
+import "./StylesForms/NumberField.css";
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
 export interface NumberFieldProps
   extends FieldBaseProps,
     Omit<InputHTMLAttributes<HTMLInputElement>, "className" | "type"> {
-  /** Unidad de medida que se muestra como badge a la derecha (°C, Kg, %, etc.) */
-  unit?: string;
-  /** Si es true, muestra botones +/- para incrementar/decrementar */
-  stepper?: boolean;
+  /** Unidad de medida como badge a la derecha (°C, Kg, %, etc.) */
+  unit?:        string;
+  /** Muestra botones +/- para incrementar/decrementar */
+  stepper?:     boolean;
   /** Step para los botones +/- (default: coincide con el step del input o 1) */
   stepperStep?: number;
-  /** Formato de display: "decimal" | "currency" | "none" (default "none") */
-  format?: "decimal" | "currency" | "none";
-  /** Decimales a mostrar cuando format !== "none" */
-  decimals?: number;
-  /** Rango: si el valor está fuera, muestra alerta visual */
-  rangeMin?: number;
-  rangeMax?: number;
+  /** Formato de display: "decimal" | "currency" | "none" (default: "none") */
+  format?:      "decimal" | "currency" | "none";
+  /** Decimales cuando format !== "none" */
+  decimals?:    number;
+  /** Si el valor está fuera del rango, activa alerta visual */
+  rangeMin?:    number;
+  rangeMax?:    number;
 }
 
-// ─── NUMBERFIELD ──────────────────────────────────────────────────────────────
+// ─── NUMBER FIELD ─────────────────────────────────────────────────────────────
 
 /**
  * Campo numérico con validación visual de rango, badge de unidad y stepper.
@@ -40,44 +38,66 @@ export interface NumberFieldProps
  *   onChange={e => setTemp(e.target.value)}
  *   hint="Rango aceptable: 0 °C – 4 °C"
  * />
+ *
+ * // Con stepper y unidad
+ * <NumberField
+ *   label="Cantidad recibida"
+ *   unit="Kg"
+ *   stepper
+ *   stepperStep={0.5}
+ *   min={0}
+ *   value={form.cantidad}
+ *   onChange={e => setForm(p => ({ ...p, cantidad: e.target.value }))}
+ * />
  */
 export const NumberField = forwardRef<HTMLInputElement, NumberFieldProps>(
   function NumberField(
-    { label, error, hint, required, fullWidth = true, className = "",
-      unit, stepper, stepperStep, format = "none", decimals = 2,
-      rangeMin, rangeMax, value, onChange, onFocus, onBlur, style,
-      min, max, step = 1, ...rest },
+    {
+      label,
+      error,
+      hint,
+      required,
+      fullWidth   = true,
+      className   = "",
+      unit,
+      stepper,
+      stepperStep,
+      format      = "none",
+      decimals    = 2,
+      rangeMin,
+      rangeMax,
+      value,
+      onChange,
+      style,
+      min,
+      max,
+      step        = 1,
+      ...rest
+    },
     ref
   ) {
     const internalRef = useRef<HTMLInputElement>(null);
     const resolvedRef = (ref as React.RefObject<HTMLInputElement>) ?? internalRef;
 
+    // ── Validación de rango ───────────────────────────────────────────────────
     const numVal = value !== undefined && value !== "" ? Number(value) : undefined;
 
-    // Validación de rango (sin sobreescribir error del padre)
     const outOfRange = numVal !== undefined && (
       (rangeMin !== undefined && numVal < rangeMin) ||
       (rangeMax !== undefined && numVal > rangeMax)
     );
+
     const effectiveError = error ?? (outOfRange
-      ? `Fuera de rango (${rangeMin ?? "—"} – ${rangeMax ?? "—"} ${unit ?? ""})`
+      ? `Fuera de rango (${rangeMin ?? "—"} – ${rangeMax ?? "—"}${unit ? ` ${unit}` : ""})`
       : undefined);
 
-    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-      e.currentTarget.style.borderColor = effectiveError ? fieldInputErrorColor : fieldInputFocusColor;
-      onFocus?.(e);
-    };
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      e.currentTarget.style.borderColor = effectiveError ? fieldInputErrorColor : fieldInputNormalColor;
-      onBlur?.(e);
-    };
-
+    // ── Stepper ───────────────────────────────────────────────────────────────
     const incDec = (delta: number) => {
       const el = resolvedRef.current;
       if (!el) return;
-      const cur = parseFloat(el.value || "0");
-      const s   = stepperStep ?? Number(step);
-      const next = parseFloat((cur + delta * s).toFixed(10));
+      const cur     = parseFloat(el.value || "0");
+      const s       = stepperStep ?? Number(step);
+      const next    = parseFloat((cur + delta * s).toFixed(10));
       const clamped =
         min !== undefined && next < Number(min) ? Number(min) :
         max !== undefined && next > Number(max) ? Number(max) :
@@ -87,15 +107,19 @@ export const NumberField = forwardRef<HTMLInputElement, NumberFieldProps>(
       onChange?.({ target: el } as React.ChangeEvent<HTMLInputElement>);
     };
 
-    const paddingRight = unit && stepper ? "pr-20"
-      : unit          ? "pr-14"
-      : stepper       ? "pr-14"
-      : "";
+    // ─────────────────────────────────────────────────────────────────────────
 
     return (
-      <FieldWrapper label={label} error={effectiveError} hint={!effectiveError ? hint : undefined}
-        required={required} fullWidth={fullWidth} className={className}>
-        <div className="relative">
+      <FieldWrapper
+        label={label}
+        error={effectiveError}
+        hint={effectiveError ? undefined : hint}
+        required={required}
+        fullWidth={fullWidth}
+        className={className}
+      >
+        <div className="field-input-wrapper">
+
           <input
             ref={resolvedRef}
             type="number"
@@ -104,61 +128,60 @@ export const NumberField = forwardRef<HTMLInputElement, NumberFieldProps>(
             step={step}
             min={min}
             max={max}
-            className={`${fieldInputBase} font-mono ${paddingRight}`}
-            style={{
-              ...fieldInputStyle,
-              ...(effectiveError ? { borderColor: fieldInputErrorColor } : {}),
-              ...style,
-              // Ocultar flechas nativas del input number
-              MozAppearance: "textfield" as any,
-            }}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
+            data-error={effectiveError  ? true : undefined}
+            data-has-unit={unit         ? true : undefined}
+            data-has-stepper={stepper   ? true : undefined}
+            className="field-input field-number"
+            style={style}
             {...rest}
           />
 
-          {/* Bloque derecho: unidad + stepper */}
-          <div className="absolute right-0 top-0 h-full flex items-stretch overflow-hidden rounded-r-lg">
-            {/* Badge unidad */}
-            {unit && (
-              <div className="flex items-center px-2.5 text-[11px] font-mono select-none shrink-0"
-                style={{
-                  background: "rgba(255,255,255,0.04)",
-                  borderLeft: "1px solid rgba(255,255,255,0.07)",
-                  color: outOfRange ? "#FCA5A5" : "#64748B",
-                }}>
-                {unit}
-              </div>
-            )}
+          {/* ── Addon derecho: unidad + stepper ── */}
+          {(unit || stepper) && (
+            <div className="field-number-addon">
 
-            {/* Botones stepper */}
-            {stepper && (
-              <div className="flex flex-col shrink-0"
-                style={{ borderLeft: unit ? "none" : "1px solid rgba(255,255,255,0.07)" }}>
-                <button type="button" tabIndex={-1}
-                  onClick={() => incDec(1)}
-                  className="flex-1 flex items-center justify-center px-2 transition-colors"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
-                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.1)")}
-                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}>
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none"
-                    stroke="#64748B" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M18 15l-6-6-6 6" />
-                  </svg>
-                </button>
-                <button type="button" tabIndex={-1}
-                  onClick={() => incDec(-1)}
-                  className="flex-1 flex items-center justify-center px-2 transition-colors"
-                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.1)")}
-                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}>
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none"
-                    stroke="#64748B" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </button>
-              </div>
-            )}
-          </div>
+              {/* Badge de unidad */}
+              {unit && (
+                <div
+                  className="field-unit"
+                  data-out-of-range={outOfRange ? true : undefined}
+                  aria-hidden="true"
+                >
+                  {unit}
+                </div>
+              )}
+
+              {/* Botones +/- */}
+              {stepper && (
+                <div className="field-stepper">
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="field-stepper-btn"
+                    onClick={() => incDec(1)}
+                    aria-label="Incrementar"
+                  >
+                    <svg width="9" height="9" viewBox="0 0 24 24" className="field-stepper-icon" aria-hidden="true">
+                      <path d="M18 15l-6-6-6 6" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="field-stepper-btn"
+                    onClick={() => incDec(-1)}
+                    aria-label="Decrementar"
+                  >
+                    <svg width="9" height="9" viewBox="0 0 24 24" className="field-stepper-icon" aria-hidden="true">
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+            </div>
+          )}
+
         </div>
       </FieldWrapper>
     );

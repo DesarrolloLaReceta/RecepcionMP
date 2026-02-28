@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { Header } from "./Header";
+import { Header }  from "./Header";
+import "./StylesLayout/Layout.css";
 
 const OPEN_KEY = "sidebar_open";
 
@@ -20,45 +21,42 @@ export function AppShell() {
 
   const close = () => setOpen(false);
 
+  // Cierra el sidebar automáticamente al reducir la ventana a móvil
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
+    const mq      = window.matchMedia("(max-width: 768px)");
     const handler = (e: MediaQueryListEvent) => { if (e.matches) setOpen(false); };
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
 
   return (
-    <div className="h-screen overflow-hidden" style={{ background: "var(--bg-app)" }}>
+    <div className="app-shell">
 
-      {/* ── Header fijo — siempre visible encima de todo ── */}
+      {/* Header fijo — siempre visible */}
       <Header onToggleSidebar={toggle} sidebarOpen={open} />
 
-      {/* ── Área bajo el header ── */}
-      <div
-        className="flex relative"
-        style={{ height: "calc(100vh - var(--header-height))", marginTop: "var(--header-height)" }}
-      >
-        {/* ── Sidebar drawer ── */}
+      {/* Área bajo el header */}
+      <div className="app-body">
+
+        {/* Sidebar drawer */}
         <Sidebar open={open} onClose={close} />
 
-        {/* ── Backdrop móvil ── */}
+        {/* Backdrop móvil — solo visible cuando el sidebar está abierto en móvil */}
         {open && (
           <div
-            className="fixed inset-0 z-30 md:hidden"
-            style={{ background: "var(--bg-overlay)", top: "var(--header-height)" }}
+            className="app-backdrop"
             onClick={close}
+            aria-hidden="true"
           />
         )}
 
-        {/* ── Contenido principal — se desplaza junto al sidebar ── */}
-        <main
-          className="flex-1 overflow-y-auto min-w-0 transition-all duration-300 ease-out"
-          style={{ background: "var(--bg-app)" }}
-        >
-          <div className="p-6">
+        {/* Contenido principal */}
+        <main className="app-main">
+          <div className="app-main-inner">
             <Outlet />
           </div>
         </main>
+
       </div>
     </div>
   );
