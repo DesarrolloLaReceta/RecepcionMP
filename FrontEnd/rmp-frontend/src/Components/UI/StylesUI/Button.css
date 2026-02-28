@@ -1,0 +1,185 @@
+/* ============================================================
+   BUTTON COMPONENT — usa tokens del tema
+   ============================================================ */
+
+/* ===== BASE ===== */
+.btn {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  font-family:     var(--font-sans);
+  font-weight:     600;
+  white-space:     nowrap;
+  flex-shrink:     0;
+  user-select:     none;
+  border-style:    solid;
+  border-width:    1px;
+  cursor:          pointer;
+  transition:      background var(--transition-fast),
+                   border-color var(--transition-fast),
+                   color var(--transition-fast),
+                   opacity var(--transition-fast);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+}
+
+.btn-full-width {
+  width: 100%;
+}
+
+
+/* ===== TAMAÑOS — texto + ícono ===== */
+.btn-xs {
+  height:        1.5rem;      /* 24px */
+  padding:       0 0.5rem;
+  font-size:     var(--text-xs);
+  gap:           0.25rem;
+  border-radius: var(--radius-md);
+}
+
+.btn-sm {
+  height:        1.75rem;     /* 28px */
+  padding:       0 0.75rem;
+  font-size:     var(--text-sm);
+  gap:           0.375rem;
+  border-radius: var(--radius-md);
+}
+
+.btn-md {
+  height:        2.25rem;     /* 36px */
+  padding:       0 1rem;
+  font-size:     var(--text-md);
+  gap:           0.5rem;
+  border-radius: var(--radius-lg);
+}
+
+.btn-lg {
+  height:        2.75rem;     /* 44px */
+  padding:       0 1.25rem;
+  font-size:     14px;
+  gap:           0.5rem;
+  border-radius: var(--radius-lg);
+}
+
+
+/* ===== TAMAÑOS — solo ícono (cuadrado) ===== */
+.btn-icon-only.btn-xs { width: 1.5rem;  padding: 0; }
+.btn-icon-only.btn-sm { width: 1.75rem; padding: 0; }
+.btn-icon-only.btn-md { width: 2.25rem; padding: 0; }
+.btn-icon-only.btn-lg { width: 2.75rem; padding: 0; }
+
+
+/* ===== VARIANTE: PRIMARY ===== */
+.btn-primary {
+  background:   #F59E0B;
+  color:        #000000;
+  border-color: #F59E0B;
+}
+.btn-primary:hover:not(:disabled) {
+  background:   #D97706;
+  border-color: #D97706;
+}
+.btn-primary:disabled {
+  background:   rgba(245, 158, 11, 0.30);
+  color:        rgba(0, 0, 0, 0.40);
+  border-color: transparent;
+}
+
+
+/* ===== VARIANTE: SECONDARY ===== */
+.btn-secondary {
+  background:   rgba(245, 158, 11, 0.08);
+  color:        #F59E0B;
+  border-color: rgba(245, 158, 11, 0.20);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.15);
+}
+.btn-secondary:disabled {
+  background:   rgba(245, 158, 11, 0.03);
+  color:        rgba(245, 158, 11, 0.30);
+  border-color: rgba(245, 158, 11, 0.08);
+}
+
+
+/* ===== VARIANTE: GHOST ===== */
+.btn-ghost {
+  background:   transparent;
+  color:        var(--text-muted);
+  border-color: transparent;
+}
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
+  color:      var(--text-ghost);
+}
+.btn-ghost:disabled {
+  color: rgba(100, 116, 139, 0.40);
+}
+
+
+/* ===== VARIANTE: DANGER ===== */
+.btn-danger {
+  background:   var(--danger-bg);
+  color:        #FCA5A5;
+  border-color: var(--danger-border);
+}
+.btn-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.15);
+}
+.btn-danger:disabled {
+  background:   rgba(239, 68, 68, 0.03);
+  color:        rgba(252, 165, 165, 0.30);
+  border-color: rgba(239, 68, 68, 0.08);
+}
+
+
+/* ===== VARIANTE: SUCCESS ===== */
+.btn-success {
+  background:   var(--success-bg);
+  color:        #86EFAC;
+  border-color: var(--success-border);
+}
+.btn-success:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.15);
+}
+.btn-success:disabled {
+  background:   rgba(34, 197, 94, 0.03);
+  color:        rgba(134, 239, 172, 0.30);
+  border-color: rgba(34, 197, 94, 0.08);
+}
+
+
+/* ===== TEXTO CON LOADING ===== */
+.btn-label-loading {
+  opacity: 0.60;
+}
+
+/* ===== ICON SVG — heredado de currentColor ===== */
+.btn-icon {
+  flex-shrink: 0;
+  fill:        none;
+  stroke:      currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+
+/* ===== BUTTON GROUP ===== */
+.btn-group {
+  display:       inline-flex;
+  border:        1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow:      hidden;
+}
+
+.btn-group .btn {
+  border-radius: 0;
+  border:        none;
+  border-right:  1px solid var(--border-default);
+}
+
+.btn-group .btn:last-child {
+  border-right: none;
+}

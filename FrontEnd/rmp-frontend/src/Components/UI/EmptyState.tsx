@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import "./StylesUI/EmptyState.css";
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
@@ -7,7 +8,7 @@ export interface EmptyStateProps {
   subtitle?:  string;
   /** SVG path del ícono central (default: documento vacío) */
   icon?:      string;
-  /** Color del ícono (default: #334155) */
+  /** Color hex/rgba del ícono — se aplica inline por ser dinámico */
   iconColor?: string;
   /** Slot para botón de acción principal */
   action?:    ReactNode;
@@ -17,14 +18,6 @@ export interface EmptyStateProps {
   /** Tamaño del bloque: "sm" para tablas/listas, "md" para paneles */
   size?:      "sm" | "md" | "lg";
 }
-
-// ─── CONFIGURACIÓN DE TAMAÑO ──────────────────────────────────────────────────
-
-const SIZE_CFG = {
-  sm: { icon: 28, iconWrap: "w-10 h-10", title: "text-[13px]", sub: "text-[11px]", gap: "gap-2" },
-  md: { icon: 36, iconWrap: "w-14 h-14", title: "text-[15px]", sub: "text-[12px]", gap: "gap-3" },
-  lg: { icon: 44, iconWrap: "w-18 h-18", title: "text-[17px]", sub: "text-[13px]", gap: "gap-4" },
-};
 
 // ─── ÍCONO DEFAULT ────────────────────────────────────────────────────────────
 
@@ -52,40 +45,50 @@ const DEFAULT_ICON =
  *   title="Sin órdenes de compra"
  *   subtitle="Crea la primera OC para comenzar el ciclo de recepción."
  *   icon="M12 5v14M5 12h14"
- *   action={<Button variant="primary" onClick={...}>Nueva OC</Button>}
+ *   action={<Button variant="primary" onClick={onCreate}>Nueva OC</Button>}
  * />
  *
- * // Tab recepciones vacío
+ * // Con slot secundario
  * <EmptyState
  *   title="Sin recepciones para esta OC"
- *   icon="M9 5H7..."
  *   action={<Button variant="secondary" size="sm">Iniciar recepción</Button>}
+ *   secondary={<a href="#">Ver documentación</a>}
  *   size="md"
  * />
  */
 export function EmptyState({
-  title, subtitle, icon = DEFAULT_ICON,
+  title,
+  subtitle,
+  icon      = DEFAULT_ICON,
   iconColor = "#334155",
-  action, secondary, className = "", size = "md",
+  action,
+  secondary,
+  className = "",
+  size      = "md",
 }: EmptyStateProps) {
-  const s = SIZE_CFG[size];
+  const cls = [
+    "empty-state",
+    `empty-state-${size}`,
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div
-      className={`
-        flex flex-col items-center justify-center text-center
-        ${s.gap} w-full ${className}
-      `}
-    >
-      {/* Ícono */}
+    <div className={cls}>
+
+      {/* ── Ícono ── */}
       <div
-        className={`${s.iconWrap} rounded-2xl flex items-center justify-center shrink-0`}
-        style={{ background: `${iconColor}12`, border: `1px solid ${iconColor}20` }}
+        className="empty-state-icon-wrap"
+        style={{
+          background:  `${iconColor}12`,
+          borderColor: `${iconColor}20`,
+        }}
       >
         <svg
-          width={s.icon} height={s.icon}
-          viewBox="0 0 24 24" fill="none"
-          stroke={iconColor} strokeWidth="1.5" strokeLinecap="round"
+          className="empty-state-icon"
+          viewBox="0 0 24 24"
+          stroke={iconColor}
           aria-hidden="true"
         >
           {icon.split(" M").map((seg, i) => (
@@ -94,21 +97,28 @@ export function EmptyState({
         </svg>
       </div>
 
-      {/* Texto */}
-      <div className="flex flex-col gap-1 max-w-[280px]">
-        <p className={`${s.title} font-semibold text-[#475569]`}>{title}</p>
+      {/* ── Texto ── */}
+      <div className="empty-state-text">
+        <p className="empty-state-title">{title}</p>
         {subtitle && (
-          <p className={`${s.sub} text-[#334155] leading-relaxed`}>{subtitle}</p>
+          <p className="empty-state-subtitle">{subtitle}</p>
         )}
       </div>
 
-      {/* Acción */}
-      {action && <div className="mt-1">{action}</div>}
-
-      {/* Secundario */}
-      {secondary && (
-        <div className="text-[10px] text-[#2D3748] font-mono">{secondary}</div>
+      {/* ── Acción principal ── */}
+      {action && (
+        <div className="empty-state-action">
+          {action}
+        </div>
       )}
+
+      {/* ── Slot secundario ── */}
+      {secondary && (
+        <div className="empty-state-secondary">
+          {secondary}
+        </div>
+      )}
+
     </div>
   );
 }

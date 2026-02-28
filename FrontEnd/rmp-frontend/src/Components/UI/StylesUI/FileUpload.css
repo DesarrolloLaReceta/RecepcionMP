@@ -1,0 +1,294 @@
+/* ============================================================
+   FILEUPLOAD COMPONENT — usa tokens del tema
+   Incluye: zona drop, file item, progress bar
+   ============================================================ */
+
+
+/* ===== CONTENEDOR RAÍZ ===== */
+.fu-root {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.5rem;   /* gap-2 */
+}
+
+
+/* ============================================================
+   ZONA DROP — <label>
+   Estados via data-attributes:
+     data-dragging="true"
+     data-error="true"
+     data-disabled="true"
+   ============================================================ */
+
+.fu-dropzone {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.5rem;
+  padding:         1.25rem 1rem;   /* py-5 px-4 */
+  border-radius:   var(--radius-lg);
+  text-align:      center;
+  cursor:          pointer;
+  border-style:    dashed;
+  border-width:    1px;
+  background:      rgba(255, 255, 255, 0.02);
+  border-color:    rgba(255, 255, 255, 0.10);
+  transition:      background    var(--transition-base),
+                   border-color  var(--transition-base),
+                   opacity       var(--transition-base);
+}
+
+/* Hover (solo cuando no está arrastrando ni disabled) */
+.fu-dropzone:hover:not([data-dragging="true"]):not([data-disabled="true"]) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Arrastrando */
+.fu-dropzone[data-dragging="true"] {
+  background:   rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.50);
+}
+
+/* Con error */
+.fu-dropzone[data-error="true"] {
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+/* Deshabilitado */
+.fu-dropzone[data-disabled="true"] {
+  opacity:       0.40;
+  cursor:        not-allowed;
+  pointer-events: none;
+}
+
+
+/* ===== INPUT OCULTO ===== */
+.fu-input {
+  display: none;
+}
+
+
+/* ===== ÍCONO UPLOAD — wrapper ===== */
+.fu-icon-wrap {
+  width:           2.5rem;   /* w-10 */
+  height:          2.5rem;   /* h-10 */
+  border-radius:   var(--radius-lg);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  border-style:    solid;
+  border-width:    1px;
+  background:      rgba(255, 255, 255, 0.05);
+  border-color:    rgba(255, 255, 255, 0.08);
+  transition:      background   var(--transition-base),
+                   border-color var(--transition-base);
+}
+
+.fu-dropzone[data-dragging="true"] .fu-icon-wrap {
+  background:   rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+/* SVG dentro del wrapper */
+.fu-icon-svg {
+  fill:           none;
+  stroke:         var(--text-muted);   /* #64748B */
+  stroke-width:   1.8;
+  stroke-linecap: round;
+  flex-shrink:    0;
+  transition:     stroke var(--transition-base);
+}
+
+.fu-dropzone[data-dragging="true"] .fu-icon-svg {
+  stroke: #F59E0B;
+}
+
+
+/* ===== TEXTOS DE LA ZONA ===== */
+.fu-label-text {
+  font-size:   var(--text-md);    /* 13px */
+  font-weight: 500;
+  color:       var(--text-ghost); /* #94A3B8 */
+  transition:  color var(--transition-base);
+}
+
+.fu-dropzone[data-dragging="true"] .fu-label-text {
+  color: #F59E0B;
+}
+
+.fu-hint {
+  font-size:   var(--text-xs);       /* 10px */
+  color:       var(--text-tertiary); /* #334155 */
+  font-family: var(--font-mono);
+  margin-top:  0.125rem;
+}
+
+.fu-error-msg {
+  font-size:   var(--text-sm);   /* 11px */
+  font-family: var(--font-mono);
+  color:       #FCA5A5;
+  margin-top:  0.125rem;
+}
+
+.fu-accept-info {
+  font-size:   var(--text-xs);       /* 9px — forzamos un paso más pequeño */
+  font-size:   9px;
+  color:       var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+
+
+/* ============================================================
+   LISTA DE ARCHIVOS
+   ============================================================ */
+
+.fu-file-list {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.375rem;   /* gap-1.5 */
+}
+
+
+/* ============================================================
+   FILE ITEM
+   ============================================================ */
+
+.fu-item {
+  display:       flex;
+  align-items:   center;
+  gap:           0.75rem;   /* gap-3 */
+  padding:       0.625rem 0.75rem;   /* py-2.5 px-3 */
+  border-radius: var(--radius-lg);
+  background:    rgba(255, 255, 255, 0.03);
+  border:        1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Thumbnail (imagen) */
+.fu-item-thumb {
+  width:        2rem;   /* w-8 */
+  height:       2rem;
+  border-radius: var(--radius-md);
+  object-fit:   cover;
+  flex-shrink:  0;
+  border:       1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Wrapper ícono de tipo (no imagen) */
+.fu-item-icon-wrap {
+  width:           2rem;
+  height:          2rem;
+  border-radius:   var(--radius-md);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  flex-shrink:     0;
+  background:      rgba(255, 255, 255, 0.05);
+  border:          1px solid rgba(255, 255, 255, 0.07);
+}
+
+.fu-item-icon-svg {
+  fill:           none;
+  stroke:         var(--text-muted);
+  stroke-width:   1.8;
+  stroke-linecap: round;
+}
+
+/* Info central */
+.fu-item-info {
+  flex:      1;
+  min-width: 0;
+}
+
+.fu-item-name {
+  font-size:     var(--text-base);   /* 12px */
+  font-weight:   500;
+  color:         var(--text-faintest);   /* #CBD5E1 */
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.fu-item-meta {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  margin-top:  0.125rem;
+}
+
+.fu-item-size {
+  font-size:   var(--text-xs);    /* 10px */
+  color:       var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.fu-item-error-text {
+  font-size:   var(--text-xs);
+  font-family: var(--font-mono);
+  color:       #FCA5A5;
+}
+
+/* Progress bar */
+.fu-item-progress-track {
+  height:        0.125rem;   /* h-0.5 */
+  border-radius: var(--radius-full);
+  margin-top:    0.375rem;
+  overflow:      hidden;
+  background:    rgba(255, 255, 255, 0.06);
+}
+
+.fu-item-progress-fill {
+  height:        100%;
+  border-radius: var(--radius-full);
+  background:    #F59E0B;
+  transition:    width var(--transition-slow);
+  /* width llega inline como style — es el único valor dinámico */
+}
+
+/* Acciones — dot + botón eliminar */
+.fu-item-actions {
+  display:     flex;
+  align-items: center;
+  gap:         0.375rem;   /* gap-1.5 */
+  flex-shrink: 0;
+}
+
+/* Dot de estado — color via data-status */
+.fu-item-dot {
+  width:         0.375rem;   /* w-1.5 */
+  height:        0.375rem;
+  border-radius: var(--radius-full);
+  flex-shrink:   0;
+}
+
+.fu-item-dot[data-status="done"]      { background: #86EFAC; }
+.fu-item-dot[data-status="error"]     { background: #FCA5A5; }
+.fu-item-dot[data-status="uploading"] { background: #F59E0B; }
+.fu-item-dot[data-status="pending"]   { background: var(--text-muted); }
+
+/* Botón eliminar */
+.fu-item-remove {
+  width:           1.5rem;   /* w-6 */
+  height:          1.5rem;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  border-radius:   var(--radius-md);
+  background:      transparent;
+  border:          none;
+  cursor:          pointer;
+  color:           var(--text-tertiary);
+  transition:      color var(--transition-fast);
+}
+
+.fu-item-remove:hover {
+  color: #FCA5A5;
+}
+
+.fu-item-remove-icon {
+  fill:           none;
+  stroke:         currentColor;
+  stroke-width:   2.5;
+  stroke-linecap: round;
+  flex-shrink:    0;
+}
