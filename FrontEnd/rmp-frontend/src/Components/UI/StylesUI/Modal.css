@@ -1,0 +1,195 @@
+/* ============================================================
+   MODAL COMPONENT — usa tokens del tema claro
+   ============================================================ */
+
+/* ===== BACKDROP ===== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(4px);
+  animation: backdropIn 0.18s ease both;
+}
+
+.modal-backdrop-default {
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-backdrop-drawer {
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+/* ===== PANEL ===== */
+.modal-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-modal);
+  box-shadow: var(--shadow-modal);
+}
+
+.modal-panel-default {
+  width: 100%;
+  max-height: 92vh;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-medium);
+  animation: modalIn 0.2s ease both;
+}
+
+.modal-panel-drawer {
+  height: 100%;
+  width: min(480px, 100vw);
+  border-left: 1px solid var(--border-medium);
+  animation: drawerIn 0.25s ease both;
+}
+
+/* Tamaños del modal */
+.modal-size-xs { max-width: 24rem; }   /* 384px */
+.modal-size-sm { max-width: 28rem; }   /* 448px */
+.modal-size-md { max-width: 32rem; }   /* 512px */
+.modal-size-lg { max-width: 42rem; }   /* 672px */
+.modal-size-xl { max-width: 56rem; }   /* 896px */
+.modal-size-full { max-width: calc(100vw - 2rem); }
+
+/* ===== HEADER ===== */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.modal-header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.modal-header-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+}
+
+.modal-header-text {
+  min-width: 0;
+}
+
+.modal-title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modal-subtitle {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  margin-top: 0.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== CLOSE BUTTON ===== */
+.modal-close-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  background: var(--bg-input);
+  color: var(--text-tertiary);
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.modal-close-btn:hover {
+  color: var(--text-secondary);
+}
+
+/* ===== BODY ===== */
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(2px);
+  border-radius: var(--radius-xl);
+}
+
+/* ===== FOOTER ===== */
+.modal-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ===== FOOTER STANDARD ===== */
+.modal-footer-standard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+}
+
+.modal-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modalIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.96) translateY(8px); 
+  }
+  to   { 
+    opacity: 1; 
+    transform: scale(1) translateY(0); 
+  }
+}
+
+@keyframes drawerIn {
+  from { 
+    opacity: 0; 
+    transform: translateX(100%); 
+  }
+  to   { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
