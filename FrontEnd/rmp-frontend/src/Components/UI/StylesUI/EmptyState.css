@@ -1,0 +1,90 @@
+/* ============================================================
+   EMPTYSTATE COMPONENT — usa tokens del tema
+   ============================================================ */
+
+/* ===== BASE ===== */
+.empty-state {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  text-align:      center;
+  width:           100%;
+}
+
+/* ===== TAMAÑOS — gap del contenedor ===== */
+.empty-state-sm { gap: 0.5rem;   }   /* gap-2 */
+.empty-state-md { gap: 0.75rem;  }   /* gap-3 */
+.empty-state-lg { gap: 1rem;     }   /* gap-4 */
+
+
+/* ===== ICON WRAP ===== */
+.empty-state-icon-wrap {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  flex-shrink:     0;
+  border-radius:   var(--radius-xl);   /* rounded-2xl */
+  border-style:    solid;
+  border-width:    1px;
+  /* background y border-color llegan como style inline (iconColor dinámico) */
+}
+
+/* Tamaño del wrapper por talla */
+.empty-state-sm .empty-state-icon-wrap { width: 2.5rem;  height: 2.5rem;  }   /* w-10 h-10 */
+.empty-state-md .empty-state-icon-wrap { width: 3.5rem;  height: 3.5rem;  }   /* w-14 h-14 */
+.empty-state-lg .empty-state-icon-wrap { width: 4.5rem;  height: 4.5rem;  }   /* w-18 h-18 */
+
+/* Tamaño del SVG dentro del wrapper */
+.empty-state-sm .empty-state-icon { width: 28px; height: 28px; }
+.empty-state-md .empty-state-icon { width: 36px; height: 36px; }
+.empty-state-lg .empty-state-icon { width: 44px; height: 44px; }
+
+.empty-state-icon {
+  fill:           none;
+  stroke-width:   1.5;
+  stroke-linecap: round;
+  /* stroke (iconColor) llega como style inline */
+}
+
+
+/* ===== BLOQUE DE TEXTO ===== */
+.empty-state-text {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.25rem;
+  max-width:      280px;
+}
+
+.empty-state-title {
+  font-weight: 600;
+  color:       var(--text-muted);       /* #475569 → slate-600 */
+}
+
+.empty-state-subtitle {
+  color:       var(--text-tertiary);    /* #334155 → slate-700 */
+  line-height: 1.6;
+}
+
+/* Tamaños de texto por talla */
+.empty-state-sm .empty-state-title    { font-size: var(--text-md);   }   /* 13px */
+.empty-state-md .empty-state-title    { font-size: var(--text-lg);   }   /* 15px */
+.empty-state-lg .empty-state-title    { font-size: 17px;             }
+
+.empty-state-sm .empty-state-subtitle { font-size: var(--text-sm);   }   /* 11px */
+.empty-state-md .empty-state-subtitle { font-size: var(--text-base); }   /* 12px */
+.empty-state-lg .empty-state-subtitle { font-size: var(--text-md);   }   /* 13px */
+
+
+/* ===== SLOT ACCIÓN ===== */
+.empty-state-action {
+  margin-top: 0.25rem;   /* mt-1 */
+}
+
+
+/* ===== SLOT SECUNDARIO ===== */
+.empty-state-secondary {
+  font-size:   var(--text-xs);    /* 10px */
+  color:       var(--text-tertiary);
+  font-family: var(--font-mono);
+}
