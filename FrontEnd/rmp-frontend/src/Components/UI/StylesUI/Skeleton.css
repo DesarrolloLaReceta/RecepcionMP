@@ -1,0 +1,122 @@
+/* ============================================================
+   SKELETON COMPONENT — usa tokens del tema claro
+   ============================================================ */
+
+/* ===== ANIMACIÓN ===== */
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+.skeleton-pulse {
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+/* ===== BASE ===== */
+.skeleton {
+  border-radius: var(--radius-sm);
+}
+
+/* ===== VARIANTE LIST ===== */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.skeleton-list-item {
+  padding: 1rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.skeleton-list-item:last-child {
+  border-bottom: none;
+}
+
+.skeleton-list-title {
+  height: 1rem;
+  width: 12rem;
+  background: var(--bg-item);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-list-subtitle {
+  height: 0.75rem;
+  width: 8rem;
+  background: var(--bg-card-dim);
+  border-radius: var(--radius-sm);
+}
+
+/* ===== VARIANTE CARD ===== */
+.skeleton-card {
+  padding: 1rem;
+  border-radius: var(--radius-xl);
+  background: var(--bg-item);
+  border: 1px solid var(--border-subtle);
+}
+
+.skeleton-card-title {
+  height: 1rem;
+  width: 75%;
+  background: var(--bg-card-dim);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-card-subtitle {
+  height: 0.75rem;
+  width: 50%;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+}
+
+.skeleton-card-line {
+  height: 0.5rem;
+  width: 100%;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-card-line:last-child {
+  margin-bottom: 0;
+  width: 83%;
+}
+
+/* ===== VARIANTE TABLE ===== */
+.skeleton-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.skeleton-table-row {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.skeleton-table-cell {
+  height: 0.75rem;
+  background: var(--bg-item);
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-table-cell:first-child {
+  flex: 1;
+}
+
+.skeleton-table-cell:nth-child(2) {
+  width: 5rem;
+}
+
+.skeleton-table-cell:nth-child(3) {
+  width: 4rem;
+}
+
+.skeleton-table-cell:nth-child(4) {
+  width: 6rem;
+}

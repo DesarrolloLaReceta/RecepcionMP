@@ -1,0 +1,162 @@
+/* Badge.css - Estilos para el componente Badge */
+
+/* ===== BASE ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  border-width: 1px;
+  border-style: solid;
+  transition: opacity var(--transition-fast);
+}
+
+.badge-clickable {
+  cursor: pointer;
+}
+
+.badge-clickable:hover {
+  opacity: 0.8;
+}
+
+/* ===== TAMAÑOS ===== */
+.badge-xs {
+  font-size: var(--text-xs);
+  padding: 0.125rem 0.375rem; /* py-0.5 px-1.5 */
+  gap: 0.25rem;
+}
+
+.badge-sm {
+  font-size: var(--text-sm);
+  padding: 0.125rem 0.5rem; /* py-0.5 px-2 */
+  gap: 0.375rem;
+}
+
+.badge-md {
+  font-size: var(--text-base);
+  padding: 0.25rem 0.625rem; /* py-1 px-2.5 */
+  gap: 0.375rem;
+}
+
+/* ===== RADIOS ===== */
+.badge-radius-sm {
+  border-radius: var(--radius-sm);
+}
+
+.badge-radius-md {
+  border-radius: var(--radius-md);
+}
+
+.badge-radius-full {
+  border-radius: var(--radius-full);
+}
+
+/* ===== DOT INDICATOR ===== */
+.badge-dot {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-dot-xs {
+  width: 0.25rem;  /* 4px */
+  height: 0.25rem;
+}
+
+.badge-dot-sm {
+  width: 0.375rem; /* 6px */
+  height: 0.375rem;
+}
+
+.badge-dot-md {
+  width: 0.375rem; /* 6px */
+  height: 0.375rem;
+}
+
+/* ===== COUNT BADGE ===== */
+.badge-count {
+  margin-left: 0.125rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.125rem;
+  background: currentColor;
+  color: #000000;
+}
+
+/* ===== ICON STYLES ===== */
+.badge-icon {
+  flex-shrink: 0;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+}
+
+/* Colores predefinidos basados en tokens */
+.badge-amber {
+  background: var(--warning-bg);
+  color: var(--warning);
+  border-color: var(--warning-border);
+}
+.badge-amber .badge-dot {
+  background: var(--warning);
+}
+
+.badge-green {
+  background: var(--success-bg);
+  color: var(--success);
+  border-color: var(--success-border);
+}
+.badge-green .badge-dot {
+  background: var(--success);
+}
+
+.badge-red {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+.badge-red .badge-dot {
+  background: var(--danger);
+}
+
+.badge-blue {
+  background: var(--info-bg);
+  color: var(--info);
+  border-color: var(--info-border);
+}
+.badge-blue .badge-dot {
+  background: var(--info);
+}
+
+.badge-purple {
+  background: var(--purple-bg);
+  color: var(--purple);
+  border-color: var(--purple-border);
+}
+.badge-purple .badge-dot {
+  background: var(--purple);
+}
+
+.badge-yellow {
+  background: rgba(250,204,21,0.08);
+  color: #EAB308;
+  border-color: rgba(250,204,21,0.18);
+}
+.badge-yellow .badge-dot {
+  background: #EAB308;
+}
+
+.badge-slate {
+  background: var(--slate-bg);
+  color: var(--slate);
+  border-color: var(--slate-border);
+}
+.badge-slate .badge-dot {
+  background: var(--slate);
+}

@@ -1,0 +1,171 @@
+/* Spinner.css - Estilos para el componente Spinner */
+
+/* ===== CONTENEDORES ===== */
+.spinner-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spinner-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 3rem 0;
+}
+
+/* ===== VARIANTE RING ===== */
+.spinner-ring {
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Tamaños ring usando tokens de texto para consistencia */
+.spinner-ring-xs {
+  width: var(--text-xs);   /* 10px */
+  height: var(--text-xs);
+  border-width: 1.5px;
+  border-style: solid;
+}
+
+.spinner-ring-sm {
+  width: var(--text-sm);   /* 11px */
+  height: var(--text-sm);
+  border-width: 2px;
+  border-style: solid;
+}
+
+.spinner-ring-md {
+  width: var(--text-base); /* 12px */
+  height: var(--text-base);
+  border-width: 2px;
+  border-style: solid;
+}
+
+.spinner-ring-lg {
+  width: var(--text-md);   /* 13px */
+  height: var(--text-md);
+  border-width: 2px;
+  border-style: solid;
+}
+
+.spinner-ring-xl {
+  width: var(--text-xl);   /* 22px */
+  height: var(--text-xl);
+  border-width: 3px;
+  border-style: solid;
+}
+
+/* ===== VARIANTE DOTS ===== */
+.spinner-dots {
+  display: flex;
+  align-items: center;
+}
+
+.spinner-dots-xs { gap: 0.125rem; }
+.spinner-dots-sm { gap: 0.25rem; }
+.spinner-dots-md { gap: 0.375rem; }
+.spinner-dots-lg { gap: 0.5rem; }
+.spinner-dots-xl { gap: 0.625rem; }
+
+.spinner-dot {
+  border-radius: 50%;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+/* Dots basados en escala de texto */
+.spinner-dot-xs {
+  width: var(--text-xs);   /* 10px */
+  height: var(--text-xs);
+}
+
+.spinner-dot-sm {
+  width: var(--text-sm);   /* 11px */
+  height: var(--text-sm);
+}
+
+.spinner-dot-md {
+  width: var(--text-base); /* 12px */
+  height: var(--text-base);
+}
+
+.spinner-dot-lg {
+  width: var(--text-md);   /* 13px */
+  height: var(--text-md);
+}
+
+.spinner-dot-xl {
+  width: calc(var(--text-xl) / 2); /* 11px aprox */
+  height: calc(var(--text-xl) / 2);
+}
+
+/* ===== VARIANTE BAR ===== */
+.spinner-bar-container {
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--primary-20);
+}
+
+.spinner-bar-xs {
+  height: 0.125rem;
+  width: 2.5rem;
+}
+
+.spinner-bar-sm {
+  height: 0.125rem;
+  width: 4rem;
+}
+
+.spinner-bar-md {
+  height: 0.25rem;
+  width: 6rem;
+}
+
+.spinner-bar-lg {
+  height: 0.375rem;
+  width: 8rem;
+}
+
+.spinner-bar-xl {
+  height: 0.5rem;
+  width: 10rem;
+}
+
+.spinner-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  width: 40%;
+  animation: barSlide 1.2s ease-in-out infinite;
+}
+
+/* ===== TEXTOS ===== */
+.spinner-text {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+/* Textos usan tokens */
+.spinner-text-xs { font-size: var(--text-xs); }
+.spinner-text-sm { font-size: var(--text-sm); }
+.spinner-text-md { font-size: var(--text-base); }
+.spinner-text-lg { font-size: var(--text-md); }
+.spinner-text-xl { font-size: var(--text-lg); } /* 15px para el label grande */
+
+/* ===== ANIMACIONES ===== */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+@keyframes barSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
