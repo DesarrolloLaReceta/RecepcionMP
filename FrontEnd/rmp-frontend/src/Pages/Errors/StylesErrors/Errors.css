@@ -1,0 +1,215 @@
+/* ============================================================
+   ERROR PAGES — NotFoundPage (404) + SinAccesoPage (403)
+   CSS compartido — fuera del AppShell, full-screen
+   ============================================================ */
+
+
+/* ===== PÁGINA COMPLETA ===== */
+.ep-page {
+  min-height:      100vh;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             2rem;
+  padding:         1.5rem;
+  background:      var(--bg-app);
+  font-family:     var(--font-sans);
+}
+
+
+/* ============================================================
+   NÚMERO DE ERROR — gigante, ghost, con ícono superpuesto
+   ============================================================ */
+
+.ep-number-wrap {
+  position:    relative;
+  user-select: none;
+}
+
+/* Texto fantasma — 404 / 403 */
+.ep-number {
+  font-size:   130px;
+  font-weight: 900;
+  line-height: 1;
+  font-family: var(--font-mono);
+  color:       transparent;
+  filter:      blur(0.5px);
+  /* WebkitTextStroke se pasa inline — dinámico por página */
+}
+
+/* Ícono centrado sobre el número */
+.ep-icon-overlay {
+  position:        absolute;
+  inset:           0;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+}
+
+.ep-icon-box {
+  width:           4rem;    /* w-16 */
+  height:          4rem;
+  border-radius:   var(--radius-xl);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  /* background y border van inline — color dinámico por tipo de error */
+}
+
+
+/* ============================================================
+   BLOQUE DE TEXTO
+   ============================================================ */
+
+.ep-heading {
+  text-align:     center;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.5rem;
+  max-width:      28rem;
+}
+
+.ep-title {
+  font-size:   var(--text-xl);
+  font-weight: 700;
+  color:       var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+.ep-subtitle {
+  font-size:   var(--text-md);
+  color:       var(--text-muted);
+  line-height: 1.6;
+  font-family: var(--font-sans);
+}
+
+/* Ruta intentada — mostrada debajo del subtítulo */
+.ep-from {
+  display:     block;
+  margin-top:  0.25rem;
+  font-size:   var(--text-sm);
+  font-family: var(--font-mono);
+  color:       var(--text-tertiary);
+}
+
+/* Código de error: "ERROR 404 · RUTA NO REGISTRADA" */
+.ep-code {
+  font-size:      var(--text-xs);
+  font-family:    var(--font-mono);
+  letter-spacing: 0.1em;
+  color:          var(--text-tertiary);
+  margin-top:     0.25rem;
+}
+
+
+/* ============================================================
+   ACCIONES (botones)
+   ============================================================ */
+
+.ep-actions {
+  display:     flex;
+  align-items: center;
+  gap:         0.75rem;
+  flex-wrap:   wrap;
+  justify-content: center;
+}
+
+
+/* ============================================================
+   BLOQUE DE ROLES REQUERIDOS (solo 403)
+   ============================================================ */
+
+.ep-roles-box {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.75rem;
+  padding:        1rem 1.5rem;
+  border-radius:  var(--radius-xl);
+  background:     rgba(255, 255, 255, 0.02);
+  border:         1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ep-roles-label {
+  font-size:      var(--text-xs);
+  font-family:    var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color:          var(--text-tertiary);
+}
+
+.ep-roles-list {
+  display:         flex;
+  flex-wrap:       wrap;
+  justify-content: center;
+  gap:             0.5rem;
+}
+
+
+/* ============================================================
+   MAPA DE PERMISOS (solo 403)
+   ============================================================ */
+
+.ep-map {
+  width:         100%;
+  max-width:     32rem;
+  border-radius: var(--radius-xl);
+  overflow:      hidden;
+  background:    rgba(15, 23, 42, 0.80);
+  border:        1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ep-map-header {
+  padding:       0.75rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ep-map-title {
+  font-size:      var(--text-xs);
+  font-weight:    700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-family:    var(--font-mono);
+  color:          var(--text-tertiary);
+}
+
+.ep-map-row {
+  display:     flex;
+  align-items: center;
+  gap:         1rem;
+  padding:     0.75rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.ep-map-row:last-child {
+  border-bottom: none;
+}
+
+/* Ícono del módulo */
+.ep-map-icon {
+  width:           1.75rem;
+  height:          1.75rem;
+  border-radius:   var(--radius-md);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  flex-shrink:     0;
+  background:      rgba(255, 255, 255, 0.04);
+}
+
+/* Nombre del módulo */
+.ep-map-name {
+  font-size:  var(--text-base);
+  color:      var(--text-muted);
+  width:      9rem;
+  flex-shrink: 0;
+}
+
+/* Lista de badges de roles */
+.ep-map-badges {
+  display:  flex;
+  flex-wrap: wrap;
+  gap:       0.375rem;
+  flex:      1;
+}
