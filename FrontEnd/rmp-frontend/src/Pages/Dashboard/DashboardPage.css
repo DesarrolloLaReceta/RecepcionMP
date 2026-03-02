@@ -1,0 +1,581 @@
+/* ============================================================
+   DASHBOARD PAGE — usa tokens del tema
+   ============================================================ */
+
+
+/* ===== CONTENEDOR PÁGINA ===== */
+.db-page {
+  display:        flex;
+  flex-direction: column;
+  gap:            1.25rem;
+  animation:      fadeSlideUp 0.3s ease both;
+}
+
+
+/* ============================================================
+   HEADER — saludo + controles de período
+   ============================================================ */
+
+.db-header {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             1rem;
+  flex-wrap:       wrap;
+}
+
+.db-greeting-title {
+  font-size:      var(--text-xl);
+  font-weight:    700;
+  color:          var(--text-primary);
+  line-height:    1.2;
+  font-family:    var(--font-sans);
+}
+
+.db-greeting-sub {
+  font-size:   var(--text-sm);
+  font-family: var(--font-mono);
+  color:       var(--text-muted);
+  margin-top:  0.125rem;
+}
+
+/* Lado derecho: selects de período + botón refresh */
+.db-controls {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  flex-wrap:   wrap;
+}
+
+/* Select compacto de mes y año en el header */
+.db-period-select {
+  appearance:    none;
+  font-size:     var(--text-sm);
+  font-family:   var(--font-mono);
+  color:         var(--text-secondary);
+  background:    var(--bg-item);
+  border:        1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding:       0.375rem 1.75rem 0.375rem 0.625rem;
+  cursor:        pointer;
+  outline:       none;
+  transition:    border-color var(--transition-fast);
+  /* Flecha personalizada */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:   no-repeat;
+  background-position: right 0.5rem center;
+}
+
+.db-period-select:focus,
+.db-period-select:hover {
+  border-color: var(--border-medium);
+}
+
+/* Botón de actualizar */
+.db-refresh-btn {
+  display:       flex;
+  align-items:   center;
+  gap:           0.375rem;
+  padding:       0.375rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size:     var(--text-sm);
+  font-family:   var(--font-mono);
+  color:         var(--text-muted);
+  background:    var(--bg-item);
+  border:        1px solid var(--border-default);
+  cursor:        pointer;
+  transition:    border-color var(--transition-fast),
+                 color        var(--transition-fast);
+}
+
+.db-refresh-btn:hover {
+  border-color: rgba(245, 158, 11, 0.30);
+  color:        var(--text-secondary);
+}
+
+.db-refresh-icon {
+  fill:           none;
+  stroke:         currentColor;
+  stroke-width:   2;
+  stroke-linecap: round;
+  flex-shrink:    0;
+  transition:     transform 0s;
+}
+
+/* Animación al cargar — se controla con data-loading en el SVG */
+.db-refresh-icon[data-loading="true"] {
+  animation: lp-spin 0.8s linear infinite;
+}
+
+@keyframes lp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.db-last-updated {
+  font-size:   var(--text-xs);
+  font-family: var(--font-mono);
+  color:       var(--text-tertiary);
+  display:     none;
+}
+
+@media (min-width: 1024px) {
+  .db-last-updated { display: block; }
+}
+
+
+/* ============================================================
+   ERROR BANNER
+   ============================================================ */
+
+.db-error {
+  display:       flex;
+  align-items:   center;
+  gap:           0.75rem;
+  padding:       1rem 1.25rem;
+  border-radius: var(--radius-lg);
+  background:    rgba(239, 68, 68, 0.07);
+  border:        1px solid rgba(239, 68, 68, 0.15);
+}
+
+.db-error-text {
+  font-size:   var(--text-md);
+  color:       #FCA5A5;
+  flex:        1;
+  font-family: var(--font-sans);
+}
+
+.db-error-retry {
+  font-size:   var(--text-xs);
+  color:       #F87171;
+  background:  transparent;
+  border:      none;
+  cursor:      pointer;
+  text-decoration: underline;
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   LABEL DE SECCIÓN
+   ============================================================ */
+
+.db-section-label {
+  font-size:      var(--text-xs);
+  font-family:    var(--font-mono);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color:          var(--text-tertiary);
+  margin-bottom:  0.75rem;
+}
+
+
+/* ============================================================
+   KPI CARDS — fila de 5 recepciones
+   ============================================================ */
+
+.db-kpi-grid {
+  display:               grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:                   0.75rem;
+}
+
+@media (min-width: 640px) {
+  .db-kpi-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .db-kpi-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+.db-kpi-card {
+  position:      relative;
+  padding:       1.25rem;
+  border-radius: var(--radius-lg);
+  overflow:      hidden;
+  background:    rgba(15, 23, 42, 0.80);
+  border:        1px solid rgba(255, 255, 255, 0.06);
+  animation:     fadeSlideUp 0.4s ease both;
+  /* animationDelay se pasa inline */
+}
+
+.db-kpi-card[data-accent="true"] {
+  background: rgba(245, 158, 11, 0.06);
+  border-color: rgba(245, 158, 11, 0.20);
+}
+
+/* Línea de acento en la parte superior de la card accent */
+.db-kpi-accent-line {
+  position:   absolute;
+  top:        0;
+  left:       0;
+  right:      0;
+  height:     1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(245, 158, 11, 0.50),
+    transparent
+  );
+}
+
+.db-kpi-label {
+  font-size:      var(--text-sm);
+  font-family:    var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+}
+
+.db-kpi-value {
+  font-size:   2rem;      /* text-3xl */
+  font-weight: 700;
+  line-height: 1;
+  font-family: var(--font-mono);
+  color:       #F1F5F9;
+  margin-top:  0.25rem;
+}
+
+.db-kpi-value[data-accent="true"] {
+  color: var(--primary);
+}
+
+.db-kpi-sub {
+  font-size:  var(--text-sm);
+  color:      var(--text-tertiary);
+  margin-top: 0.125rem;
+}
+
+
+/* ============================================================
+   GRILLA MEDIA — indicadores + lotes + acciones (3 cols)
+   ============================================================ */
+
+.db-mid-grid,
+.db-alerts-grid {
+  display:               grid;
+  grid-template-columns: 1fr;
+  gap:                   1rem;
+}
+
+@media (min-width: 1024px) {
+  .db-mid-grid,
+  .db-alerts-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+
+/* ============================================================
+   PANEL — contenedor genérico con header y body
+   ============================================================ */
+
+.db-panel {
+  border-radius: var(--radius-lg);
+  overflow:      hidden;
+  display:       flex;
+  flex-direction: column;
+  background:    rgba(15, 23, 42, 0.80);
+  border:        1px solid rgba(255, 255, 255, 0.06);
+}
+
+.db-panel-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         0.875rem 1.25rem;
+  border-bottom:   1px solid rgba(255, 255, 255, 0.06);
+}
+
+.db-panel-title-wrap {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+}
+
+.db-panel-title {
+  font-size:      var(--text-sm);
+  font-weight:    700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          #94A3B8;
+  font-family:    var(--font-mono);
+}
+
+/* "Ver todo →" */
+.db-panel-more {
+  font-size:       var(--text-xs);
+  font-family:     var(--font-mono);
+  color:           var(--text-muted);
+  background:      transparent;
+  border:          none;
+  cursor:          pointer;
+  transition:      color var(--transition-fast);
+}
+
+.db-panel-more:hover {
+  color: var(--primary);
+}
+
+.db-panel-body {
+  flex: 1;
+}
+
+
+/* ============================================================
+   ROW — fila clickable dentro de Panel
+   ============================================================ */
+
+.db-row {
+  display:       flex;
+  align-items:   center;
+  gap:           0.75rem;
+  padding:       0.75rem 1.25rem;
+  cursor:        pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition:    background var(--transition-fast);
+  background:    transparent;
+}
+
+.db-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.db-row:last-child {
+  border-bottom: none;
+}
+
+/* Dot de urgencia (lotes por vencer) */
+.db-urgency-dot {
+  width:         0.375rem;
+  height:        0.375rem;
+  border-radius: var(--radius-full);
+  flex-shrink:   0;
+  /* background color va inline — dinámico por días restantes */
+}
+
+/* Texto principal de la fila */
+.db-row-name {
+  font-size:     var(--text-md);
+  font-weight:   500;
+  color:         #CBD5E1;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.db-row-sub {
+  font-size:   var(--text-sm);
+  color:       var(--text-muted);
+  white-space: nowrap;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono);
+}
+
+/* Valor a la derecha (días restantes, etc.) */
+.db-row-value {
+  font-size:   var(--text-base);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  /* color va inline — dinámico por urgencia */
+}
+
+.db-row-date {
+  font-size: var(--text-xs);
+  color:     var(--text-tertiary);
+}
+
+/* Badge de entidad en documentos por vencer */
+.db-entity-badge {
+  font-size:     9px;
+  padding:       0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  font-family:   var(--font-mono);
+  flex-shrink:   0;
+  background:    rgba(255, 255, 255, 0.05);
+  color:         var(--text-muted);
+}
+
+
+/* ============================================================
+   MINI STAT — fila de label + valor
+   ============================================================ */
+
+.db-mini-stat {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         0.625rem 0;
+  border-bottom:   1px solid rgba(255, 255, 255, 0.04);
+}
+
+.db-mini-stat:last-child {
+  border-bottom: none;
+}
+
+.db-mini-stat-label {
+  font-size: var(--text-base);
+  color:     var(--text-muted);
+}
+
+.db-mini-stat-value {
+  font-size:   var(--text-md);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  /* color va inline — dinámico */
+}
+
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+
+.db-progress-header {
+  display:         flex;
+  justify-content: space-between;
+  margin-bottom:   0.375rem;
+}
+
+.db-progress-label {
+  font-size: var(--text-base);
+  color:     var(--text-muted);
+}
+
+.db-progress-value {
+  font-size:   var(--text-md);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  /* color va inline */
+}
+
+.db-progress-track {
+  width:         100%;
+  height:        0.375rem;
+  border-radius: var(--radius-full);
+  overflow:      hidden;
+  /* background va inline — dinámico por métrica */
+}
+
+.db-progress-fill {
+  height:        100%;
+  border-radius: var(--radius-full);
+  transition:    width 700ms ease;
+  /* width y background van inline */
+}
+
+
+/* ============================================================
+   PANEL DE CALIDAD — sección especial con texto grande
+   ============================================================ */
+
+.db-quality-panel {
+  padding:        1.25rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            1rem;
+}
+
+.db-quality-divider {
+  padding-top:  0.25rem;
+  border-top:   1px solid rgba(255, 255, 255, 0.05);
+  margin-top:   0.25rem;
+}
+
+
+/* ===== ESTADO LOTES — texto grande de total ===== */
+.db-lots-panel {
+  padding: 1.25rem;
+}
+
+.db-lots-total {
+  font-size:   2.25rem;   /* text-4xl */
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color:       var(--text-primary);
+  line-height: 1;
+  margin-bottom: 0.125rem;
+}
+
+.db-lots-sub {
+  font-size:     var(--text-sm);
+  color:         var(--text-tertiary);
+  margin-bottom: 1rem;
+}
+
+
+/* ============================================================
+   ACCIONES RÁPIDAS
+   ============================================================ */
+
+.db-actions-panel {
+  padding:        1.25rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.625rem;
+}
+
+.db-action-btn {
+  display:       flex;
+  align-items:   center;
+  gap:           0.75rem;
+  width:         100%;
+  border-radius: var(--radius-md);
+  padding:       0.75rem 1rem;
+  text-align:    left;
+  font-size:     var(--text-md);
+  font-weight:   500;
+  font-family:   var(--font-sans);
+  cursor:        pointer;
+  transition:    background var(--transition-fast);
+  /* color, background y border van inline (accent vs normal) */
+}
+
+.db-action-btn[data-accent="true"] {
+  background:   rgba(245, 158, 11, 0.10);
+  border:       1px solid rgba(245, 158, 11, 0.20);
+  color:        var(--primary);
+}
+
+.db-action-btn[data-accent="true"]:hover {
+  background: rgba(245, 158, 11, 0.18);
+}
+
+.db-action-btn[data-accent="false"] {
+  background:   rgba(255, 255, 255, 0.03);
+  border:       1px solid rgba(255, 255, 255, 0.06);
+  color:        #94A3B8;
+}
+
+.db-action-btn[data-accent="false"]:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+
+/* ============================================================
+   TEMPERATURA FUERA DE RANGO — indicador circular
+   ============================================================ */
+
+.db-temp-badge {
+  width:           2rem;
+  height:          2rem;
+  border-radius:   var(--radius-md);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       var(--text-xs);
+  font-weight:     700;
+  font-family:     var(--font-mono);
+  flex-shrink:     0;
+  /* background y color van inline — dinámico por over/under */
+}
+
+.db-temp-value {
+  font-size:   var(--text-md);
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.db-temp-range {
+  font-size: var(--text-sm);
+  color:     var(--text-muted);
+}

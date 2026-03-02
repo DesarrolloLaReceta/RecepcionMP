@@ -1,15 +1,15 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { ROUTES } from "../../Constants/routes";
 import { AppRoles, type AppRole } from "../../Auth/msalConfig";
+import { Button, Badge } from "../../Components/UI/Index";
+import "./StylesErrors/Errors.css";
 
-// ─── MAPA PERMISOS POR MÓDULO ─────────────────────────────────────────────────
-// Fuente de verdad visual de qué rol puede acceder a qué.
-// Debe mantenerse sincronizado con los guards de App.tsx.
+// ─── MAPA DE ACCESO POR MÓDULO ────────────────────────────────────────────────
 
 interface ModuleAccess {
-  label:   string;
-  icon:    string;   // SVG path d=""
-  roles:   AppRole[];
+  label: string;
+  icon:  string;
+  roles: AppRole[];
 }
 
 const MODULE_ACCESS: ModuleAccess[] = [
@@ -50,55 +50,70 @@ const MODULE_ACCESS: ModuleAccess[] = [
   },
 ];
 
-// Color por rol
-const ROL_CFG: Record<AppRole, { color: string; bg: string; border: string }> = {
-  [AppRoles.Administrador]: { color: "#F59E0B", bg: "rgba(245,158,11,0.10)", border: "rgba(245,158,11,0.25)" },
-  [AppRoles.Calidad]:       { color: "#86EFAC", bg: "rgba(34,197,94,0.10)",  border: "rgba(34,197,94,0.25)"  },
-  [AppRoles.Recepcion]:     { color: "#93C5FD", bg: "rgba(59,130,246,0.10)", border: "rgba(59,130,246,0.25)" },
-  [AppRoles.Compras]:       { color: "#C4B5FD", bg: "rgba(168,85,247,0.10)", border: "rgba(168,85,247,0.25)" },
-  [AppRoles.Auditor]:       { color: "#94A3B8", bg: "rgba(100,116,139,0.10)", border: "rgba(100,116,139,0.2)" },
+// ─── COLORES POR ROL ──────────────────────────────────────────────────────────
+
+const ROL_CFG: Record<AppRole, { colorToken: string; bg?: never }> = {
+  [AppRoles.Administrador]: { colorToken: "#F59E0B" },
+  [AppRoles.Calidad]:       { colorToken: "#86EFAC" },
+  [AppRoles.Recepcion]:     { colorToken: "#93C5FD" },
+  [AppRoles.Compras]:       { colorToken: "#C4B5FD" },
+  [AppRoles.Auditor]:       { colorToken: "#94A3B8" },
 };
 
-// ─── COMPONENTE ───────────────────────────────────────────────────────────────
+// Fallback para roles no definidos
+const ROL_FALLBACK = { colorToken: "#94A3B8" };
+
+// ─── COMPONENTE PARA RENDERIZAR BADGES DE ROL ─────────────────────────────────
+
+function RoleBadge({ role }: { role: AppRole }) {
+  const config = ROL_CFG[role] ?? ROL_FALLBACK;
+  
+  return (
+    <Badge 
+      size="sm" 
+      color="custom" 
+      colorToken={config.colorToken}
+    >
+      {role}
+    </Badge>
+  );
+}
+
+// ─── SIN ACCESO PAGE ──────────────────────────────────────────────────────────
 
 export default function SinAccesoPage() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // El guard de ruta puede pasar el rol requerido y la ruta intentada
   const state      = location.state as { requiredRoles?: AppRole[]; from?: string } | null;
   const requeridos = state?.requiredRoles ?? [];
   const desde      = state?.from;
 
   return (
-    <div
-      className="flex flex-col items-center justify-center min-h-screen gap-8 p-6"
-      style={{ background: "#0A0F1A" }}
-    >
-      {/* ── Código de error con ícono superpuesto ── */}
-      <div className="relative select-none">
+    <div className="ep-page">
+
+      {/* Número 403 con ícono superpuesto */}
+      <div className="ep-number-wrap">
         <p
-          className="text-[130px] font-black leading-none font-mono"
-          style={{
-            color: "transparent",
-            WebkitTextStroke: "1px rgba(239,68,68,0.15)",
-            filter: "blur(0.5px)",
-          }}
+          className="ep-number"
+          style={{ WebkitTextStroke: "1px rgba(239,68,68,0.15)" }}
+          aria-hidden="true"
         >
           403
         </p>
-
-        {/* Escudo con candado */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="ep-icon-overlay" aria-hidden="true">
           <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center"
+            className="ep-icon-box"
             style={{
               background: "rgba(239,68,68,0.08)",
-              border: "1px solid rgba(239,68,68,0.2)",
+              border:     "1px solid rgba(239,68,68,0.20)",
             }}
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-              stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="28" height="28" viewBox="0 0 24 24"
+              fill="none" stroke="#EF4444"
+              strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+            >
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               <rect x="9" y="11" width="6" height="5" rx="1" />
               <path d="M12 11V9a2 2 0 00-2-2v0a2 2 0 00-2 2v2" />
@@ -107,151 +122,84 @@ export default function SinAccesoPage() {
         </div>
       </div>
 
-      {/* ── Mensaje principal ── */}
-      <div className="text-center flex flex-col gap-2 max-w-sm">
-        <h1 className="text-xl font-bold text-white">Acceso denegado</h1>
-        <p className="text-sm text-[#475569] leading-relaxed">
+      {/* Texto */}
+      <div className="ep-heading">
+        <h1 className="ep-title">Acceso denegado</h1>
+        <p className="ep-subtitle">
           No tienes los permisos necesarios para acceder a esta sección.
-          {desde && (
-            <span className="block mt-1 font-mono text-[11px] text-[#2D3748]">
-              {desde}
-            </span>
-          )}
+          {desde && <span className="ep-from">{desde}</span>}
         </p>
-        <p className="text-[10px] text-[#2D3748] font-mono mt-1">
-          ERROR 403 · PERMISOS INSUFICIENTES
-        </p>
+        <p className="ep-code">ERROR 403 · PERMISOS INSUFICIENTES</p>
       </div>
 
-      {/* ── Roles requeridos (si el guard los pasó) ── */}
+      {/* Roles requeridos */}
       {requeridos.length > 0 && (
-        <div
-          className="flex flex-col items-center gap-3 px-6 py-4 rounded-2xl"
-          style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}
-        >
-          <p className="text-[10px] text-[#334155] font-mono tracking-widest uppercase">
-            Roles con acceso
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {requeridos.map(rol => {
-              const c = ROL_CFG[rol] ?? ROL_CFG[AppRoles.Auditor];
-              return (
-                <span
-                  key={rol}
-                  className="px-3 py-1 rounded-lg text-[11px] font-bold"
-                  style={{ background: c.bg, color: c.color, border: `1px solid ${c.border}` }}
-                >
-                  {rol}
-                </span>
-              );
-            })}
+        <div className="ep-roles-box">
+          <p className="ep-roles-label">Roles con acceso</p>
+          <div className="ep-roles-list">
+            {requeridos.map(rol => (
+              <RoleBadge key={rol} role={rol} />
+            ))}
           </div>
         </div>
       )}
 
-      {/* ── Mapa de accesos por módulo ── */}
-      <div
-        className="w-full max-w-lg rounded-2xl overflow-hidden"
-        style={{ background: "rgba(15,23,42,0.8)", border: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <div
-          className="px-5 py-3"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          <p className="text-[10px] font-bold tracking-[0.25em] uppercase font-mono text-[#334155]">
-            Mapa de permisos del sistema
-          </p>
-        </div>
-
-        <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-          {MODULE_ACCESS.map(mod => (
-            <div
-              key={mod.label}
-              className="flex items-center gap-4 px-5 py-3"
-            >
-              {/* Ícono módulo */}
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: "rgba(255,255,255,0.04)" }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                  stroke="#475569" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d={mod.icon} />
-                </svg>
-              </div>
-
-              {/* Nombre */}
-              <p className="text-[12px] text-[#64748B] w-[140px] shrink-0">{mod.label}</p>
-
-              {/* Roles con acceso */}
-              <div className="flex flex-wrap gap-1.5">
-                {mod.roles.map(rol => {
-                  const c = ROL_CFG[rol] ?? ROL_CFG[AppRoles.Auditor];
-                  return (
-                    <span
-                      key={rol}
-                      className="px-2 py-0.5 rounded text-[9px] font-bold font-mono"
-                      style={{ background: c.bg, color: c.color, border: `1px solid ${c.border}` }}
-                    >
-                      {rol}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Acciones ── */}
-      <div className="flex items-center gap-3">
-        <button
+      {/* Acciones */}
+      <div className="ep-actions">
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all"
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            color: "#64748B",
-          }}
-          onMouseEnter={e => {
-            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)";
-            (e.currentTarget as HTMLElement).style.color      = "#94A3B8";
-          }}
-          onMouseLeave={e => {
-            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
-            (e.currentTarget as HTMLElement).style.color      = "#64748B";
-          }}
+          iconLeft="M15 18l-6-6 6-6"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
           Volver
-        </button>
-
-        <button
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => navigate(ROUTES.DASHBOARD)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all"
-          style={{
-            background: "rgba(239,68,68,0.1)",
-            border: "1px solid rgba(239,68,68,0.2)",
-            color: "#FCA5A5",
-          }}
-          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.18)")}
-          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.1)")}
+          iconLeft="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10" />
-          </svg>
           Ir al Dashboard
-        </button>
+        </Button>
       </div>
 
-      {/* ── Pie ── */}
-      <p className="text-[10px] text-[#1E293B] font-mono">
-        Contacta al administrador del sistema para solicitar acceso.
-      </p>
+      {/* Mapa de permisos del sistema */}
+      <div className="ep-map">
+        <div className="ep-map-header">
+          <p className="ep-map-title">Mapa de permisos del sistema</p>
+        </div>
+
+        {MODULE_ACCESS.map(mod => (
+          <div key={mod.label} className="ep-map-row">
+
+            {/* Ícono del módulo */}
+            <div className="ep-map-icon" aria-hidden="true">
+              <svg
+                width="13" height="13" viewBox="0 0 24 24"
+                fill="none" stroke="#475569"
+                strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+              >
+                {mod.icon.split(" M").map((seg, i) => (
+                  <path key={i} d={i === 0 ? seg : "M" + seg} />
+                ))}
+              </svg>
+            </div>
+
+            {/* Nombre del módulo */}
+            <p className="ep-map-name">{mod.label}</p>
+
+            {/* Badges de roles con acceso */}
+            <div className="ep-map-badges">
+              {mod.roles.map(rol => (
+                <RoleBadge key={rol} role={rol} />
+              ))}
+            </div>
+
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 }

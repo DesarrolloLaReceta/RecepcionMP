@@ -2,7 +2,7 @@
  * mockAuth.tsx — Provider de autenticación simulada para desarrollo local.
  *
  * Provee directamente a AuthContext (de AuthContext.tsx) para que useAuth()
- * funcione igual que en producción sin cambiar ningún componente.
+ * funcione igual que en producción sin cambiar ningún componente consumidor.
  *
  * Activar con: VITE_USE_MOCK_AUTH=true en .env.local
  * ⚠️  NO incluir en builds de producción.
@@ -50,13 +50,13 @@ export const MOCK_USERS = [
     roles:       [AppRoles.Auditor] as AppRole[],
     initials:    "JR",
   },
-];
+] as const;
 
 export type MockUser = (typeof MOCK_USERS)[number];
 
-// ─── CONTEXTO INTERNO (solo para setMockUser) ─────────────────────────────────
+// ─── CONTEXTO INTERNO ─────────────────────────────────────────────────────────
 // Separado de AuthContext para que MockLoginPage pueda acceder a setMockUser
-// sin romper la interfaz pública de AuthContextValue.
+// sin exponer ese setter en la interfaz pública de AuthContextValue.
 
 interface MockInternalValue {
   currentUser: MockUser | null;
@@ -75,26 +75,27 @@ export function MockAuthProvider({ children }: { children: React.ReactNode }) {
   const hasRole = (role: AppRole | AppRole[]): boolean => {
     if (!currentUser) return false;
     const required = Array.isArray(role) ? role : [role];
-    return required.some((r) => currentUser.roles.includes(r));
+    return required.some(r => currentUser.roles.includes(r));
   };
 
   const getAccessToken = async (): Promise<string> =>
     `mock-token-${currentUser?.id ?? "anonymous"}-${Date.now()}`;
 
-  const login  = async () => { /* MockLoginPage maneja el login */ };
+  // El login real lo maneja MockLoginPage a través de useMockAuth + setMockUser
+  const login  = async () => {};
   const logout = () => setCurrentUser(null);
 
-  // Valor que provee al AuthContext público — misma interfaz que producción
+  // Valor expuesto al AuthContext público — misma interfaz que producción
   const authValue: AuthContextValue = {
-    account:         currentUser
-                       ? { name: currentUser.displayName, username: currentUser.email }
-                       : null,
+    account:        currentUser
+                      ? { name: currentUser.displayName, username: currentUser.email }
+                      : null,
     isAuthenticated,
-    isLoading:       false,
-    displayName:     currentUser?.displayName ?? "",
-    email:           currentUser?.email       ?? "",
-    roles:           currentUser?.roles       ?? [],
-    initials:        currentUser?.initials    ?? "",
+    isLoading:      false,
+    displayName:    currentUser?.displayName ?? "",
+    email:          currentUser?.email       ?? "",
+    roles:          currentUser?.roles       ?? [],
+    initials:       currentUser?.initials    ?? "",
     hasRole,
     getAccessToken,
     login,
@@ -102,7 +103,6 @@ export function MockAuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    // AuthContext: el contexto público que usan todos los componentes vía useAuth()
     <AuthContext.Provider value={authValue}>
       {/* MockInternalContext: solo lo consume MockLoginPage para setMockUser */}
       <MockInternalContext.Provider value={{ currentUser, setMockUser: setCurrentUser }}>
@@ -112,10 +112,13 @@ export function MockAuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ─── HOOK INTERNO (solo MockLoginPage) ───────────────────────────────────────
+// ─── HOOK INTERNO ─────────────────────────────────────────────────────────────
+// Solo para uso en MockLoginPage — no exportar en el barrel de Auth.
 
 export function useMockAuth(): MockInternalValue {
   const ctx = useContext(MockInternalContext);
-  if (!ctx) throw new Error("useMockAuth debe usarse dentro de <MockAuthProvider>");
+  if (!ctx) {
+    throw new Error("useMockAuth debe usarse dentro de <MockAuthProvider>");
+  }
   return ctx;
 }
