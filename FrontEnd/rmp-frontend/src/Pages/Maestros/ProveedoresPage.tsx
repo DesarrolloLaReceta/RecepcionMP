@@ -11,8 +11,8 @@ import { formatDate } from "../../Utils/formatters";
 import {
   MOCK_PROVEEDORES_LIST, MOCK_PROVEEDOR_DETALLE,
 } from "./MockData";
-import "../Styles/MaestrosLayout.css";
-import "./StylesPages/ProveedoresPage.css";
+import "./StylesMaestros/MaestrosLayout.css";
+import "./StylesMaestros/ProveedoresPage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 

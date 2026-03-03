@@ -10,8 +10,8 @@ import { formatDate } from "../../Utils/formatters";
 import {
   MOCK_CHECKLISTS_LIST, MOCK_CHECKLIST_DETALLE, MOCK_CATEGORIAS,
 } from "./MockData";
-import "../Styles/MaestrosLayout.css";
-import "./StylesPages/ChecklistsPage.css";
+import "./StylesMaestros/MaestrosLayout.css";
+import "./StylesMaestros/CheckListPage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 

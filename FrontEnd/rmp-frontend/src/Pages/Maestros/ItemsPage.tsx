@@ -8,8 +8,8 @@ import { StatusBadge, Button, Modal, ModalFooter } from "../../Components/UI/Ind
 import { TextField, SelectField, NumberField, TextAreaField } from "../../Components/Forms/Index";
 import { formatTempRange } from "../../Utils/formatters";
 import { MOCK_ITEMS_LIST, MOCK_ITEM_DETALLE, MOCK_CATEGORIAS } from "./MockData";
-import "../Styles/MaestrosLayout.css";
-import "./StylesPages/ItemsPage.css";
+import "./StylesMaestros/MaestrosLayout.css";
+import "./StylesMaestros/ItemsPage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 
