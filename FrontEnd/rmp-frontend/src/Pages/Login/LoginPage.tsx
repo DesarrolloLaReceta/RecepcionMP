@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Auth/AuthContext";
 import { Spinner, Badge } from "../../Components/UI/Index";
-import "./StylesPages/LoginPage.css";
+import "./StylesLogin/LoginPage.css";
 
 // ─── ÍCONOS SVG ───────────────────────────────────────────────────────────────
 

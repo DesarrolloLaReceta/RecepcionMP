@@ -1,0 +1,67 @@
+/* ============================================================
+   PROVEEDORES PAGE — prefix .pv-*
+   Usa MaestrosLayout.css para el patrón lista+panel
+   ============================================================ */
+
+/* ── FILA PROVEEDOR ── */
+.pv-row-inner { display: flex; align-items: center; gap: 0.75rem; }
+.pv-avatar {
+  width: 2.25rem; height: 2.25rem;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-sm); font-weight: 700; font-family: var(--font-mono);
+  flex-shrink: 0;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  color: var(--primary);
+}
+.pv-row-info { flex: 1; min-width: 0; }
+.pv-razon-social {
+  font-size: var(--text-base); font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pv-nit { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-tertiary); margin-top: 0.0625rem; }
+.pv-cats { display: flex; gap: 0.25rem; flex-wrap: wrap; margin-top: 0.25rem; }
+.pv-cat-pill {
+  font-size: 9px; font-family: var(--font-mono);
+  padding: 0.0625rem 0.375rem; border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04); color: var(--text-tertiary);
+}
+.pv-doc-alert {
+  width: 0.5rem; height: 0.5rem;
+  border-radius: var(--radius-full);
+  background: #F59E0B; flex-shrink: 0;
+}
+
+/* ── PANEL: HEADER ── */
+.pv-panel-header {
+  display: flex; align-items: flex-start; gap: 1rem;
+  padding: 1.25rem 1.5rem 0;
+  flex-shrink: 0;
+}
+.pv-panel-avatar {
+  width: 3rem; height: 3rem;
+  border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-lg); font-weight: 700; font-family: var(--font-mono);
+  flex-shrink: 0;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  color: var(--primary);
+}
+.pv-panel-name { font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); }
+.pv-panel-nit  { font-size: var(--text-sm); font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.125rem; }
+.pv-panel-close {
+  margin-left: auto; flex-shrink: 0;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-tertiary); transition: color var(--transition-fast);
+  padding: 0.25rem; border-radius: var(--radius-sm);
+}
+.pv-panel-close:hover { color: var(--text-muted); }
+
+/* ── DOC ITEM (tab documentos) ── */
+.pv-doc-vencimiento {
+  display: flex; align-items: center; gap: 0.25rem;
+  font-size: var(--text-xs); font-family: var(--font-mono);
+}

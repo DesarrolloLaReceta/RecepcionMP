@@ -1,0 +1,238 @@
+.dl-page { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 1.25rem; 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    animation: fadeSlideUp 0.35s ease both; 
+}
+
+.dl-header { 
+    display: flex; 
+    align-items: flex-start; 
+    gap: 0.75rem;
+    flex-wrap: wrap; 
+}
+
+.dl-header-info { 
+    flex: 1; 
+    min-width: 0; 
+}
+
+.dl-breadcrumb { 
+    font-size: var(--text-xs); 
+    font-family: var(--font-mono); 
+    letter-spacing: 0.2em; 
+    text-transform: uppercase; 
+    color: var(--text-muted); 
+    margin-bottom: 0.25rem; 
+}
+
+.dl-lote-num { 
+    font-size: var(--text-xl); 
+    font-weight: 700; 
+    color: var(--text-primary); 
+    font-family: var(--font-sans); 
+}
+
+.dl-lote-item { 
+    font-size: var(--text-md); 
+    color: var(--text-secondary); 
+    margin-top: 0.125rem; 
+}
+
+.dl-grid { 
+    display: grid; 
+    grid-template-columns: 1fr; 
+    gap: 1rem; 
+}
+
+@media (min-width: 1024px) { 
+    .dl-grid { 
+        grid-template-columns: 1fr 2fr; 
+    } 
+
+}
+
+.dl-col { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 1rem; 
+}
+
+.dl-field-grid { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1rem 1.5rem; 
+}
+
+.dl-field-full { 
+    grid-column: 1 / -1; 
+}
+
+.dl-field-label { 
+    font-size: 9px; 
+    font-family: var(--font-mono); 
+    text-transform: uppercase; 
+    letter-spacing: 0.12em; 
+    color: #334155; 
+    margin-bottom: 0.125rem; 
+}
+
+.dl-field-value { 
+    font-size: var(--text-base); 
+    color: #CBD5E1; 
+}
+
+.dl-field-value--mono { 
+    font-family: var(--font-mono); 
+}
+
+.dl-venc-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.5rem; 
+    flex-wrap: wrap; 
+}
+
+.dl-venc-dot { 
+    width: 0.375rem; 
+    height: 0.375rem; 
+    border-radius: var(--radius-full); 
+    flex-shrink: 0; 
+
+}
+
+.dl-venc-dias { 
+    font-size: var(--text-sm); 
+    font-family: var(--font-mono); 
+}
+
+.dl-inspeccion-grid { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1rem; 
+}
+
+@media (min-width: 768px) { 
+    .dl-inspeccion-grid { 
+        grid-template-columns: repeat(4, 1fr); 
+    } 
+}
+
+.dl-temp-bloc { 
+    grid-column: 1 / -1; 
+    padding: 0.75rem 1rem; 
+    border-radius: var(--radius-lg); 
+}
+
+.dl-temp-header { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.75rem; 
+    margin-bottom: 0.375rem; 
+}
+
+.dl-temp-label { 
+    font-size: var(--text-sm); 
+    color: var(--text-muted); 
+}
+
+.dl-temp-value { 
+    font-size: 1.25rem; 
+    font-family: var(--font-mono); 
+    font-weight: 700; 
+    margin-left: auto; 
+}
+
+.dl-temp-range { 
+    font-size: var(--text-xs); 
+    font-family: var(--font-mono); 
+    color: var(--text-tertiary); 
+}
+
+.dl-docs-alert { 
+    display: flex; 
+    align-items: flex-start; 
+    gap: 0.5rem; 
+    padding: 0.75rem; 
+    border-radius: var(--radius-md); 
+    background: rgba(245,158,11,0.07); 
+    border: 1px solid rgba(245,158,11,0.15); 
+}
+
+.dl-docs-alert-title { 
+    font-size: var(--text-sm); 
+    font-weight: 600; 
+    color: var(--primary); 
+    margin-bottom: 0.125rem; 
+}
+
+.dl-docs-alert-item { 
+    font-size: var(--text-xs); 
+    color: #B45309; 
+}
+
+.dl-check-row { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 0.5rem 0; 
+    border-bottom: 1px solid rgba(255,255,255,0.03); 
+    gap: 0.5rem; 
+}
+
+.dl-check-row:last-child { 
+    border-bottom: none; 
+}
+
+.dl-check-label { 
+    font-size: var(--text-base); 
+    color: var(--text-muted); 
+    flex: 1; 
+}
+
+.dl-check-dot { 
+    width: 0.5rem; 
+    height: 0.5rem; 
+    border-radius: var(--radius-full); 
+    flex-shrink: 0; 
+}
+
+
+.dl-check-dot[data-ok="true"] { 
+    background: #22C55E; 
+}
+
+.dl-check-dot[data-ok="false"] { 
+    background: #EF4444; 
+}
+
+.dl-link-rec { 
+    font-family: var(--font-mono); 
+    color: #93C5FD; 
+    transition: color var(--transition-fast); 
+    text-decoration: none; 
+}
+
+.dl-link-rec:hover { 
+    color: var(--primary); 
+}
+
+.dl-back-btn { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 0.375rem; 
+    font-size: var(--text-sm); 
+    font-family: var(--font-mono); 
+    color: var(--text-muted); 
+    background: none; 
+    border: none; 
+    cursor: pointer; 
+    padding: 0; 
+    transition: color var(--transition-fast); 
+}
+
+.dl-back-btn:hover { 
+    color: var(--text-secondary); 
+}
