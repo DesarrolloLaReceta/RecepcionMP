@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Button, type ButtonVariant } from "./Button";
 import { Spinner } from "./Spinner";
 import { Icon } from "./Icon";
-import "./SytlesUI/Modal.css";
+import "./StylesUI/Modal.css";
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 

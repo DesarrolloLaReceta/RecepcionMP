@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { MOCK_USERS, type MockUser, useMockAuth } from "../../Auth/mockAuth";
 import { AppRoles } from "../../Auth/msalConfig";
 import { Badge, type BadgeColor } from "../../Components/UI/Index";
-import "./StylesPages/MockLoginPage.css";
+import "./StylesLogin/MockLoginPage.css";
 
 // ─── COLORES POR ROL ──────────────────────────────────────────────────────────
 
