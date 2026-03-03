@@ -1,211 +1,187 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   itemsService, categoriasService,
   type ItemResumen, type Item, type Categoria,
-  EstadoItem, EstadoItemLabels,
-  type CrearItemCommand,
+  type CrearItemCommand, EstadoItem,
 } from "../../Services/maestros.service";
+import { StatusBadge, Button, Modal, ModalFooter } from "../../Components/UI/Index";
+import { TextField, SelectField, NumberField, TextAreaField } from "../../Components/Forms/Index";
+import { formatTempRange } from "../../Utils/formatters";
 import { MOCK_ITEMS_LIST, MOCK_ITEM_DETALLE, MOCK_CATEGORIAS } from "./MockData";
+import "./StylesMaestros/MaestrosLayout.css";
+import "./StylesMaestros/ItemsPage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-
-const ESTADO_CFG: Record<EstadoItem, { color: string; bg: string; dot: string }> = {
-  [EstadoItem.Activo]:   { color: "#86EFAC", bg: "rgba(34,197,94,0.08)",   dot: "#22C55E" },
-  [EstadoItem.Inactivo]: { color: "#94A3B8", bg: "rgba(100,116,139,0.08)", dot: "#64748B" },
-};
-
-function CatBadge({ nombre }: { nombre: string }) {
-  const colores: Record<string, { bg: string; color: string }> = {
-    "Cárnicos":       { bg: "rgba(239,68,68,0.08)",   color: "#FCA5A5" },
-    "Lácteos":        { bg: "rgba(59,130,246,0.08)",   color: "#93C5FD" },
-    "Secos":          { bg: "rgba(245,158,11,0.08)",   color: "#FCD34D" },
-    "Frutas/Verduras":{ bg: "rgba(34,197,94,0.08)",    color: "#86EFAC" },
-    "Congelados":     { bg: "rgba(168,85,247,0.08)",   color: "#C4B5FD" },
-  };
-  const c = colores[nombre] ?? { bg: "rgba(255,255,255,0.05)", color: "#64748B" };
-  return (
-    <span className="text-[10px] px-2 py-0.5 rounded font-mono font-medium"
-      style={{ background: c.bg, color: c.color }}>
-      {nombre}
-    </span>
-  );
-}
-
 // ─── FILA ÍTEM ────────────────────────────────────────────────────────────────
 
-function ItemRow({ item, active, onClick }: { item: ItemResumen; active: boolean; onClick: () => void }) {
+function ItemRow({
+  item, active, onClick,
+}: {
+  item: ItemResumen;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
-    <button onClick={onClick} className="w-full text-left px-4 py-3.5 transition-all"
-      style={{
-        background: active ? "rgba(245,158,11,0.06)" : "transparent",
-        borderLeft: `2px solid ${active ? "#F59E0B" : "transparent"}`,
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
-      }}
-      onMouseEnter={e => !active && ((e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)")}
-      onMouseLeave={e => !active && ((e.currentTarget as HTMLElement).style.background = "transparent")}>
-      <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke={item.requiereCadenaFrio ? "#93C5FD" : "#64748B"} strokeWidth="1.8">
-            {item.requiereCadenaFrio
-              ? <path d="M12 2v20M12 2l-4 4M12 2l4 4M4.5 6.5l3 3M19.5 6.5l-3 3M4.5 17.5l3-3M19.5 17.5l-3-3" strokeLinecap="round" />
-              : <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82zM7 7h.01" />
-            }
-          </svg>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <p className="text-[13px] font-semibold text-[#CBD5E1] truncate">{item.nombre}</p>
-            {item.estado === EstadoItem.Inactivo && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded font-mono"
-                style={{ background: "rgba(100,116,139,0.1)", color: "#64748B" }}>
-                INACTIVO
-              </span>
-            )}
-          </div>
-          <p className="text-[10px] text-[#475569] font-mono">{item.codigo}</p>
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <CatBadge nombre={item.categoriaNombre} />
-            <span className="text-[10px] text-[#475569] font-mono">{item.unidadMedida}</span>
-            {item.requiereCadenaFrio && item.temperaturaMinima !== undefined && (
-              <span className="text-[10px] text-[#93C5FD] font-mono">
-                ❄ {item.temperaturaMinima}°–{item.temperaturaMaxima}°C
-              </span>
+    <div
+      className="ms-row"
+      data-active={active}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => e.key === "Enter" && onClick()}
+    >
+      <div className="it-row-inner">
+        <span className="it-codigo">{item.codigo}</span>
+        <div className="it-row-info">
+          <p className="it-nombre">{item.nombre}</p>
+          <div className="it-meta">
+            <span className="it-cat">{item.categoriaNombre}</span>
+            {item.requiereCadenaFrio && (
+              <>
+                <svg className="it-frio-icon" width="10" height="10" viewBox="0 0 24 24"
+                  fill="none" stroke="#93C5FD" strokeWidth="2" strokeLinecap="round" aria-label="Cadena de frío">
+                  <path d="M12 2v20M12 2l-4 4M12 2l4 4M4.93 7.07l14.14 9.9M4.93 7.07L3 11M4.93 7.07l4 .93M19.07 7.07L21 11M19.07 7.07l-4 .93M4.93 16.93l14.14-9.9M4.93 16.93L3 13M4.93 16.93l4-.93M19.07 16.93L21 13M19.07 16.93l-4-.93" />
+                </svg>
+                {item.temperaturaMinima != null && item.temperaturaMaxima != null && (
+                  <span className="it-temp-range">
+                    {formatTempRange(item.temperaturaMinima, item.temperaturaMaxima)}
+                  </span>
+                )}
+              </>
             )}
           </div>
         </div>
-        <div className="text-right shrink-0">
-          <p className="text-[13px] font-bold font-mono text-[#94A3B8]">{item.totalLotesRecibidos}</p>
-          <p className="text-[9px] text-[#334155]">lotes</p>
-        </div>
-      </div>
-    </button>
-  );
-}
-
-// ─── PANEL DETALLE ────────────────────────────────────────────────────────────
-
-function PanelDetalle({ item, onClose }: { item: Item; onClose: () => void }) {
-  return (
-    <div className="flex flex-col h-full overflow-auto">
-      {/* Header */}
-      <div className="px-6 py-5 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke={item.requiereCadenaFrio ? "#93C5FD" : "#64748B"} strokeWidth="1.8">
-                {item.requiereCadenaFrio
-                  ? <path d="M12 2v20M12 2l-4 4M12 2l4 4M4.5 6.5l3 3M19.5 6.5l-3 3M4.5 17.5l3-3M19.5 17.5l-3-3" strokeLinecap="round" />
-                  : <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82zM7 7h.01" />
-                }
-              </svg>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <h2 className="text-[16px] font-bold text-white">{item.nombre}</h2>
-                <span className="text-[10px] px-2 py-0.5 rounded-lg font-bold"
-                  style={{ ...{ background: ESTADO_CFG[item.estado].bg, color: ESTADO_CFG[item.estado].color } }}>
-                  {EstadoItemLabels[item.estado].toUpperCase()}
-                </span>
-              </div>
-              <p className="text-[11px] text-[#475569] font-mono">{item.codigo}</p>
-              <div className="flex items-center gap-2 mt-1.5">
-                <CatBadge nombre={item.categoriaNombre} />
-                <span className="text-[10px] text-[#64748B] font-mono">{item.unidadMedida}</span>
-              </div>
-            </div>
-          </div>
-          <button onClick={onClose}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-[#475569] hover:text-[#94A3B8] shrink-0"
-            style={{ background: "rgba(255,255,255,0.04)" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div className="p-6 flex flex-col gap-5">
-        {/* Descripción */}
-        {item.descripcion && (
-          <p className="text-[13px] text-[#94A3B8] leading-relaxed">{item.descripcion}</p>
-        )}
-
-        {/* Cadena de frío */}
-        {item.requiereCadenaFrio && (
-          <div className="rounded-xl p-4"
-            style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.15)" }}>
-            <div className="flex items-center gap-2 mb-3">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93C5FD" strokeWidth="2">
-                <path d="M12 2v20M12 2l-4 4M12 2l4 4M4.5 6.5l3 3M19.5 6.5l-3 3" strokeLinecap="round" />
-              </svg>
-              <p className="text-[11px] text-[#93C5FD] font-semibold uppercase tracking-wider font-mono">Cadena de frío</p>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: "T° mínima",  val: `${item.temperaturaMinima}°C` },
-                { label: "T° máxima",  val: `${item.temperaturaMaxima}°C` },
-                { label: "Vida útil mín.", val: item.vidaUtilMinimaDias ? `${item.vidaUtilMinimaDias}d` : "—" },
-              ].map(k => (
-                <div key={k.label} className="text-center p-2 rounded-lg"
-                  style={{ background: "rgba(59,130,246,0.08)" }}>
-                  <p className="text-[14px] font-bold font-mono text-[#93C5FD]">{k.val}</p>
-                  <p className="text-[9px] text-[#475569] mt-0.5">{k.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Documentos requeridos */}
-        <div>
-          <p className="text-[10px] text-[#334155] uppercase tracking-wider font-mono mb-3">
-            Documentos requeridos en recepción
-          </p>
-          <div className="flex flex-col gap-2">
-            {item.documentosRequeridos.map(doc => (
-              <div key={doc.tipoDocumento} className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                <div className="w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ background: doc.obligatorio ? "#F59E0B" : "#334155" }} />
-                <p className="text-[12px] text-[#94A3B8] flex-1">{doc.nombreTipo}</p>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
-                  style={{
-                    background: doc.obligatorio ? "rgba(245,158,11,0.08)" : "rgba(255,255,255,0.03)",
-                    color: doc.obligatorio ? "#F59E0B" : "#334155",
-                  }}>
-                  {doc.obligatorio ? "Obligatorio" : "Opcional"}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Criterios de aceptación */}
-        {item.criteriosAceptacion && (
-          <div>
-            <p className="text-[10px] text-[#334155] uppercase tracking-wider font-mono mb-2">
-              Criterios de aceptación / rechazo
-            </p>
-            <div className="rounded-xl p-4"
-              style={{ background: "rgba(245,158,11,0.04)", border: "1px solid rgba(245,158,11,0.1)" }}>
-              <p className="text-[12px] text-[#94A3B8] leading-relaxed">{item.criteriosAceptacion}</p>
-            </div>
-          </div>
-        )}
+        <StatusBadge domain="item" value={item.estado} size="xs" />
       </div>
     </div>
   );
 }
 
+// ─── PANEL DETALLE ────────────────────────────────────────────────────────────
+
+function PanelDetalle({
+  item, onClose,
+}: {
+  item: Item;
+  onClose: () => void;
+}) {
+  const [tab, setTab] = useState<"info" | "docs">("info");
+
+  return (
+    <>
+      {/* Header */}
+      <div className="it-panel-header">
+        <div>
+          <p className="it-panel-nombre">{item.nombre}</p>
+          <p className="it-panel-codigo">{item.codigo} · {item.categoriaNombre}</p>
+          <div style={{ marginTop: "0.375rem" }}>
+            <StatusBadge domain="item" value={item.estado} size="sm" />
+          </div>
+        </div>
+        <button className="it-panel-close" onClick={onClose} aria-label="Cerrar panel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div className="ms-tabs" style={{ marginTop: "0.75rem" }}>
+        {([
+          { key: "info", label: "Información" },
+          { key: "docs", label: `Docs requeridos (${item.documentosRequeridos.length})` },
+        ] as const).map(t => (
+          <button key={t.key} className="ms-tab" data-active={tab === t.key}
+            onClick={() => setTab(t.key)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="ms-panel-body">
+        {tab === "info" && (
+          <>
+            <div className="ms-info-grid">
+              <div className="ms-info-card">
+                <p className="ms-info-label">Unidad de medida</p>
+                <p className="ms-info-value">{item.unidadMedida}</p>
+              </div>
+              <div className="ms-info-card">
+                <p className="ms-info-label">Vida útil mínima</p>
+                <p className="ms-info-value">
+                  {item.vidaUtilMinimaDias != null ? `${item.vidaUtilMinimaDias} días` : "—"}
+                </p>
+              </div>
+              {item.requiereCadenaFrio && (
+                <div className="ms-info-card" style={{ gridColumn: "1 / -1" }}>
+                  <p className="ms-info-label">Temperatura objetivo</p>
+                  <p className="ms-info-value" style={{ color: "#93C5FD", fontFamily: "var(--font-mono)" }}>
+                    {item.temperaturaMinima != null && item.temperaturaMaxima != null
+                      ? formatTempRange(item.temperaturaMinima, item.temperaturaMaxima)
+                      : "—"}
+                  </p>
+                </div>
+              )}
+              {item.descripcion && (
+                <div className="ms-info-card" style={{ gridColumn: "1 / -1" }}>
+                  <p className="ms-info-label">Descripción</p>
+                  <p className="ms-info-value">{item.descripcion}</p>
+                </div>
+              )}
+            </div>
+
+            {item.criteriosAceptacion && (
+              <>
+                <p style={{ fontSize: "var(--text-xs)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-tertiary)" }}>
+                  Criterios de aceptación / rechazo
+                </p>
+                <div className="it-criterios-box">
+                  <p className="it-criterios-text">{item.criteriosAceptacion}</p>
+                </div>
+              </>
+            )}
+          </>
+        )}
+
+        {tab === "docs" && (
+          <>
+            {item.documentosRequeridos.length === 0 ? (
+              <p style={{ fontSize: "var(--text-md)", color: "var(--text-tertiary)" }}>Sin documentos configurados.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {item.documentosRequeridos.map(doc => (
+                  <div key={doc.tipoDocumento} className="it-doc-row">
+                    <span
+                      className="it-doc-dot"
+                      style={{ background: doc.obligatorio ? "#F59E0B" : "#334155" }}
+                    />
+                    <span className="it-doc-nombre">{doc.nombreTipo}</span>
+                    <span
+                      className="it-doc-badge"
+                      style={{
+                        background: doc.obligatorio ? "rgba(245,158,11,0.08)" : "rgba(255,255,255,0.03)",
+                        color: doc.obligatorio ? "#F59E0B" : "#334155",
+                      }}
+                    >
+                      {doc.obligatorio ? "Obligatorio" : "Opcional"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
 // ─── MODAL NUEVO ÍTEM ─────────────────────────────────────────────────────────
 
-function ModalNuevoItem({ categorias, onClose, onCreado }: {
+function ModalNuevoItem({
+  categorias, onClose, onCreado,
+}: {
   categorias: Categoria[];
   onClose: () => void;
   onCreado: (item: ItemResumen) => void;
@@ -214,7 +190,8 @@ function ModalNuevoItem({ categorias, onClose, onCreado }: {
     requiereCadenaFrio: false, unidadMedida: "Kg",
   });
   const [saving, setSaving] = useState(false);
-  const upd = (k: keyof CrearItemCommand, v: unknown) => setForm(p => ({ ...p, [k]: v }));
+  const upd = (k: keyof CrearItemCommand, v: unknown) =>
+    setForm(p => ({ ...p, [k]: v }));
   const valid = form.codigo?.trim() && form.nombre?.trim() && form.categoriaId;
 
   const crear = async () => {
@@ -225,140 +202,154 @@ function ModalNuevoItem({ categorias, onClose, onCreado }: {
       else await new Promise(r => setTimeout(r, 700));
       const cat = categorias.find(c => c.id === form.categoriaId);
       onCreado({
-        id: `item-${Date.now()}`, codigo: form.codigo!, nombre: form.nombre!,
-        categoriaNombre: cat?.nombre ?? "", unidadMedida: form.unidadMedida ?? "Kg",
-        estado: EstadoItem.Activo, requiereCadenaFrio: form.requiereCadenaFrio ?? false,
-        temperaturaMinima: form.temperaturaMinima, temperaturaMaxima: form.temperaturaMaxima,
+        id: `item-${Date.now()}`,
+        codigo: form.codigo!,
+        nombre: form.nombre!,
+        categoriaNombre: cat?.nombre ?? "",
+        unidadMedida: form.unidadMedida ?? "Kg",
+        estado: EstadoItem.Activo,
+        requiereCadenaFrio: form.requiereCadenaFrio ?? false,
+        temperaturaMinima: form.temperaturaMinima,
+        temperaturaMaxima: form.temperaturaMaxima,
         totalLotesRecibidos: 0,
       });
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const inp = "w-full px-3.5 py-2.5 rounded-lg text-[13px] outline-none";
-  const ist = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "#CBD5E1" } as React.CSSProperties;
-  const lbl = "text-[11px] font-semibold tracking-wider uppercase font-mono text-[#64748B]";
-  const onF = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => (e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)");
-  const onB = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)");
+  const catOptions = categorias.map(c => ({ value: c.id, label: c.nombre }));
+  const umOptions  = ["Kg", "g", "L", "mL", "Unidad", "Caja"].map(v => ({ value: v, label: v }));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
-      onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-lg rounded-2xl overflow-hidden"
-        style={{ background: "rgba(10,15,26,0.98)", border: "1px solid rgba(255,255,255,0.08)", animation: "modalIn 0.2s ease" }}>
-        <style>{`@keyframes modalIn { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }`}</style>
-        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <h2 className="text-[15px] font-bold text-white">Nuevo ítem</h2>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#475569]"
-            style={{ background: "rgba(255,255,255,0.04)" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="p-6 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label className={lbl}>Código <span className="text-[#FCA5A5]">*</span></label>
-              <input value={form.codigo ?? ""} onChange={e => upd("codigo", e.target.value)}
-                placeholder="CAT-001" className={inp} style={ist} onFocus={onF} onBlur={onB} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className={lbl}>Unidad <span className="text-[#FCA5A5]">*</span></label>
-              <select value={form.unidadMedida} onChange={e => upd("unidadMedida", e.target.value)}
-                className={inp} style={ist} onFocus={onF} onBlur={onB}>
-                {["Kg", "g", "L", "mL", "Und", "Caja"].map(u => <option key={u}>{u}</option>)}
-              </select>
-            </div>
-            <div className="col-span-2 flex flex-col gap-1.5">
-              <label className={lbl}>Nombre <span className="text-[#FCA5A5]">*</span></label>
-              <input value={form.nombre ?? ""} onChange={e => upd("nombre", e.target.value)}
-                placeholder="Nombre del ítem" className={inp} style={ist} onFocus={onF} onBlur={onB} />
-            </div>
-            <div className="col-span-2 flex flex-col gap-1.5">
-              <label className={lbl}>Categoría <span className="text-[#FCA5A5]">*</span></label>
-              <select value={form.categoriaId ?? ""} onChange={e => {
-                const cat = categorias.find(c => c.id === e.target.value);
-                upd("categoriaId", e.target.value);
-                if (cat) upd("requiereCadenaFrio", cat.requiereCadenaFrio);
-              }} className={inp} style={ist} onFocus={onF} onBlur={onB}>
-                <option value="">Selecciona una categoría</option>
-                {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {/* Cadena de frío */}
-          <div className="flex items-center justify-between py-3 px-4 rounded-xl"
-            style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.1)" }}>
-            <div>
-              <p className="text-[13px] text-[#CBD5E1]">Requiere cadena de frío</p>
-              <p className="text-[10px] text-[#475569] mt-0.5">Activa el control de temperatura en recepción</p>
-            </div>
-            <button onClick={() => upd("requiereCadenaFrio", !form.requiereCadenaFrio)}
-              className="w-10 h-5 rounded-full relative transition-all duration-200 shrink-0"
-              style={{ background: form.requiereCadenaFrio ? "#3B82F6" : "rgba(255,255,255,0.08)" }}>
-              <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all duration-200"
-                style={{ left: form.requiereCadenaFrio ? "22px" : "2px" }} />
+    <Modal
+      open
+      onClose={onClose}
+      title="Nuevo ítem / materia prima"
+      icon="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+      size="lg"
+      footer={
+        <ModalFooter
+          onCancel={onClose}
+          onConfirm={crear}
+          loading={saving}
+          disabled={!valid}
+          confirmLabel="Crear ítem"
+        />
+      }
+    >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+        <TextField
+          label="Código"
+          required
+          placeholder="CAR-001"
+          value={form.codigo ?? ""}
+          onChange={e => upd("codigo", e.target.value)}
+        />
+        <TextField
+          label="Nombre"
+          required
+          placeholder="Pechuga de pollo"
+          value={form.nombre ?? ""}
+          onChange={e => upd("nombre", e.target.value)}
+        />
+        <SelectField
+          label="Categoría"
+          required
+          placeholder="Selecciona categoría"
+          options={catOptions}
+          value={form.categoriaId ?? ""}
+          onChange={e => upd("categoriaId", e.target.value)}
+        />
+        <SelectField
+          label="Unidad de medida"
+          options={umOptions}
+          value={form.unidadMedida ?? "Kg"}
+          onChange={e => upd("unidadMedida", e.target.value)}
+        />
+        <NumberField
+          label="Vida útil mínima (días)"
+          placeholder="7"
+          min={1}
+          value={form.vidaUtilMinimaDias ?? ""}
+          onChange={e => upd("vidaUtilMinimaDias", e.target.value ? Number(e.target.value) : undefined)}
+        />
+        {/* Toggle cadena de frío */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+          <label className="field-label">Cadena de frío</label>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", paddingTop: "0.375rem" }}>
+            <button
+              type="button"
+              onClick={() => upd("requiereCadenaFrio", !form.requiereCadenaFrio)}
+              style={{
+                width: "2.25rem", height: "1.25rem",
+                borderRadius: "var(--radius-full)",
+                background: form.requiereCadenaFrio ? "#F59E0B" : "rgba(255,255,255,0.08)",
+                border: "none", cursor: "pointer", position: "relative",
+                transition: "background 0.2s",
+              }}
+              aria-pressed={form.requiereCadenaFrio}
+              aria-label="Requiere cadena de frío"
+            >
+              <span style={{
+                position: "absolute", top: "0.125rem",
+                width: "1rem", height: "1rem",
+                borderRadius: "var(--radius-full)",
+                background: "#fff",
+                left: form.requiereCadenaFrio ? "1.125rem" : "0.125rem",
+                transition: "left 0.2s",
+              }} />
             </button>
-          </div>
-
-          {form.requiereCadenaFrio && (
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: "T° mínima (°C)", key: "temperaturaMinima" as keyof CrearItemCommand },
-                { label: "T° máxima (°C)", key: "temperaturaMaxima" as keyof CrearItemCommand },
-                { label: "Vida útil mín. (días)", key: "vidaUtilMinimaDias" as keyof CrearItemCommand },
-              ].map(f => (
-                <div key={f.key} className="flex flex-col gap-1.5">
-                  <label className={lbl}>{f.label}</label>
-                  <input type="number" value={String(form[f.key] ?? "")}
-                    onChange={e => upd(f.key, Number(e.target.value))}
-                    className={inp} style={ist} onFocus={onF} onBlur={onB} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="flex flex-col gap-1.5">
-            <label className={lbl}>Criterios de aceptación</label>
-            <textarea value={form.criteriosAceptacion ?? ""}
-              onChange={e => upd("criteriosAceptacion", e.target.value)}
-              rows={3} placeholder="Describe los criterios para aceptar o rechazar este ítem…"
-              className="w-full px-3.5 py-2.5 rounded-lg text-[13px] outline-none resize-none"
-              style={ist}
-              onFocus={e => (e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)")}
-              onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)")} />
+            <span style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+              {form.requiereCadenaFrio ? "Requiere" : "No requiere"}
+            </span>
           </div>
         </div>
 
-        <div className="flex gap-3 px-6 pb-6">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm text-[#64748B] hover:text-[#94A3B8]">Cancelar</button>
-          <button onClick={crear} disabled={saving || !valid}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold disabled:opacity-40"
-            style={{ background: "#F59E0B", color: "#000" }}>
-            {saving ? <><div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />Guardando…</> : "Crear ítem"}
-          </button>
+        {form.requiereCadenaFrio && (
+          <>
+            <NumberField
+              label="T° mínima (°C)"
+              placeholder="0"
+              value={form.temperaturaMinima ?? ""}
+              onChange={e => upd("temperaturaMinima", e.target.value ? Number(e.target.value) : undefined)}
+            />
+            <NumberField
+              label="T° máxima (°C)"
+              placeholder="4"
+              value={form.temperaturaMaxima ?? ""}
+              onChange={e => upd("temperaturaMaxima", e.target.value ? Number(e.target.value) : undefined)}
+            />
+          </>
+        )}
+
+        <div style={{ gridColumn: "1 / -1" }}>
+          <TextAreaField
+            label="Criterios de aceptación / rechazo"
+            placeholder="Color, olor, temperatura, rotulado…"
+            rows={3}
+            value={form.criteriosAceptacion ?? ""}
+            onChange={e => upd("criteriosAceptacion", e.target.value)}
+          />
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
 // ─── PÁGINA ───────────────────────────────────────────────────────────────────
 
 export default function ItemsPage() {
-  const [lista, setLista]             = useState<ItemResumen[]>([]);
-  const [categorias, setCategorias]   = useState<Categoria[]>([]);
-  const [loading, setLoading]         = useState(true);
-  const [selectedId, setSelectedId]   = useState<string | null>(null);
-  const [detalle, setDetalle]         = useState<Item | null>(null);
-  const [loadingDet, setLoadingDet]   = useState(false);
-  const [search, setSearch]           = useState("");
-  const [filtroCategoria, setFiltroCategoria] = useState("");
-  const [filtroFrio, setFiltroFrio]   = useState<"" | "si" | "no">("");
-  const [showModal, setShowModal]     = useState(false);
+  const [lista,            setLista]           = useState<ItemResumen[]>([]);
+  const [categorias,       setCategorias]      = useState<Categoria[]>([]);
+  const [loading,          setLoading]         = useState(true);
+  const [selectedId,       setSelectedId]      = useState<string | null>(null);
+  const [detalle,          setDetalle]         = useState<Item | null>(null);
+  const [loadingDet,       setLoadingDet]      = useState(false);
+  const [search,           setSearch]          = useState("");
+  const [filtroCategoria,  setFiltroCategoria] = useState("");
+  const [filtroFrio,       setFiltroFrio]      = useState<"" | "si" | "no">("");
+  const [showModal,        setShowModal]       = useState(false);
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -366,8 +357,11 @@ export default function ItemsPage() {
       const [items, cats] = isMock
         ? [MOCK_ITEMS_LIST, MOCK_CATEGORIAS]
         : await Promise.all([itemsService.getAll(), categoriasService.getAll()]);
-      setLista(items); setCategorias(cats);
-    } finally { setLoading(false); }
+      setLista(items);
+      setCategorias(cats);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { cargar(); }, [cargar]);
@@ -389,114 +383,128 @@ export default function ItemsPage() {
     return (
       (filtroCategoria === "" || item.categoriaNombre === filtroCategoria) &&
       (filtroFrio === "" || (filtroFrio === "si" ? item.requiereCadenaFrio : !item.requiereCadenaFrio)) &&
-      (!search || item.nombre.toLowerCase().includes(q) || item.codigo.toLowerCase().includes(q))
+      (!q || item.nombre.toLowerCase().includes(q) || item.codigo.toLowerCase().includes(q))
     );
   });
 
   const catOptions = [...new Set(lista.map(i => i.categoriaNombre))];
 
   return (
-    <div className="flex flex-col h-full gap-4" style={{ animation: "fadeSlideUp 0.35s ease both" }}>
-      <style>{`@keyframes fadeSlideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
+    <div className="ms-page">
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+      <div className="ms-header">
         <div>
-          <p className="text-[10px] text-[#475569] tracking-[0.3em] uppercase font-mono mb-1">Maestros</p>
-          <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'DM Sans', sans-serif" }}>Ítems</h1>
+          <p className="ms-breadcrumb">Maestros</p>
+          <h1 className="ms-title">Ítems / Materias primas</h1>
+          <p className="ms-subtitle">Catálogo de ítems con parámetros de calidad y documentos</p>
         </div>
-        <button onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all self-start"
-          style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.25)", color: "#F59E0B" }}
-          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.2)")}
-          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.12)")}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Nuevo ítem
-        </button>
+        <div className="ms-header-actions">
+          <Button variant="ghost" size="sm" onClick={cargar} loading={loading}
+            iconLeft="M1 4v6h6M23 20v-6h-6M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15">
+            Actualizar
+          </Button>
+          <Button variant="primary" size="sm" onClick={() => setShowModal(true)}
+            iconLeft="M12 5v14M5 12h14">
+            Nuevo ítem
+          </Button>
+        </div>
+      </div>
+
+      {/* KPIs */}
+      <div className="ms-kpi-grid">
+        {[
+          { label: "Total",         value: lista.length,                                            color: "#CBD5E1" },
+          { label: "Activos",       value: lista.filter(i => i.estado === EstadoItem.Activo).length, color: "#86EFAC" },
+          { label: "Cadena de frío",value: lista.filter(i => i.requiereCadenaFrio).length,           color: "#93C5FD" },
+          { label: "Inactivos",     value: lista.filter(i => i.estado !== EstadoItem.Activo).length, color: "#94A3B8" },
+        ].map(k => (
+          <div key={k.label} className="ms-kpi-card">
+            <p className="ms-kpi-label">{k.label}</p>
+            <p className="ms-kpi-value" style={{ color: k.color }}>{k.value}</p>
+          </div>
+        ))}
       </div>
 
       {/* Filtros */}
-      <div className="flex gap-2 flex-wrap shrink-0">
-        <div className="relative flex-1 min-w-48">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="13" height="13"
-            viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+      <div className="ms-filters">
+        <div className="ms-search-wrap">
+          <svg className="ms-search-icon" width="12" height="12" viewBox="0 0 24 24"
+            fill="none" stroke="#475569" strokeWidth="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
           </svg>
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar por nombre o código…"
-            className="w-full pl-9 pr-4 py-2 rounded-xl text-[13px] outline-none"
-            style={{ background: "rgba(15,23,42,0.8)", border: "1px solid rgba(255,255,255,0.07)", color: "#CBD5E1" }}
-            onFocus={e => (e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)")}
-            onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)")} />
+          <input type="text" placeholder="Buscar por nombre o código…"
+            value={search} onChange={e => setSearch(e.target.value)}
+            className="ms-input ms-input-search" aria-label="Buscar ítem" />
         </div>
         <select value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)}
-          className="text-[12px] px-3 py-2 rounded-xl outline-none"
-          style={{ background: "rgba(15,23,42,0.8)", border: "1px solid rgba(255,255,255,0.07)", color: filtroCategoria ? "#CBD5E1" : "#475569" }}>
+          className="ms-select" data-empty={filtroCategoria === ""} aria-label="Filtrar por categoría">
           <option value="">Todas las categorías</option>
-          {catOptions.map(c => <option key={c}>{c}</option>)}
+          {catOptions.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-        <select value={filtroFrio} onChange={e => setFiltroFrio(e.target.value as any)}
-          className="text-[12px] px-3 py-2 rounded-xl outline-none"
-          style={{ background: "rgba(15,23,42,0.8)", border: "1px solid rgba(255,255,255,0.07)", color: filtroFrio ? "#CBD5E1" : "#475569" }}>
-          <option value="">Cadena de frío</option>
-          <option value="si">Requiere ❄</option>
-          <option value="no">Sin cadena de frío</option>
+        <select value={filtroFrio} onChange={e => setFiltroFrio(e.target.value as "" | "si" | "no")}
+          className="ms-select" data-empty={filtroFrio === ""} aria-label="Filtrar por cadena de frío">
+          <option value="">Cadena de frío: todos</option>
+          <option value="si">Requiere frío</option>
+          <option value="no">Sin frío</option>
         </select>
       </div>
 
-      {/* Lista + Panel */}
-      <div className="flex gap-4 flex-1 min-h-0 overflow-hidden">
-        <div className="flex flex-col rounded-xl overflow-hidden"
-          style={{
-            width: selectedId ? "300px" : "100%", transition: "width 0.25s ease",
-            background: "rgba(15,23,42,0.8)", border: "1px solid rgba(255,255,255,0.06)", flexShrink: 0,
-          }}>
-          <div className="px-4 py-3 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-            <p className="text-[10px] text-[#334155] font-mono">{filtrados.length} ítem{filtrados.length !== 1 ? "s" : ""}</p>
+      {/* Body */}
+      <div className="ms-body">
+        <div className="ms-list" style={{ width: selectedId ? "320px" : "100%" }}>
+          <div className="ms-list-header">
+            <p className="ms-list-count">
+              {filtrados.length} ítem{filtrados.length !== 1 ? "s" : ""}
+            </p>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="ms-list-scroll">
             {loading
-              ? Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="p-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                  <div className="h-4 w-36 rounded animate-pulse mb-2" style={{ background: "rgba(255,255,255,0.05)" }} />
-                  <div className="h-3 w-20 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+              ? Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="ms-skeleton-row">
+                  <div className="ms-skeleton-line" style={{ height: "0.875rem", width: "55%", marginBottom: "0.5rem" }} />
+                  <div className="ms-skeleton-line" style={{ height: "0.625rem", width: "30%" }} />
                 </div>
               ))
               : filtrados.length === 0
-                ? <div className="flex items-center justify-center py-16">
-                    <p className="text-[#334155] text-sm">Sin ítems.</p>
-                  </div>
-                : filtrados.map(item => (
-                  <ItemRow key={item.id} item={item}
-                    active={selectedId === item.id}
-                    onClick={() => setSelectedId(prev => prev === item.id ? null : item.id)} />
-                ))
+              ? <div className="ms-list-empty"><p className="ms-list-empty-text">Sin resultados.</p></div>
+              : filtrados.map(item => (
+                <ItemRow
+                  key={item.id}
+                  item={item}
+                  active={selectedId === item.id}
+                  onClick={() => setSelectedId(prev => prev === item.id ? null : item.id)}
+                />
+              ))
             }
           </div>
         </div>
 
         {selectedId && (
-          <div className="flex-1 rounded-xl overflow-hidden min-w-0"
-            style={{ background: "rgba(15,23,42,0.85)", border: "1px solid rgba(255,255,255,0.07)", animation: "panelIn 0.2s ease" }}>
-            <style>{`@keyframes panelIn { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }`}</style>
-            {loadingDet
-              ? <div className="flex items-center justify-center h-full">
-                  <div className="w-7 h-7 border-2 border-[#F59E0B] border-t-transparent rounded-full animate-spin" />
-                </div>
-              : detalle
-                ? <PanelDetalle item={detalle} onClose={() => setSelectedId(null)} />
-                : null
-            }
+          <div className="ms-panel">
+            {loadingDet ? (
+              <div className="ms-panel-loading">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--primary)" strokeWidth="2" strokeLinecap="round"
+                  style={{ animation: "spin 0.8s linear infinite" }}>
+                  <path d="M21 12a9 9 0 11-6.219-8.56" />
+                </svg>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+              </div>
+            ) : detalle ? (
+              <PanelDetalle item={detalle} onClose={() => setSelectedId(null)} />
+            ) : null}
           </div>
         )}
       </div>
 
       {showModal && (
-        <ModalNuevoItem categorias={categorias}
+        <ModalNuevoItem
+          categorias={categorias}
           onClose={() => setShowModal(false)}
-          onCreado={item => { setLista(prev => [item, ...prev]); setShowModal(false); }} />
+          onCreado={item => { setLista(prev => [item, ...prev]); setShowModal(false); }}
+        />
       )}
     </div>
   );

@@ -21,7 +21,7 @@
   /* ── FONDOS ────────────────────────────────────────────────
      Capas del sistema claro: app → sidebar/header → card      */
   --bg-app:          #F1F5F9;            /* fondo general (slate-100)   */
-  --bg-surface:      #FFFFFF;            /* sidebar, header, cards      */
+  --bg-surface:      #ffffff;            /* sidebar, header, cards      */
   --bg-card:         #FFFFFF;            /* tarjetas principales        */
   --bg-card-dim:     #F8FAFC;            /* tarjetas vacías / fondo alt */
   --bg-modal:        #FFFFFF;            /* modales                     */

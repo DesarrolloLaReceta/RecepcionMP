@@ -3,7 +3,7 @@ import { useAuth } from "../Auth/AuthContext";
 import { type AppRole } from "../Auth/msalConfig";
 import { ROUTES } from "../Constants/routes";
 import { Spinner } from "./UI/Index";
-import "./StylesComponents/ProtectedRoute.css";
+import "./ProtectedRoute.css";
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 

@@ -7,7 +7,7 @@ import { Badge, type BadgeSize, type BadgeColor } from "./Badge";
 import { EstadoRecepcion } from "../../Types/api";
 import { EstadoOC }        from "../../Services/ordenes-compra.service";
 import { EstadoNC, PrioridadNC } from "../../Services/no-conformidades.service";
-import { EstadoProveedor }  from "../../Services/maestros.service";
+import { EstadoItem, EstadoProveedor }  from "../../Services/maestros.service";
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
@@ -17,7 +17,8 @@ export type StatusDomain =
   | "nc"
   | "prioridadNC"
   | "lote"
-  | "proveedor";
+  | "proveedor"
+  | "item";
 
 type StatusValue = number | string;
 
@@ -98,6 +99,13 @@ const PROVEEDOR_CFG: Record<EstadoProveedor, StatusConfig> = {
   [EstadoProveedor.Suspendido]: { color: "red",    label: "Suspendido", dot: true },
 };
 
+//
+const ITEM_CFG: Record<string, StatusConfig> = {
+  [EstadoItem.Activo]:   { color: "green",  label: "Activo",   dot: true },
+  [EstadoItem.Inactivo]: { color: "slate",  label: "Inactivo", dot: false },
+  
+};
+
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
 /**
@@ -111,6 +119,7 @@ function getStatusConfig(domain: StatusDomain, value: StatusValue): StatusConfig
     case "prioridadNC": return PRIORIDAD_NC_CFG[value as PrioridadNC];
     case "lote":        return LOTE_CFG[String(value)];
     case "proveedor":   return PROVEEDOR_CFG[value as EstadoProveedor];
+    case "item":        return ITEM_CFG[String(value)];
     default:            return undefined;
   }
 }

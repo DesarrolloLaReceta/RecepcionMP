@@ -1,0 +1,261 @@
+/* ============================================================
+   LOTES PAGE
+   ============================================================ */
+
+.lt-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: fadeSlideUp 0.3s ease both;
+}
+
+/* HEADER */
+.lt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.lt-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+.lt-subtitle {
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin-top: 0.125rem;
+}
+
+/* KPI GRID */
+.lt-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+@media (min-width: 1024px) {
+  .lt-kpi-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.lt-kpi-card {
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-xl);
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+.lt-kpi-label {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.lt-kpi-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  margin-top: 0.25rem;
+  line-height: 1;
+}
+
+/* FILTROS */
+.lt-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.lt-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+.lt-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.lt-input {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #CBD5E1;
+  width: 100%;
+}
+.lt-input:focus { border-color: rgba(245, 158, 11, 0.30); }
+.lt-search-input { padding-left: 2rem; }
+
+.lt-select {
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #CBD5E1;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  min-width: 160px;
+}
+.lt-select:focus { border-color: rgba(245, 158, 11, 0.30); }
+.lt-select option { background: #0F172A; color: #CBD5E1; }
+
+/* TABLA */
+.lt-table {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+.lt-table-head {
+  display: grid;
+  padding: 0.75rem 1.25rem;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #334155;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(10, 15, 26, 0.90);
+  grid-template-columns: 1.8fr 1.2fr 1fr 110px 100px 110px 90px 36px;
+}
+.lt-table-head-right  { text-align: right;  }
+.lt-table-head-center { text-align: center; }
+
+/* Fila clickable */
+.lt-row {
+  display: grid;
+  grid-template-columns: 1.8fr 1.2fr 1fr 110px 100px 110px 90px 36px;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  background: transparent;
+}
+.lt-row:last-child { border-bottom: none; }
+.lt-row:hover      { background: rgba(255, 255, 255, 0.02); }
+
+.lt-cell-right  { text-align: right;  }
+.lt-cell-center { text-align: center; }
+
+/* Contenido de celdas */
+.lt-lote-num {
+  font-size: var(--text-base);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lt-lote-item {
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lt-lote-prov {
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lt-lote-cat {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: 0.0625rem;
+  font-family: var(--font-mono);
+}
+.lt-lote-rec {
+  font-size: var(--text-base);
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+.lt-lote-rec-fecha {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: 0.0625rem;
+}
+.lt-lote-qty {
+  font-size: var(--text-base);
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Badge de temperatura */
+.lt-temp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--text-base);
+  font-family: var(--font-mono);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  justify-content: center;
+}
+.lt-temp-badge[data-ok="true"]  { color: #86EFAC; background: rgba(34, 197, 94, 0.08); }
+.lt-temp-badge[data-ok="false"] { color: #FCA5A5; background: rgba(239, 68, 68, 0.08);  }
+.lt-temp-na {
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+}
+
+/* Vencimiento */
+.lt-venc-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  justify-content: flex-end;
+}
+.lt-venc-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+.lt-venc-label {
+  font-size: var(--text-base);
+  font-family: var(--font-mono);
+}
+
+/* Chevron */
+.lt-row-chevron {
+  display: flex;
+  justify-content: flex-end;
+  color: #334155;
+  transition: color var(--transition-fast);
+}
+.lt-row:hover .lt-row-chevron { color: #64748B; }
+
+/* Error */
+.lt-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  font-size: var(--text-md);
+  color: #FCA5A5;
+}
+
+/* Footer */
+.lt-footer-info {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: #2D3748;
+  text-align: center;
+}

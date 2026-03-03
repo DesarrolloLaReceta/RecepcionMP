@@ -1,0 +1,70 @@
+/* ============================================================
+   ITEMS PAGE — prefix .it-*
+   Usa MaestrosLayout.css para el patrón lista+panel
+   ============================================================ */
+
+/* ── FILA ÍTEM ── */
+.it-row-inner { display: flex; align-items: center; gap: 0.75rem; }
+.it-codigo {
+  font-size: var(--text-xs); font-family: var(--font-mono);
+  padding: 0.125rem 0.5rem; border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted); flex-shrink: 0;
+}
+.it-row-info { flex: 1; min-width: 0; }
+.it-nombre {
+  font-size: var(--text-base); font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.it-meta { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem; flex-wrap: wrap; }
+.it-cat {
+  font-size: var(--text-xs); font-family: var(--font-mono);
+  color: var(--text-tertiary);
+}
+.it-frio-icon { flex-shrink: 0; }
+.it-temp-range {
+  font-size: var(--text-xs); font-family: var(--font-mono);
+  color: #93C5FD;
+}
+
+/* ── PANEL HEADER ── */
+.it-panel-header {
+  padding: 1.25rem 1.5rem 0;
+  flex-shrink: 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.it-panel-nombre { font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); }
+.it-panel-codigo { font-size: var(--text-sm); font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.125rem; }
+.it-panel-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-tertiary); transition: color var(--transition-fast);
+  padding: 0.25rem; border-radius: var(--radius-sm);
+}
+.it-panel-close:hover { color: var(--text-muted); }
+
+/* ── DOC REQUERIDO ── */
+.it-doc-row {
+  display: flex; align-items: center; gap: 0.625rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.it-doc-row:last-child { border-bottom: none; }
+.it-doc-dot {
+  width: 0.5rem; height: 0.5rem;
+  border-radius: var(--radius-full); flex-shrink: 0;
+}
+.it-doc-nombre { font-size: var(--text-base); color: #94A3B8; flex: 1; }
+.it-doc-badge {
+  font-size: 9px; font-family: var(--font-mono);
+  padding: 0.0625rem 0.375rem; border-radius: var(--radius-sm);
+}
+
+/* ── CRITERIOS ── */
+.it-criterios-box {
+  padding: 0.875rem;
+  border-radius: var(--radius-lg);
+  background: rgba(245, 158, 11, 0.04);
+  border: 1px solid rgba(245, 158, 11, 0.10);
+}
+.it-criterios-text { font-size: var(--text-sm); color: #94A3B8; line-height: 1.6; }
