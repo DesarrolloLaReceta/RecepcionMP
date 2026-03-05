@@ -3,37 +3,27 @@ import { useNavigate } from "react-router-dom";
 import {
   ordenesCompraService,
   type OrdenCompraResumen,
+  type DetalleOC,
   EstadoOC, EstadoOCLabels,
-  type OrdenesCompraFilter,
   type CrearOCCommand,
 } from "../../Services/ordenes-compra.service";
 import {
-  proveedoresService,
-  itemsService,
-  type ProveedorResumen,
-  type ItemResumen,
+  proveedoresService, itemsService,
+  type ProveedorResumen, type ItemResumen,
 } from "../../Services/maestros.service";
+import { Button, Modal, ModalFooter } from "../../Components/UI/Index";
+import { SelectField, DateField, NumberField, TextAreaField } from "../../Components/Forms/Index";
+import { formatDate, formatCOP } from "../../Utils/formatters";
 import { MOCK_OC_TODAS } from "./MockData";
 import { MOCK_PROVEEDORES_LIST, MOCK_ITEMS_LIST } from "../Maestros/MockData";
+import "./StylesOC/OrdenesCompraPage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+// ── helpers
+function isVencida(fecha?: string) { return !!fecha && new Date(fecha) < new Date(); }
 
-function fmtDate(iso?: string) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" });
-}
-function fmtCOP(val: number) {
-  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(val);
-}
-function isVencida(fecha?: string) {
-  if (!fecha) return false;
-  return new Date(fecha) < new Date();
-}
-
-// ─── CONFIGURACIÓN ESTADO ─────────────────────────────────────────────────────
-
+// ── config visual
 const ESTADO_CFG: Record<EstadoOC, { color: string; bg: string; dot: string }> = {
   [EstadoOC.Abierta]:              { color: "#86EFAC", bg: "rgba(34,197,94,0.08)",   dot: "#22C55E" },
   [EstadoOC.ParcialmenteRecibida]: { color: "#FCD34D", bg: "rgba(245,158,11,0.08)",  dot: "#F59E0B" },
@@ -43,227 +33,158 @@ const ESTADO_CFG: Record<EstadoOC, { color: string; bg: string; dot: string }> =
   [EstadoOC.Vencida]:              { color: "#FCA5A5", bg: "rgba(239,68,68,0.08)",   dot: "#EF4444" },
 };
 
-// ─── BADGE ESTADO ─────────────────────────────────────────────────────────────
-
+// badge estado
 function EstadoBadge({ estado }: { estado: EstadoOC }) {
   const c = ESTADO_CFG[estado];
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold"
-      style={{ background: c.bg, color: c.color }}>
-      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: c.dot }} />
+    <span className="oc-state-badge" style={{ background: c.bg, color: c.color }}>
+      <span className="oc-state-dot" style={{ background: c.dot }} />
       {EstadoOCLabels[estado].toUpperCase()}
     </span>
   );
 }
 
-// ─── BARRA DE PROGRESO RECEPCIÓN ──────────────────────────────────────────────
-
-function ProgresoBarra({ oc }: { oc: OrdenCompraResumen }) {
-  const totalSolicitado = oc.detalles.reduce((s, d) => s + d.cantidadSolicitada, 0);
-  const totalRecibido   = oc.detalles.reduce((s, d) => s + d.cantidadRecibida,   0);
-  const pct = totalSolicitado > 0 ? Math.round((totalRecibido / totalSolicitado) * 100) : 0;
-
+// barra progreso inline
+function ProgresoMini({ oc }: { oc: OrdenCompraResumen }) {
+  const solicitado = oc.detalles.reduce((s, d) => s + d.cantidadSolicitada, 0);
+  const recibido   = oc.detalles.reduce((s, d) => s + d.cantidadRecibida,   0);
+  const pct = solicitado > 0 ? Math.round((recibido / solicitado) * 100) : 0;
   return (
-    <div className="flex items-center gap-2">
-      <div className="h-1.5 w-16 rounded-full overflow-hidden shrink-0"
-        style={{ background: "rgba(255,255,255,0.06)" }}>
-        <div className="h-full rounded-full transition-all"
-          style={{ width: `${pct}%`, background: pct === 100 ? "#22C55E" : "#F59E0B" }} />
-      </div>
-      <span className="text-[10px] font-mono text-[#64748B]">{pct}%</span>
+    <div className="oc-row-bar-wrap">
+      <div className="oc-row-bar-fill"
+        style={{ width: `${pct}%`, background: pct === 100 ? "#22C55E" : "#F59E0B" }} />
     </div>
   );
 }
 
-// ─── FILA DE LISTA ────────────────────────────────────────────────────────────
+// ── FILA OC ──────────────────────────────────────────────────────────────────
 
-function OCRow({ oc, active, onClick }: {
-  oc: OrdenCompraResumen; active: boolean; onClick: () => void;
-}) {
-  const vencida = isVencida(oc.fechaVencimiento) &&
-    oc.estado !== EstadoOC.Cerrada &&
-    oc.estado !== EstadoOC.Cancelada &&
-    oc.estado !== EstadoOC.TotalmenteRecibida;
-
+function OCRow({ oc, active, onClick }: { oc: OrdenCompraResumen; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="w-full text-left px-4 py-4 transition-all relative"
-      style={{
-        background: active ? "rgba(245,158,11,0.06)" : "transparent",
-        borderLeft: `2px solid ${active ? "#F59E0B" : "transparent"}`,
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
-      }}
-      onMouseEnter={e => !active && ((e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)")}
-      onMouseLeave={e => !active && ((e.currentTarget as HTMLElement).style.background = "transparent")}>
-
-      {/* Chip vencida */}
-      {vencida && (
-        <span className="absolute top-3 right-3 text-[9px] px-1.5 py-0.5 rounded font-bold font-mono"
-          style={{ background: "rgba(239,68,68,0.15)", color: "#FCA5A5" }}>
-          VENCIDA
-        </span>
-      )}
-
-      <div className="flex items-start gap-3">
-        {/* Ícono cadena de frío */}
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke={oc.requiereCadenaFrio ? "#93C5FD" : "#475569"} strokeWidth="1.8">
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 000 4h6a2 2 0 000-4M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-        </div>
-
-        <div className="flex-1 min-w-0 pr-12">
-          <div className="flex items-center gap-2 mb-0.5">
-            <p className="text-[12px] font-bold text-[#CBD5E1] font-mono">{oc.numeroOC}</p>
-            <EstadoBadge estado={oc.estado} />
-          </div>
-          <p className="text-[13px] text-[#94A3B8] truncate">{oc.proveedorNombre}</p>
-          <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-            <ProgresoBarra oc={oc} />
-            <span className="text-[10px] text-[#334155]">{oc.totalItems} ítem{oc.totalItems !== 1 ? "s" : ""}</span>
-            <span className="text-[10px] font-mono text-[#475569]">{fmtCOP(oc.valorTotal)}</span>
-          </div>
-          <div className="flex gap-3 mt-1 text-[10px] text-[#2D3748]">
-            <span>Emisión: {fmtDate(oc.fechaEmision)}</span>
-            {oc.fechaEntregaEsperada && <span>Entrega: {fmtDate(oc.fechaEntregaEsperada)}</span>}
-          </div>
-        </div>
+    <button className="oc-row" data-active={active} onClick={onClick}>
+      <div className="oc-row-top">
+        <span className="oc-row-num">{oc.numeroOC}</span>
+        <EstadoBadge estado={oc.estado} />
       </div>
+      <p className="oc-row-prov">{oc.proveedorNombre}</p>
+      <div className="oc-row-bottom">
+        <span className="oc-row-meta">Emisión: {formatDate(oc.fechaEmision)}</span>
+        {oc.fechaEntregaEsperada && <span className="oc-row-meta">Entrega: {formatDate(oc.fechaEntregaEsperada)}</span>}
+        <span className="oc-row-meta" style={{ marginLeft: "auto" }}>{formatCOP(oc.valorTotal)}</span>
+      </div>
+      <ProgresoMini oc={oc} />
     </button>
   );
 }
 
-// ─── PANEL RESUMEN ────────────────────────────────────────────────────────────
+// ── PANEL RESUMEN ─────────────────────────────────────────────────────────────
 
 function PanelResumen({ oc, onVerDetalle, onClose }: {
-  oc: OrdenCompraResumen;
-  onVerDetalle: () => void;
-  onClose: () => void;
+  oc: OrdenCompraResumen; onVerDetalle: () => void; onClose: () => void;
 }) {
-  const totalSolicitado = oc.detalles.reduce((s, d) => s + d.cantidadSolicitada, 0);
-  const totalRecibido   = oc.detalles.reduce((s, d) => s + d.cantidadRecibida,   0);
-  const totalPendiente  = oc.detalles.reduce((s, d) => s + d.cantidadPendiente,  0);
-  const pct = totalSolicitado > 0 ? Math.round((totalRecibido / totalSolicitado) * 100) : 0;
-  const cfg = ESTADO_CFG[oc.estado];
+  const solicitado = oc.detalles.reduce((s, d) => s + d.cantidadSolicitada, 0);
+  const recibido   = oc.detalles.reduce((s, d) => s + d.cantidadRecibida,   0);
+  const pendiente  = oc.detalles.reduce((s, d) => s + d.cantidadPendiente,  0);
+  const pct = solicitado > 0 ? Math.round((recibido / solicitado) * 100) : 0;
 
   return (
-    <div className="flex flex-col h-full overflow-auto">
+    <>
       {/* Header */}
-      <div className="px-6 py-5 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] text-[#475569] font-mono mb-0.5">{oc.numeroOC}</p>
-            <h2 className="text-[16px] font-bold text-white leading-snug">{oc.proveedorNombre}</h2>
-            <p className="text-[11px] text-[#475569] font-mono mt-0.5">{oc.proveedorNit}</p>
-            <div className="flex items-center gap-2 mt-2">
-              <EstadoBadge estado={oc.estado} />
-              {oc.requiereCadenaFrio && (
-                <span className="text-[10px] px-2 py-0.5 rounded font-mono"
-                  style={{ background: "rgba(59,130,246,0.08)", color: "#93C5FD" }}>
-                  ❄ cadena frío
-                </span>
-              )}
-            </div>
+      <div className="oc-panel-header">
+        <div className="oc-panel-info">
+          <p className="oc-panel-num">{oc.numeroOC}</p>
+          <p className="oc-panel-prov">{oc.proveedorNombre}</p>
+          <p className="oc-panel-nit">{oc.proveedorNit}</p>
+          <div className="oc-panel-badges">
+            <EstadoBadge estado={oc.estado} />
+            {oc.requiereCadenaFrio && (
+              <span style={{ fontSize: "var(--text-xs)", fontFamily: "var(--font-mono)", padding: "0.125rem 0.5rem",
+                borderRadius: "var(--radius-sm)", background: "rgba(59,130,246,0.08)", color: "#93C5FD" }}>
+                ❄ cadena frío
+              </span>
+            )}
           </div>
-          <button onClick={onClose}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-[#475569] hover:text-[#94A3B8] shrink-0"
-            style={{ background: "rgba(255,255,255,0.04)" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-            </svg>
-          </button>
         </div>
+        <button className="oc-panel-close" onClick={onClose} aria-label="Cerrar panel">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
-        {/* Progreso general */}
-        <div className="mt-4">
-          <div className="flex items-center justify-between mb-1.5">
-            <p className="text-[10px] text-[#334155] font-mono uppercase tracking-wider">Progreso de recepción</p>
-            <p className="text-[11px] font-mono" style={{ color: pct === 100 ? "#86EFAC" : "#F59E0B" }}>
-              {pct}% — {totalRecibido.toLocaleString()} / {totalSolicitado.toLocaleString()} uds
-            </p>
-          </div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-            <div className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${pct}%`, background: pct === 100 ? "#22C55E" : "#F59E0B" }} />
-          </div>
+      {/* Progreso */}
+      <div className="oc-panel-progress">
+        <div className="oc-progress-header">
+          <p className="oc-progress-label">Progreso de recepción</p>
+          <p className="oc-progress-pct" style={{ color: pct === 100 ? "#86EFAC" : "#F59E0B" }}>
+            {pct}% — {recibido.toLocaleString()} / {solicitado.toLocaleString()} uds
+          </p>
+        </div>
+        <div className="oc-progress-track">
+          <div className="oc-progress-fill" style={{ width: `${pct}%`, background: pct === 100 ? "#22C55E" : "#F59E0B" }} />
         </div>
       </div>
 
-      <div className="p-6 flex flex-col gap-5">
-        {/* KPIs */}
-        <div className="grid grid-cols-3 gap-2">
+      {/* KPI mini */}
+      <div className="oc-panel-kpis">
+        <div className="oc-kpi-mini-grid">
           {[
-            { label: "Valor total",  val: fmtCOP(oc.valorTotal), color: "#CBD5E1" },
-            { label: "Pendiente",    val: `${totalPendiente.toLocaleString()} uds`, color: totalPendiente > 0 ? "#FCD34D" : "#86EFAC" },
-            { label: "Entrega esp.", val: fmtDate(oc.fechaEntregaEsperada) },
+            { label: "Valor total",  val: formatCOP(oc.valorTotal),              color: "#CBD5E1" },
+            { label: "Pendiente",    val: `${pendiente.toLocaleString()} uds`,   color: pendiente > 0 ? "#FCD34D" : "#86EFAC" },
+            { label: "Entrega esp.", val: formatDate(oc.fechaEntregaEsperada),   color: "#94A3B8" },
           ].map(k => (
-            <div key={k.label} className="p-3 rounded-xl text-center"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
-              <p className="text-[12px] font-bold font-mono leading-snug" style={{ color: k.color ?? "#94A3B8" }}>
-                {k.val}
-              </p>
-              <p className="text-[9px] text-[#334155] mt-0.5">{k.label}</p>
+            <div key={k.label} className="oc-kpi-mini">
+              <p className="oc-kpi-mini-val" style={{ color: k.color }}>{k.val}</p>
+              <p className="oc-kpi-mini-label">{k.label}</p>
             </div>
           ))}
         </div>
+      </div>
 
-        {/* Ítems */}
-        <div>
-          <p className="text-[10px] text-[#334155] uppercase tracking-wider font-mono mb-3">
-            Ítems ({oc.totalItems})
-          </p>
-          <div className="flex flex-col gap-2">
-            {oc.detalles.map(det => {
-              const pctDet = det.cantidadSolicitada > 0
-                ? Math.round((det.cantidadRecibida / det.cantidadSolicitada) * 100)
-                : 0;
-              return (
-                <div key={det.id} className="p-3 rounded-xl"
-                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="min-w-0">
-                      <p className="text-[12px] text-[#CBD5E1] font-medium truncate">{det.itemNombre}</p>
-                      <p className="text-[10px] text-[#475569] font-mono">{det.itemCodigo}</p>
-                    </div>
-                    <span className="text-[11px] font-bold font-mono shrink-0"
-                      style={{ color: pctDet === 100 ? "#86EFAC" : "#F59E0B" }}>
-                      {pctDet}%
-                    </span>
-                  </div>
-                  <div className="h-1 rounded-full overflow-hidden mb-1.5"
-                    style={{ background: "rgba(255,255,255,0.06)" }}>
-                    <div className="h-full rounded-full"
-                      style={{ width: `${pctDet}%`, background: pctDet === 100 ? "#22C55E" : "#F59E0B" }} />
-                  </div>
-                  <p className="text-[10px] text-[#475569] font-mono">
-                    {det.cantidadRecibida} / {det.cantidadSolicitada} {det.unidadMedida}
-                    {det.requiereCadenaFrio && <span className="text-[#93C5FD] ml-2">❄ {det.temperaturaMinima}°–{det.temperaturaMaxima}°C</span>}
-                  </p>
+      {/* Ítems */}
+      <div className="oc-panel-items">
+        <p className="oc-panel-items-title">Ítems ({oc.totalItems})</p>
+        {oc.detalles.map((det: DetalleOC) => {
+          const pctDet = det.cantidadSolicitada > 0
+            ? Math.round((det.cantidadRecibida / det.cantidadSolicitada) * 100) : 0;
+          return (
+            <div key={det.id} className="oc-item-card">
+              <div className="oc-item-card-top">
+                <div>
+                  <p className="oc-item-nombre">{det.itemNombre}</p>
+                  <p className="oc-item-codigo">{det.itemCodigo}</p>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+                <span className="oc-item-pct" style={{ color: pctDet === 100 ? "#86EFAC" : "#F59E0B" }}>
+                  {pctDet}%
+                </span>
+              </div>
+              <div className="oc-item-bar-track">
+                <div className="oc-item-bar-fill"
+                  style={{ width: `${pctDet}%`, background: pctDet === 100 ? "#22C55E" : "#F59E0B" }} />
+              </div>
+              <p className="oc-item-meta">
+                {det.cantidadRecibida} / {det.cantidadSolicitada} {det.unidadMedida}
+                {det.requiereCadenaFrio && ` ❄ ${det.temperaturaMinima}°–${det.temperaturaMaxima}°C`}
+              </p>
+            </div>
+          );
+        })}
+      </div>
 
-        {/* CTA ver detalle */}
-        <button onClick={onVerDetalle}
-          className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-semibold transition-all"
-          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", color: "#F59E0B" }}
-          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.18)")}
-          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.1)")}>
+      {/* CTA */}
+      <div className="oc-panel-cta">
+        <button className="oc-ver-detalle-btn" onClick={onVerDetalle}>
           Ver detalle completo
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <path d="M9 18l6-6-6-6" />
           </svg>
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
-// ─── MODAL NUEVA OC ───────────────────────────────────────────────────────────
+// ── MODAL NUEVA OC ─────────────────────────────────────────────────────────────
 
 interface DetalleForm { itemId: string; cantidad: string; precioUnitario: string; }
 
@@ -273,29 +194,23 @@ function ModalNuevaOC({ proveedores, items, onClose, onCreada }: {
   onClose: () => void;
   onCreada: (oc: OrdenCompraResumen) => void;
 }) {
-  const [proveedorId, setProveedorId]         = useState("");
-  const [fechaEntrega, setFechaEntrega]       = useState("");
-  const [notas, setNotas]                     = useState("");
-  const [detalles, setDetalles]               = useState<DetalleForm[]>([
-    { itemId: "", cantidad: "", precioUnitario: "" },
-  ]);
-  const [saving, setSaving] = useState(false);
+  const [proveedorId,   setProveedorId]   = useState("");
+  const [fechaEntrega,  setFechaEntrega]  = useState("");
+  const [notas,         setNotas]         = useState("");
+  const [detalles,      setDetalles]      = useState<DetalleForm[]>([{ itemId: "", cantidad: "", precioUnitario: "" }]);
+  const [saving,        setSaving]        = useState(false);
 
-  const addDetalle = () =>
-    setDetalles(prev => [...prev, { itemId: "", cantidad: "", precioUnitario: "" }]);
+  const addDetalle    = () => setDetalles(p => [...p, { itemId: "", cantidad: "", precioUnitario: "" }]);
+  const removeDetalle = (idx: number) => setDetalles(p => p.filter((_, i) => i !== idx));
+  const updDetalle    = (idx: number, k: keyof DetalleForm, v: string) =>
+    setDetalles(p => p.map((d, i) => i === idx ? { ...d, [k]: v } : d));
 
-  const removeDetalle = (idx: number) =>
-    setDetalles(prev => prev.filter((_, i) => i !== idx));
+  const provOptions = proveedores.map(p => ({ value: p.id, label: `${p.razonSocial} — ${p.nit}` }));
+  const itemOptions = items.map(i => ({ value: i.id, label: `${i.codigo} · ${i.nombre}` }));
 
-  const updDetalle = (idx: number, k: keyof DetalleForm, v: string) =>
-    setDetalles(prev => prev.map((d, i) => i === idx ? { ...d, [k]: v } : d));
+  const valid = proveedorId && detalles.every(d => d.itemId && Number(d.cantidad) > 0 && Number(d.precioUnitario) > 0);
 
-  const minDate = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-
-  const valid = proveedorId &&
-    detalles.every(d => d.itemId && Number(d.cantidad) > 0 && Number(d.precioUnitario) > 0);
-
-  const crear = async () => {
+  const handleCrear = async () => {
     if (!valid) return;
     setSaving(true);
     try {
@@ -309,415 +224,242 @@ function ModalNuevaOC({ proveedores, items, onClose, onCreada }: {
           precioUnitario: Number(d.precioUnitario),
         })),
       };
-      if (!isMock) await ordenesCompraService.crear(cmd);
-      else await new Promise(r => setTimeout(r, 800));
-
-      const prov = proveedores.find(p => p.id === proveedorId);
-      const detObjs = detalles.map((d, i) => {
-        const item = items.find(it => it.id === d.itemId);
-        const cant = Number(d.cantidad);
-        const precio = Number(d.precioUnitario);
-        return {
-          id: `det-new-${i}`,
-          itemId: d.itemId,
-          itemNombre: item?.nombre ?? "",
-          itemCodigo: item?.codigo ?? "",
-          categoriaId: "",
-          categoriaNombre: item?.categoriaNombre ?? "",
-          cantidadSolicitada: cant,
-          cantidadRecibida: 0,
-          cantidadPendiente: cant,
-          unidadMedida: item?.unidadMedida ?? "Kg",
-          precioUnitario: precio,
-          subtotal: cant * precio,
-          requiereCadenaFrio: item?.requiereCadenaFrio ?? false,
-          temperaturaMinima: item?.temperaturaMinima,
-          temperaturaMaxima: item?.temperaturaMaxima,
+      let oc: OrdenCompraResumen;
+      if (isMock) {
+        await new Promise(r => setTimeout(r, 700));
+        const prov = proveedores.find(p => p.id === proveedorId)!;
+        oc = {
+          id: `oc-${Date.now()}`, numeroOC: `OC-2026-${Date.now()}`,
+          proveedorId, proveedorNombre: prov.razonSocial, proveedorNit: prov.nit,
+          fechaEmision: new Date().toISOString().slice(0, 10),
+          fechaEntregaEsperada: fechaEntrega || undefined,
+          estado: EstadoOC.Abierta, totalItems: detalles.length,
+          valorTotal: detalles.reduce((s, d) => s + Number(d.cantidad) * Number(d.precioUnitario), 0),
+          requiereCadenaFrio: false,
+          detalles: detalles.map((d, i) => {
+            const it = items.find(x => x.id === d.itemId)!;
+            return {
+              id: `det-${i}`, itemId: d.itemId,
+              itemNombre: it?.nombre ?? d.itemId, itemCodigo: it?.codigo ?? "",
+              categoriaId: "", categoriaNombre: "",
+              cantidadSolicitada: Number(d.cantidad), cantidadRecibida: 0,
+              cantidadPendiente: Number(d.cantidad),
+              unidadMedida: it?.unidadMedida ?? "UN",
+              precioUnitario: Number(d.precioUnitario),
+              subtotal: Number(d.cantidad) * Number(d.precioUnitario),
+              requiereCadenaFrio: false,
+            };
+          }),
         };
-      });
-
-      const nueva: OrdenCompraResumen = {
-        id: `oc-${Date.now()}`,
-        numeroOC: `OC-2026-${String(Date.now()).slice(-4)}`,
-        proveedorId,
-        proveedorNombre: prov?.razonSocial ?? "",
-        proveedorNit: prov?.nit ?? "",
-        fechaEmision: new Date().toISOString().slice(0, 10),
-        fechaEntregaEsperada: fechaEntrega || undefined,
-        estado: EstadoOC.Abierta,
-        totalItems: detalles.length,
-        valorTotal: detObjs.reduce((s, d) => s + d.subtotal, 0),
-        requiereCadenaFrio: detObjs.some(d => d.requiereCadenaFrio),
-        detalles: detObjs,
-      };
-      onCreada(nueva);
+      } else {
+        const { id } = await ordenesCompraService.crear(cmd);
+        oc = await ordenesCompraService.getById(id) as unknown as OrdenCompraResumen;
+      }
+      onCreada(oc);
     } finally { setSaving(false); }
   };
 
-  const inp  = "w-full px-3.5 py-2.5 rounded-lg text-[13px] outline-none";
-  const ist  = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "#CBD5E1" } as React.CSSProperties;
-  const lbl  = "text-[11px] font-semibold tracking-wider uppercase font-mono text-[#64748B]";
-  const onF  = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-    (e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)");
-  const onB  = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-    (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)");
-
-  const totalValor = detalles.reduce((s, d) =>
-    s + (Number(d.cantidad) || 0) * (Number(d.precioUnitario) || 0), 0);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}
-      onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-2xl rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
-        style={{ background: "rgba(10,15,26,0.98)", border: "1px solid rgba(255,255,255,0.08)", animation: "modalIn 0.2s ease" }}>
-        <style>{`@keyframes modalIn { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }`}</style>
+    <Modal open onClose={onClose} title="Nueva Orden de Compra"
+      icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+      size="lg"
+      footer={<ModalFooter onCancel={onClose} onConfirm={handleCrear} loading={saving} disabled={!valid} confirmLabel="Crear OC" />}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+          <SelectField label="Proveedor" required options={provOptions}
+            value={proveedorId} onChange={e => setProveedorId(e.target.value)} />
+          <DateField label="Fecha de entrega esperada"
+            value={fechaEntrega} onChange={e => setFechaEntrega(e.target.value)} />
+        </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 shrink-0"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <h2 className="text-[15px] font-bold text-white">Nueva Orden de Compra</h2>
-          <button onClick={onClose}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-[#475569]"
-            style={{ background: "rgba(255,255,255,0.04)" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+        {/* Ítems */}
+        <div className="oc-detalle-sep">
+          <span className="oc-detalle-sep-label">Ítems ({detalles.length})</span>
+          <button className="oc-add-item-btn" type="button" onClick={addDetalle}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
             </svg>
+            Agregar ítem
           </button>
         </div>
 
-        {/* Contenido scrollable */}
-        <div className="overflow-y-auto flex-1 p-6 flex flex-col gap-5">
-
-          {/* Proveedor + fecha */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 flex flex-col gap-1.5">
-              <label className={lbl}>Proveedor <span className="text-[#FCA5A5]">*</span></label>
-              <select value={proveedorId} onChange={e => setProveedorId(e.target.value)}
-                className={inp} style={ist} onFocus={onF} onBlur={onB}>
-                <option value="">Selecciona un proveedor</option>
-                {proveedores.map(p => (
-                  <option key={p.id} value={p.id}>{p.razonSocial} — {p.nit}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className={lbl}>Fecha entrega esperada</label>
-              <input type="date" value={fechaEntrega} onChange={e => setFechaEntrega(e.target.value)}
-                min={minDate} className={inp} style={ist} onFocus={onF} onBlur={onB} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className={lbl}>Notas</label>
-              <input value={notas} onChange={e => setNotas(e.target.value)}
-                placeholder="Instrucciones de entrega, muelle, etc." className={inp} style={ist} onFocus={onF} onBlur={onB} />
-            </div>
-          </div>
-
-          {/* Ítems */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <label className={lbl}>Ítems <span className="text-[#FCA5A5]">*</span></label>
-              {totalValor > 0 && (
-                <span className="text-[12px] font-bold font-mono text-[#F59E0B]">
-                  Total: {fmtCOP(totalValor)}
-                </span>
-              )}
-            </div>
-            <div className="flex flex-col gap-3">
-              {detalles.map((det, idx) => {
-                const selectedItem = items.find(it => it.id === det.itemId);
-                const subtotal = (Number(det.cantidad) || 0) * (Number(det.precioUnitario) || 0);
-                return (
-                  <div key={idx} className="rounded-xl p-4"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                    <div className="grid grid-cols-12 gap-3 items-end">
-                      {/* Ítem selector */}
-                      <div className="col-span-5 flex flex-col gap-1.5">
-                        <label className={lbl}>Ítem</label>
-                        <select value={det.itemId} onChange={e => updDetalle(idx, "itemId", e.target.value)}
-                          className={inp} style={ist} onFocus={onF} onBlur={onB}>
-                          <option value="">Seleccionar…</option>
-                          {items.map(it => (
-                            <option key={it.id} value={it.id}>
-                              [{it.codigo}] {it.nombre}
-                            </option>
-                          ))}
-                        </select>
-                        {selectedItem?.requiereCadenaFrio && (
-                          <span className="text-[10px] text-[#93C5FD] font-mono">
-                            ❄ {selectedItem.temperaturaMinima}°–{selectedItem.temperaturaMaxima}°C
-                          </span>
-                        )}
-                      </div>
-                      {/* Cantidad */}
-                      <div className="col-span-2 flex flex-col gap-1.5">
-                        <label className={lbl}>Cantidad</label>
-                        <input type="number" value={det.cantidad} min="1"
-                          onChange={e => updDetalle(idx, "cantidad", e.target.value)}
-                          placeholder="0" className={inp} style={ist} onFocus={onF} onBlur={onB} />
-                      </div>
-                      {/* Precio */}
-                      <div className="col-span-3 flex flex-col gap-1.5">
-                        <label className={lbl}>Precio unit. (COP)</label>
-                        <input type="number" value={det.precioUnitario} min="0"
-                          onChange={e => updDetalle(idx, "precioUnitario", e.target.value)}
-                          placeholder="0" className={inp} style={ist} onFocus={onF} onBlur={onB} />
-                      </div>
-                      {/* Subtotal + eliminar */}
-                      <div className="col-span-2 flex flex-col items-end gap-1.5">
-                        <p className="text-[9px] text-[#334155] font-mono uppercase">Subtotal</p>
-                        <p className="text-[12px] font-bold font-mono text-[#94A3B8]">
-                          {subtotal > 0 ? fmtCOP(subtotal) : "—"}
-                        </p>
-                        {detalles.length > 1 && (
-                          <button onClick={() => removeDetalle(idx)}
-                            className="text-[#334155] hover:text-[#FCA5A5] transition-colors mt-0.5">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                              <path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              <button onClick={addDetalle}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] transition-all self-start"
-                style={{ background: "rgba(245,158,11,0.04)", border: "1px dashed rgba(245,158,11,0.18)", color: "#F59E0B" }}
-                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.09)")}
-                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.04)")}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                Agregar ítem
+        <div className="oc-modal-detalle-list">
+          {detalles.map((d, idx) => (
+            <div key={idx} className="oc-detalle-row">
+              <SelectField label={idx === 0 ? "Ítem" : undefined} options={itemOptions}
+                required value={d.itemId} onChange={e => updDetalle(idx, "itemId", e.target.value)} />
+              <NumberField label={idx === 0 ? "Cantidad" : undefined}
+                placeholder="0" min={1}
+                value={d.cantidad} onChange={e => updDetalle(idx, "cantidad", e.target.value)} />
+              <NumberField label={idx === 0 ? "Precio unitario" : undefined}
+                placeholder="0" min={0}
+                value={d.precioUnitario} onChange={e => updDetalle(idx, "precioUnitario", e.target.value)} />
+              <button className="oc-remove-btn" type="button" onClick={() => removeDetalle(idx)}
+                disabled={detalles.length === 1} aria-label="Eliminar ítem">
+                ✕
               </button>
             </div>
-          </div>
+          ))}
         </div>
 
-        {/* Footer */}
-        <div className="flex gap-3 px-6 py-4 shrink-0"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <button onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl text-sm text-[#64748B] hover:text-[#94A3B8]">
-            Cancelar
-          </button>
-          <button onClick={crear} disabled={saving || !valid}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold disabled:opacity-40"
-            style={{ background: "#F59E0B", color: "#000" }}>
-            {saving
-              ? <><div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> Creando…</>
-              : "Crear orden de compra"
-            }
-          </button>
-        </div>
+        <TextAreaField label="Notas / instrucciones" placeholder="Condiciones de entrega, temperatura requerida…"
+          rows={2} value={notas} onChange={e => setNotas(e.target.value)} />
       </div>
-    </div>
+    </Modal>
   );
 }
 
-// ─── PÁGINA PRINCIPAL ─────────────────────────────────────────────────────────
+// ── PÁGINA ────────────────────────────────────────────────────────────────────
 
 export default function OrdenesCompraPage() {
   const navigate = useNavigate();
-  const [lista, setLista]                 = useState<OrdenCompraResumen[]>([]);
-  const [proveedores, setProveedores]     = useState<ProveedorResumen[]>([]);
-  const [items, setItems]                 = useState<ItemResumen[]>([]);
-  const [loading, setLoading]             = useState(true);
-  const [selectedId, setSelectedId]       = useState<string | null>(null);
-  const [search, setSearch]               = useState("");
-  const [filtroEstado, setFiltroEstado]   = useState<EstadoOC | "">("");
-  const [filtroFrio, setFiltroFrio]       = useState<"" | "si" | "no">("");
-  const [showModal, setShowModal]         = useState(false);
-
-  const selectedOC = lista.find(oc => oc.id === selectedId) ?? null;
+  const [lista,       setLista]       = useState<OrdenCompraResumen[]>([]);
+  const [proveedores, setProveedores] = useState<ProveedorResumen[]>([]);
+  const [items,       setItems]       = useState<ItemResumen[]>([]);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState<string | null>(null);
+  const [selectedId,  setSelectedId]  = useState<string | null>(null);
+  const [showModal,   setShowModal]   = useState(false);
+  const [search,          setSearch]          = useState("");
+  const [filtroEstado,    setFiltroEstado]    = useState<EstadoOC | "">("");
+  const [filtroFrio,      setFiltroFrio]      = useState<"" | "si" | "no">("");
 
   const cargar = useCallback(async () => {
-    setLoading(true);
+    setLoading(true); setError(null);
     try {
-      if (isMock) {
-        setLista(MOCK_OC_TODAS);
-        setProveedores(MOCK_PROVEEDORES_LIST);
-        setItems(MOCK_ITEMS_LIST);
-      } else {
-        const [ocs, provs, its] = await Promise.all([
-          ordenesCompraService.getAll(),
-          proveedoresService.getAll(),
-          itemsService.getAll(),
-        ]);
-        setLista(ocs); setProveedores(provs); setItems(its);
-      }
-    } finally { setLoading(false); }
+      const [ocs, provs, its] = await Promise.all([
+        isMock ? Promise.resolve(MOCK_OC_TODAS) : ordenesCompraService.getAll(),
+        isMock ? Promise.resolve(MOCK_PROVEEDORES_LIST) : proveedoresService.getAll(),
+        isMock ? Promise.resolve(MOCK_ITEMS_LIST)       : itemsService.getAll(),
+      ]);
+      setLista(ocs); setProveedores(provs); setItems(its);
+    } catch { setError("No se pudo cargar las órdenes de compra."); }
+    finally { setLoading(false); }
   }, []);
-
   useEffect(() => { cargar(); }, [cargar]);
 
-  const filtradas = lista.filter(oc => {
-    const q = search.toLowerCase();
-    return (
-      (filtroEstado === "" || oc.estado === filtroEstado) &&
-      (filtroFrio === "" || (filtroFrio === "si" ? oc.requiereCadenaFrio : !oc.requiereCadenaFrio)) &&
-      (!search ||
-        oc.numeroOC.toLowerCase().includes(q) ||
-        oc.proveedorNombre.toLowerCase().includes(q) ||
-        oc.proveedorNit.includes(q)
-      )
-    );
-  });
+  const q = search.toLowerCase();
+  const filtradas = lista.filter(oc =>
+    (filtroEstado === "" || oc.estado === filtroEstado) &&
+    (filtroFrio   === "" || (filtroFrio === "si" ? oc.requiereCadenaFrio : !oc.requiereCadenaFrio)) &&
+    (!search || oc.numeroOC.toLowerCase().includes(q) || oc.proveedorNombre.toLowerCase().includes(q) || oc.proveedorNit.includes(q))
+  );
 
-  // KPIs rápidos
-  const abiertas     = lista.filter(oc => oc.estado === EstadoOC.Abierta).length;
-  const parciales    = lista.filter(oc => oc.estado === EstadoOC.ParcialmenteRecibida).length;
-  const vencidasCnt  = lista.filter(oc =>
-    isVencida(oc.fechaVencimiento) &&
-    oc.estado !== EstadoOC.Cerrada &&
-    oc.estado !== EstadoOC.Cancelada &&
-    oc.estado !== EstadoOC.TotalmenteRecibida
+  const abiertas    = lista.filter(o => o.estado === EstadoOC.Abierta).length;
+  const parciales   = lista.filter(o => o.estado === EstadoOC.ParcialmenteRecibida).length;
+  const vencidasCnt = lista.filter(o =>
+    isVencida(o.fechaVencimiento) && o.estado !== EstadoOC.Cerrada && o.estado !== EstadoOC.Cancelada && o.estado !== EstadoOC.TotalmenteRecibida
   ).length;
 
-  return (
-    <div className="flex flex-col h-full gap-4" style={{ animation: "fadeSlideUp 0.35s ease both" }}>
-      <style>{`@keyframes fadeSlideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }`}</style>
+  const selectedOC = lista.find(o => o.id === selectedId) ?? null;
+  const estadoOptions = Object.entries(EstadoOCLabels).map(([k, v]) => ({ value: k, label: v }));
 
+  return (
+    <div className="oc-page">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 shrink-0">
+      <div className="oc-header">
         <div>
-          <p className="text-[10px] text-[#475569] tracking-[0.3em] uppercase font-mono mb-1">
-            Compras / Módulo
-          </p>
-          <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-            Órdenes de Compra
-          </h1>
+          <p className="oc-breadcrumb">Compras / Módulo</p>
+          <h1 className="oc-title">Órdenes de Compra</h1>
         </div>
-        <div className="flex items-center gap-3">
-          {/* KPIs */}
-          <div className="hidden sm:flex gap-2">
+        <div className="oc-header-right">
+          {/* KPI pills */}
+          <div className="oc-kpi-pills">
             {[
-              { label: "Abiertas",  val: abiertas,  color: "#86EFAC", bg: "rgba(34,197,94,0.06)"  },
-              { label: "Parciales", val: parciales,  color: "#FCD34D", bg: "rgba(245,158,11,0.06)" },
+              { label: "Abiertas",  val: abiertas,    color: "#86EFAC", bg: "rgba(34,197,94,0.06)"  },
+              { label: "Parciales", val: parciales,   color: "#FCD34D", bg: "rgba(245,158,11,0.06)" },
               { label: "Vencidas",  val: vencidasCnt, color: "#FCA5A5", bg: "rgba(239,68,68,0.06)"  },
             ].map(k => (
-              <div key={k.label} className="px-3 py-2 rounded-xl text-center"
-                style={{ background: k.bg, border: `1px solid ${k.color}22` }}>
-                <p className="text-[15px] font-bold font-mono" style={{ color: k.color }}>{k.val}</p>
-                <p className="text-[9px] text-[#475569] mt-0.5">{k.label}</p>
+              <div key={k.label} className="oc-kpi-pill" style={{ background: k.bg, borderColor: k.color + "22" }}>
+                <p className="oc-kpi-pill-val" style={{ color: k.color }}>{k.val}</p>
+                <p className="oc-kpi-pill-label">{k.label}</p>
               </div>
             ))}
           </div>
-          <button onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shrink-0"
-            style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.25)", color: "#F59E0B" }}
-            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.2)")}
-            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.12)")}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            Nueva OC
-          </button>
+          <Button variant="ghost" size="sm" loading={loading} onClick={cargar}
+            iconLeft="M1 4v6h6M23 20v-6h-6M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"
+            >Actualizar</Button>
+          <Button variant="primary" size="sm" onClick={() => setShowModal(true)}
+            iconLeft="M12 5v14M5 12h14" >Nueva OC</Button>
         </div>
       </div>
 
+      {error && (
+        <div style={{ padding: "0.75rem 1rem", borderRadius: "var(--radius-lg)", flexShrink: 0,
+          background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
+          color: "#FCA5A5", fontSize: "var(--text-sm)" }}>
+          {error}
+        </div>
+      )}
+
       {/* Filtros */}
-      <div className="flex gap-2 flex-wrap shrink-0">
-        <div className="relative flex-1 min-w-48">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="13" height="13"
-            viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2">
+      <div className="oc-filters">
+        <div className="oc-search-wrap">
+          <svg className="oc-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" aria-hidden="true">
             <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" strokeLinecap="round" />
           </svg>
-          <input value={search} onChange={e => setSearch(e.target.value)}
+          <input className="oc-input oc-input-search" type="text"
             placeholder="Buscar OC, proveedor, NIT…"
-            className="w-full pl-9 pr-4 py-2 rounded-xl text-[13px] outline-none"
-            style={{ background: "rgba(15,23,42,0.8)", border: "1px solid rgba(255,255,255,0.07)", color: "#CBD5E1" }}
-            onFocus={e => (e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)")}
-            onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)")} />
+            value={search} onChange={e => setSearch(e.target.value)}
+            aria-label="Buscar órdenes de compra" />
         </div>
-        <select value={filtroEstado}
+        <select className="oc-select" data-empty={filtroEstado === ""}
+          value={filtroEstado}
           onChange={e => setFiltroEstado(e.target.value === "" ? "" : Number(e.target.value) as EstadoOC)}
-          className="text-[12px] px-3 py-2 rounded-xl outline-none"
-          style={{ background: "rgba(15,23,42,0.8)", border: "1px solid rgba(255,255,255,0.07)", color: filtroEstado !== "" ? "#CBD5E1" : "#475569" }}>
+          aria-label="Filtrar por estado">
           <option value="">Todos los estados</option>
-          {Object.entries(EstadoOCLabels).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
+          {estadoOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
-        <select value={filtroFrio}
-          onChange={e => setFiltroFrio(e.target.value as any)}
-          className="text-[12px] px-3 py-2 rounded-xl outline-none"
-          style={{ background: "rgba(15,23,42,0.8)", border: "1px solid rgba(255,255,255,0.07)", color: filtroFrio ? "#CBD5E1" : "#475569" }}>
+        <select className="oc-select" data-empty={filtroFrio === ""}
+          value={filtroFrio} onChange={e => setFiltroFrio(e.target.value as any)}
+          aria-label="Filtrar por cadena de frío">
           <option value="">Cadena de frío</option>
           <option value="si">Requiere ❄</option>
           <option value="no">Sin cadena de frío</option>
         </select>
-        <p className="text-[11px] text-[#334155] font-mono self-center hidden sm:block">
-          {filtradas.length} OC{filtradas.length !== 1 ? "s" : ""}
-        </p>
+        <span className="oc-count">{filtradas.length} OC{filtradas.length !== 1 ? "s" : ""}</span>
       </div>
 
-      {/* Lista + Panel */}
-      <div className="flex gap-4 flex-1 min-h-0 overflow-hidden">
+      {/* Body */}
+      <div className="oc-body">
         {/* Lista */}
-        <div className="flex flex-col rounded-xl overflow-hidden"
-          style={{
-            width: selectedId ? "340px" : "100%",
-            transition: "width 0.25s ease",
-            background: "rgba(15,23,42,0.8)",
-            border: "1px solid rgba(255,255,255,0.06)",
-            flexShrink: 0,
-          }}>
-          <div className="px-4 py-3 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-            <p className="text-[10px] text-[#334155] font-mono">
-              {filtradas.length} orden{filtradas.length !== 1 ? "es" : ""} de compra
-            </p>
+        <div className="oc-list" data-panel={selectedId !== null}>
+          <div className="oc-list-header">
+            <p className="oc-list-count">{filtradas.length} orden{filtradas.length !== 1 ? "es" : ""} de compra</p>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="oc-list-scroll">
             {loading
               ? Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="p-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                  <div className="h-4 w-32 rounded animate-pulse mb-2" style={{ background: "rgba(255,255,255,0.05)" }} />
-                  <div className="h-3 w-48 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
-                </div>
-              ))
-              : filtradas.length === 0
-                ? <div className="flex items-center justify-center py-16">
-                    <p className="text-[#334155] text-sm">Sin órdenes de compra.</p>
+                  <div key={i} className="oc-skeleton-row">
+                    <div className="oc-skeleton-line" style={{ height: "0.875rem", width: "55%", marginBottom: "0.5rem" }} />
+                    <div className="oc-skeleton-line" style={{ height: "0.625rem", width: "75%" }} />
                   </div>
-                : filtradas.map(oc => (
-                  <OCRow key={oc.id} oc={oc}
-                    active={selectedId === oc.id}
-                    onClick={() => setSelectedId(prev => prev === oc.id ? null : oc.id)} />
                 ))
+              : filtradas.length === 0
+                ? <div className="oc-list-empty">Sin órdenes de compra.</div>
+                : filtradas.map(oc => (
+                    <OCRow key={oc.id} oc={oc}
+                      active={selectedId === oc.id}
+                      onClick={() => setSelectedId(p => p === oc.id ? null : oc.id)} />
+                  ))
             }
           </div>
         </div>
 
         {/* Panel resumen */}
         {selectedId && selectedOC && (
-          <div className="flex-1 rounded-xl overflow-hidden min-w-0"
-            style={{
-              background: "rgba(15,23,42,0.85)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              animation: "panelIn 0.2s ease",
-            }}>
-            <style>{`@keyframes panelIn { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }`}</style>
-            <PanelResumen
-              oc={selectedOC}
+          <div className="oc-panel">
+            <PanelResumen oc={selectedOC}
               onVerDetalle={() => navigate(`/ordenes-compra/${selectedOC.id}`)}
-              onClose={() => setSelectedId(null)}
-            />
+              onClose={() => setSelectedId(null)} />
           </div>
         )}
       </div>
 
       {showModal && (
-        <ModalNuevaOC
-          proveedores={proveedores}
-          items={items}
+        <ModalNuevaOC proveedores={proveedores} items={items}
           onClose={() => setShowModal(false)}
-          onCreada={oc => { setLista(prev => [oc, ...prev]); setShowModal(false); }}
-        />
+          onCreada={oc => { setLista(p => [oc, ...p]); setShowModal(false); }} />
       )}
     </div>
   );

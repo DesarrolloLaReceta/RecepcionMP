@@ -1,0 +1,207 @@
+/* ============================================================
+   DETALLE OC PAGE — prefix .ocd-*
+   Layout: 1-col info/estado + 2-col tabs ítems/recepciones
+   ============================================================ */
+
+/* ── PÁGINA ── */
+.ocd-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeSlideUp 0.35s ease both;
+}
+
+/* ── ENCABEZADO (breadcrumb + título + acciones) ── */
+.ocd-header {
+  display: flex; align-items: flex-start; gap: 0.875rem;
+}
+.ocd-back-btn {
+  width: 2rem; height: 2rem; flex-shrink: 0; margin-top: 0.25rem;
+  border-radius: var(--radius-md); background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07); cursor: pointer;
+  color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.ocd-back-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+.ocd-header-meta {
+  flex: 1; min-width: 0;
+}
+.ocd-numero-label {
+  font-size: var(--text-xs); font-family: var(--font-mono);
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;
+}
+.ocd-title {
+  font-size: var(--text-xl); font-weight: 700; color: var(--text-primary); line-height: 1.2;
+}
+.ocd-subtitle { font-size: var(--text-md); color: var(--text-muted); margin-top: 0.25rem; }
+.ocd-header-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+
+/* Estado badge */
+.ocd-badge {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.25rem 0.75rem; border-radius: var(--radius-md);
+  font-size: var(--text-xs); font-weight: 700; font-family: var(--font-mono);
+}
+.ocd-badge-dot { width: 0.375rem; height: 0.375rem; border-radius: var(--radius-full); flex-shrink: 0; }
+
+/* ── BARRA DE PROGRESO HERO ── */
+.ocd-progress-card {
+  border-radius: var(--radius-xl); padding: 1.25rem 1.5rem;
+  background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.06);
+  display: flex; flex-direction: column; gap: 0.875rem;
+}
+.ocd-progress-header { display: flex; align-items: center; justify-content: space-between; }
+.ocd-progress-label  { font-size: var(--text-xs); font-family: var(--font-mono); text-transform: uppercase; color: var(--text-tertiary); }
+.ocd-progress-pct    { font-size: var(--text-sm); font-family: var(--font-mono); }
+.ocd-progress-track  {
+  height: 8px; border-radius: var(--radius-full); overflow: hidden;
+  background: rgba(255,255,255,0.06);
+}
+.ocd-progress-fill   { height: 100%; border-radius: var(--radius-full); transition: width 0.7s; }
+.ocd-progress-stats  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.ocd-stat-mini {
+  padding: 0.75rem; border-radius: var(--radius-md); text-align: center;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+}
+.ocd-stat-mini-val   { font-size: var(--text-sm); font-weight: 700; font-family: var(--font-mono); line-height: 1.2; }
+.ocd-stat-mini-label { font-size: 9px; color: var(--text-tertiary); margin-top: 0.125rem; }
+
+/* ── GRID CONTENIDO ── */
+.ocd-grid {
+  display: grid; grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+@media (min-width: 1024px) {
+  .ocd-grid { grid-template-columns: 1fr 2fr; }
+}
+
+/* ── SECCIÓN (card con header) ── */
+.ocd-section {
+  border-radius: var(--radius-xl); overflow: hidden;
+  background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 0;
+}
+.ocd-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.ocd-section-title {
+  font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.25em;
+  text-transform: uppercase; font-family: var(--font-mono); color: #64748B;
+}
+.ocd-section-body { padding: 0; }
+
+/* ── DATAROW ── */
+.ocd-datarow {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.ocd-datarow:last-of-type { border-bottom: none; }
+.ocd-datarow-label {
+  font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-tertiary); flex-shrink: 0;
+}
+.ocd-datarow-val { font-size: var(--text-sm); color: #94A3B8; text-align: right; }
+
+/* Notas box */
+.ocd-notas-box {
+  margin: 0.5rem 1.5rem 1rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  background: rgba(245,158,11,0.04); border: 1px solid rgba(245,158,11,0.1);
+}
+.ocd-notas-label { font-size: var(--text-xs); font-family: var(--font-mono); color: #F59E0B; text-transform: uppercase; margin-bottom: 0.25rem; }
+.ocd-notas-texto { font-size: var(--text-sm); color: #94A3B8; line-height: 1.6; }
+
+/* ── COLUMNA DERECHA (tabs) ── */
+.ocd-tabs-col { display: flex; flex-direction: column; gap: 0; }
+
+/* Tabs */
+.ocd-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.ocd-tab {
+  padding: 0.625rem 1rem;
+  font-size: var(--text-sm); font-weight: 500; background: none;
+  border: none; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  cursor: pointer; color: var(--text-muted);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+.ocd-tab:hover { color: var(--text-secondary); }
+.ocd-tab[data-active="true"] { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* ── TABLA ÍTEMS ── */
+.ocd-items-table {
+  border-radius: var(--radius-xl); overflow: hidden;
+  background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.06);
+  margin-top: 1rem;
+}
+.ocd-items-header-row {
+  display: grid;
+  grid-template-columns: minmax(0,3fr) repeat(3,minmax(0,1fr)) minmax(0,1.4fr) minmax(0,1.4fr);
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.ocd-items-th {
+  font-size: var(--text-xs); font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  font-family: var(--font-mono); color: var(--text-tertiary);
+}
+.ocd-item-row {
+  display: grid;
+  grid-template-columns: minmax(0,3fr) repeat(3,minmax(0,1fr)) minmax(0,1.4fr) minmax(0,1.4fr);
+  padding: 0.875rem 1.25rem; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.ocd-item-row:last-of-type { border-bottom: none; }
+.ocd-item-nombre { font-size: var(--text-sm); color: #CBD5E1; font-weight: 500; }
+.ocd-item-codigo { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.125rem; }
+.ocd-item-cat    { font-size: 9px; color: var(--text-tertiary); }
+.ocd-cell-num { font-size: var(--text-sm); font-family: var(--font-mono); }
+.ocd-cell-price { font-size: var(--text-xs); font-family: var(--font-mono); color: #64748B; }
+.ocd-cell-sub   { font-size: var(--text-sm); font-family: var(--font-mono); font-weight: 700; color: #94A3B8; }
+.ocd-frio-tag {
+  font-size: var(--text-xs); font-family: var(--font-mono); color: #93C5FD; margin-left: 0.5rem;
+}
+/* Fila totales */
+.ocd-totals-row {
+  display: grid;
+  grid-template-columns: minmax(0,3fr) repeat(3,minmax(0,1fr)) minmax(0,1.4fr) minmax(0,1.4fr);
+  padding: 0.875rem 1.25rem; align-items: center;
+  background: rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.ocd-totals-label { font-size: var(--text-xs); font-weight: 700; font-family: var(--font-mono); color: #64748B; }
+
+/* ── RECEPCIONES TAB ── */
+.ocd-rec-list { display: flex; flex-direction: column; gap: 0.625rem; margin-top: 1rem; }
+.ocd-rec-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0.875rem 1rem; border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+  text-decoration: none;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.ocd-rec-card:hover { border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.02); }
+.ocd-rec-num { font-size: var(--text-sm); font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); }
+.ocd-rec-fecha { font-size: var(--text-xs); color: var(--text-muted); margin-top: 0.125rem; }
+
+/* Empty state tabs */
+.ocd-tab-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.75rem; padding: 3.5rem 1rem; margin-top: 1rem;
+  border-radius: var(--radius-xl);
+  background: rgba(15,23,42,0.6); border: 1px dashed rgba(255,255,255,0.06);
+}
+.ocd-tab-empty-text { font-size: var(--text-sm); color: var(--text-tertiary); }
+
+/* ── ESTADOS: loading / error ── */
+.ocd-state-center {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 400px; gap: 0.75rem;
+}
+.ocd-loading-text { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); }
+.ocd-error-text   { font-size: var(--text-sm); color: #FCA5A5; }
+.ocd-back-link    { font-size: var(--text-sm); color: var(--primary); text-decoration: underline; cursor: pointer; background: none; border: none; }

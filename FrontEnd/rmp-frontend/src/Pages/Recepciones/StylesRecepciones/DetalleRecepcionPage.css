@@ -1,0 +1,237 @@
+/* ============================================================
+   DETALLE RECEPCION PAGE — prefix .dr-*
+   Layout: encabezado + 2-col datos generales + tabs (lotes/inspección/docs/temps)
+   ============================================================ */
+
+/* ── PÁGINA ── */
+.dr-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeSlideUp 0.35s ease both;
+}
+
+/* ── ENCABEZADO ── */
+.dr-header { display: flex; align-items: flex-start; gap: 0.875rem; }
+.dr-back-btn {
+  width: 2rem; height: 2rem; margin-top: 0.25rem; flex-shrink: 0;
+  border-radius: var(--radius-md); background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07); cursor: pointer; color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.dr-back-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+.dr-header-meta { flex: 1; min-width: 0; }
+.dr-oc-label {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+  font-size: var(--text-xs); font-family: var(--font-mono);
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem;
+}
+.dr-estado-badge {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0.125rem 0.625rem; border-radius: var(--radius-md);
+  font-size: var(--text-xs); font-weight: 600;
+}
+.dr-badge-dot { width: 0.375rem; height: 0.375rem; border-radius: var(--radius-full); flex-shrink: 0; }
+.dr-title    { font-size: var(--text-xl); font-weight: 700; color: var(--text-primary); }
+.dr-subtitle { font-size: var(--text-sm); color: var(--text-muted); margin-top: 0.25rem; }
+
+/* ── GRID 2 COL DATOS GENERALES ── */
+.dr-data-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media (min-width: 768px) { .dr-data-grid { grid-template-columns: 1fr 1fr; } }
+
+/* ── SECTION CARD ── */
+.dr-section {
+  border-radius: var(--radius-xl); overflow: hidden;
+  background: rgba(15,23,42,0.80); border: 1px solid rgba(255,255,255,0.06);
+}
+.dr-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.875rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.dr-section-title {
+  font-size: var(--text-xs); font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  font-family: var(--font-mono); color: #64748B;
+}
+.dr-section-action {
+  font-size: var(--text-xs); font-family: var(--font-mono);
+  color: var(--text-muted); background: none; border: none; cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.dr-section-action:hover { color: var(--primary); }
+
+/* ── DATA ROW ── */
+.dr-datarow {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem;
+  padding: 0.625rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.dr-datarow:last-of-type { border-bottom: none; }
+.dr-datarow-label { font-size: var(--text-sm); color: var(--text-muted); flex-shrink: 0; }
+.dr-datarow-val   { font-size: var(--text-sm); color: #CBD5E1; text-align: right; }
+.dr-datarow-val[data-mono="true"] { font-family: var(--font-mono); }
+
+/* Observaciones dentro de section */
+.dr-obs-box { padding: 0.75rem 1.25rem; }
+.dr-obs-label { font-size: var(--text-xs); font-family: var(--font-mono); text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 0.25rem; }
+.dr-obs-text  { font-size: var(--text-sm); color: #64748B; line-height: 1.6; }
+
+/* Barra lotes (resumen) */
+.dr-lotes-bar-wrap { padding: 1rem 1.25rem; }
+.dr-lotes-bar-track {
+  display: flex; height: 8px; border-radius: var(--radius-full); overflow: hidden; gap: 1px;
+  background: rgba(255,255,255,0.05);
+}
+.dr-lotes-liberados  { height: 100%; background: #4ADE80; transition: width 0.5s; }
+.dr-lotes-rechazados { height: 100%; background: #F87171; }
+
+/* ── TABS ── */
+.dr-tabs {
+  display: flex; gap: 0.375rem; overflow-x: auto; padding-bottom: 0.25rem; flex-shrink: 0;
+}
+.dr-tab {
+  padding: 0.5rem 1rem; border-radius: var(--radius-md);
+  font-size: var(--text-sm); font-weight: 500; white-space: nowrap; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); color: #64748B;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+.dr-tab:hover { color: var(--text-secondary); }
+.dr-tab[data-active="true"] {
+  background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.25); color: var(--primary);
+}
+
+/* ── LOTE CARD ── */
+.dr-lote-card {
+  border-radius: var(--radius-lg);
+  background: rgba(15,23,42,0.80); border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+.dr-lote-header {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1.25rem; cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.dr-lote-header:hover { background: rgba(255,255,255,0.02); }
+.dr-lote-num   { font-size: var(--text-sm); font-family: var(--font-mono); font-weight: 700; color: var(--primary); }
+.dr-lote-item  { font-size: var(--text-sm); color: #CBD5E1; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dr-lote-venc  { font-size: var(--text-xs); font-family: var(--font-mono); }
+.dr-lote-chevron {
+  color: var(--text-muted); flex-shrink: 0;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+.dr-lote-chevron[data-open="true"]  { transform: rotate(90deg); color: var(--primary); }
+.dr-lote-chevron[data-open="false"] { transform: rotate(0deg); }
+
+.dr-lote-body {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex; gap: 0;
+}
+.dr-lote-detail-col {
+  flex: 1; padding: 0.875rem 1.25rem; border-right: 1px solid rgba(255,255,255,0.05);
+  display: flex; flex-direction: column; gap: 0;
+}
+.dr-lote-detail-col:last-child { border-right: none; }
+.dr-lote-kv {
+  display: flex; justify-content: space-between; padding: 0.375rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.dr-lote-kv:last-child { border-bottom: none; }
+.dr-lote-k { font-size: var(--text-xs); color: var(--text-muted); }
+.dr-lote-v { font-size: var(--text-xs); font-family: var(--font-mono); color: #94A3B8; }
+
+/* Documentos dentro de lote */
+.dr-lote-docs { padding: 0.875rem 1.25rem; }
+.dr-lote-docs-title { font-size: var(--text-xs); font-family: var(--font-mono); text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 0.625rem; }
+.dr-doc-link {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03); text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.dr-doc-link:last-child { border-bottom: none; }
+.dr-doc-link-text { font-size: var(--text-xs); color: #64748B; transition: color var(--transition-fast); }
+.dr-doc-link:hover .dr-doc-link-text { color: var(--primary); }
+
+/* ── CHECK ITEM (inspección BPM) ── */
+.dr-checkitem {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.625rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.dr-checkitem-label { font-size: var(--text-sm); color: #64748B; }
+.dr-checkitem-crit-icon { color: var(--primary); margin-right: 0.25rem; }
+.dr-checkitem-badge {
+  font-size: var(--text-xs); font-weight: 700; font-family: var(--font-mono);
+  padding: 0.125rem 0.5rem; border-radius: var(--radius-sm);
+}
+.dr-checkitem-badge[data-ok="true"]  { background: rgba(34,197,94,0.08);  color: #86EFAC; }
+.dr-checkitem-badge[data-ok="false"] { background: rgba(239,68,68,0.08);  color: #FCA5A5; }
+
+/* Temperatura inicial en inspección */
+.dr-temp-inicial {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.875rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.dr-temp-inicial-val {
+  margin-left: auto; font-size: 0.875rem; font-weight: 700;
+  font-family: var(--font-mono); color: #93C5FD;
+}
+
+/* ── BADGE TEMPERATURA ── */
+.dr-temp-badge { font-size: var(--text-sm); font-weight: 700; font-family: var(--font-mono); }
+.dr-temp-badge[data-fuera="true"]  { color: #FCA5A5; }
+.dr-temp-badge[data-fuera="false"] { color: #86EFAC; }
+.dr-temp-warn { font-size: var(--text-xs); margin-left: 0.25rem; }
+
+/* ── DOCUMENTOS LISTA ── */
+.dr-doc-list { display: flex; flex-direction: column; gap: 0.625rem; }
+.dr-doc-card {
+  display: flex; align-items: center; gap: 0.875rem; padding: 0.875rem 1rem;
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+}
+.dr-doc-icon { width: 2rem; height: 2rem; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dr-doc-info { flex: 1; min-width: 0; }
+.dr-doc-tipo { font-size: var(--text-sm); color: #CBD5E1; font-weight: 500; }
+.dr-doc-meta { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.125rem; }
+.dr-doc-dl-btn {
+  display: flex; align-items: center; gap: 0.375rem;
+  padding: 0.375rem 0.75rem; border-radius: var(--radius-md);
+  font-size: var(--text-xs); font-weight: 600;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #94A3B8;
+  text-decoration: none; flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.dr-doc-dl-btn:hover { background: rgba(255,255,255,0.09); color: var(--text-primary); }
+
+/* ── TEMPERATURAS LISTA ── */
+.dr-temp-list { display: flex; flex-direction: column; gap: 0.625rem; }
+.dr-temp-card {
+  display: flex; align-items: center; gap: 1rem; padding: 0.875rem 1rem;
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+}
+.dr-temp-card[data-fuera="true"] { border-color: rgba(239,68,68,0.20); background: rgba(239,68,68,0.04); }
+.dr-temp-card-val {
+  font-size: 1.25rem; font-weight: 700; font-family: var(--font-mono); flex-shrink: 0; min-width: 4.5rem;
+}
+.dr-temp-card-val[data-fuera="true"]  { color: #FCA5A5; }
+.dr-temp-card-val[data-fuera="false"] { color: #86EFAC; }
+.dr-temp-card-info { flex: 1; min-width: 0; }
+.dr-temp-item-name { font-size: var(--text-sm); color: #CBD5E1; font-weight: 500; }
+.dr-temp-meta      { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.125rem; }
+.dr-temp-rango     { font-size: var(--text-xs); font-family: var(--font-mono); flex-shrink: 0; color: var(--text-muted); }
+
+/* ── ESTADOS: loading / error / empty ── */
+.dr-state-center {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 400px; gap: 0.75rem;
+}
+.dr-loading-text { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); }
+.dr-error-text   { font-size: var(--text-sm); color: #FCA5A5; }
+.dr-back-link    { font-size: var(--text-sm); color: var(--primary); text-decoration: underline; cursor: pointer; background: none; border: none; }
+.dr-tab-empty {
+  display: flex; align-items: center; justify-content: center;
+  padding: 3rem 1rem; font-size: var(--text-sm); color: var(--text-tertiary);
+}
+.dr-spin { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
