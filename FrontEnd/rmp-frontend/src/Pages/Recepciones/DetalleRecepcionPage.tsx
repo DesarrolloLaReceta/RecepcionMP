@@ -119,8 +119,8 @@ function LoteCard({ lote, expanded, onToggle }: {
             </div>
             <div className="dr-lote-detail-col">
               {[
-                ["Sensorial",   lote.estadoSensorialLabel],
-                ["Rotulado",    lote.estadoRotuladoLabel],
+                ["Sensorial",   lote.estadoSensorial],
+                ["Rotulado",    lote.estadoRotulado],
                 ["Destino",     lote.ubicacionDestino === 0 ? "Almacén" : "Cuarentena"],
                 ["Temperatura", lote.temperaturaMedida !== undefined ? `${lote.temperaturaMedida}°C` : "N/A"],
               ].map(([k, v]) => (

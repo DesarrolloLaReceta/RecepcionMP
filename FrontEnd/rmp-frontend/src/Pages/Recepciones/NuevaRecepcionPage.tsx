@@ -584,38 +584,52 @@ export default function NuevaRecepcionPage() {
       const { id } = isMock
         ? await new Promise<{ id: string }>(r => setTimeout(() => r({ id: "mock-rec-1" }), 900))
         : await recepcionesService.iniciar({
-            ocId:                state.ocSeleccionada!.id,
-            fechaRecepcion:      state.fechaRecepcion,
-            horaLlegadaVehiculo: state.horaLlegada,
-            placaVehiculo:       state.placaVehiculo,
-            nombreTransportista: state.nombreTransportista,
-            observaciones:       state.observaciones,
-            inspeccionVehiculo:  {
-              temperaturaInicial:     state.tempInicial ? Number(state.tempInicial) : undefined,
-              temperaturaDentroRango: state.temperaturaDentroRango,
-              integridadEmpaque:      state.integridadEmpaque,
-              limpiezaVehiculo:       state.limpiezaVehiculo,
-              presenciaOloresExtranos: state.oloresExtranos,
-              plagasVisible:          state.plagasVisible,
-              documentosTransporteOk: state.documentosTransporteOk,
-              observaciones:          state.obsInspeccion,
-            },
-            lotes: state.lotes.map(l => ({
-              detalleOcId:         l.detalleOcId,
-              numeroLoteProveedor: l.numeroLoteProveedor,
-              fechaFabricacion:    l.fechaFabricacion || undefined,
-              fechaVencimiento:    l.fechaVencimiento,
-              cantidadRecibida:    Number(l.cantidadRecibida),
-              temperaturaMedida:   l.temperaturaMedida ? Number(l.temperaturaMedida) : undefined,
-              estadoSensorial:     l.estadoSensorial,
-              estadoRotulado:      l.estadoRotulado,
-              ubicacionDestino:    l.ubicacionDestino,
-            })),
+            ordenCompraId:          state.ocSeleccionada!.id,
+            fechaRecepcion:         state.fechaRecepcion,
+            horaLlegadaVehiculo:    state.horaLlegada,
+            placaVehiculo:          state.placaVehiculo,
+            nombreTransportista:    state.nombreTransportista,
+            observacionesGenerales: state.observaciones,
           });
 
-      for (const doc of state.documentos) {
-        if (doc.archivo) await recepcionesService.subirDocumento(id, doc.tipo, doc.archivo);
+      if (!isMock) {
+        // Inspección del vehículo
+        await recepcionesService.registrarInspeccionVehiculo(id, {
+          recepcionId:             id,
+          temperaturaInicial:      state.tempInicial ? Number(state.tempInicial) : undefined,
+          temperaturaDentroRango:  state.temperaturaDentroRango,
+          integridadEmpaque:       state.integridadEmpaque,
+          limpiezaVehiculo:        state.limpiezaVehiculo,
+          presenciaOloresExtranos: state.oloresExtranos,
+          plagasVisible:           state.plagasVisible,
+          documentosTransporteOk:  state.documentosTransporteOk,
+          observaciones:           state.obsInspeccion,
+        });
+
+        // Lotes (uno por uno)
+        for (const l of state.lotes) {
+          if (!l.fechaVencimiento || Number(l.cantidadRecibida) <= 0) continue;
+          await recepcionesService.registrarLote(id, {
+            recepcionId:         id,
+            detalleOcId:         l.detalleOcId,
+            itemId:              l.itemId,
+            numeroLoteProveedor: l.numeroLoteProveedor || undefined,
+            fechaFabricacion:    l.fechaFabricacion   || undefined,
+            fechaVencimiento:    l.fechaVencimiento,
+            cantidadRecibida:    Number(l.cantidadRecibida),
+            temperaturaMedida:   l.temperaturaMedida ? Number(l.temperaturaMedida) : undefined,
+            estadoSensorial:     l.estadoSensorial,
+            estadoRotulado:      l.estadoRotulado,
+            ubicacionDestino:    l.ubicacionDestino,
+          });
+        }
+
+        // Documentos
+        for (const doc of state.documentos) {
+          if (doc.archivo) await recepcionesService.subirDocumento(id, doc.tipo, doc.archivo);
+        }
       }
+
       navigate(`/recepciones/${id}`);
     } catch {
       setError("Ocurrió un error al guardar la recepción. Revisa los datos e intenta de nuevo.");
