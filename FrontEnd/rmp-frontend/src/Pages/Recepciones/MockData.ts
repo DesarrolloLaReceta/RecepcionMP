@@ -1,5 +1,7 @@
-import type { RecepcionResumen } from "../../Services/recepciones.service";
-import { EstadoRecepcion } from "../../Types/api";
+import type { RecepcionResumen, RecepcionDetalle } from "../../Services/recepciones.service";
+import { EstadoRecepcion, TipoDocumento, OrigenTemperatura, EstadoSensorial, EstadoRotulado, UbicacionDestino } from "../../Types/api";
+
+// ─── LISTADO ──────────────────────────────────────────────────────────────────
 
 export const MOCK_RECEPCIONES: RecepcionResumen[] = [
   {
@@ -50,3 +52,165 @@ export const MOCK_RECEPCIONES: RecepcionResumen[] = [
     totalLotes: 0, lotesLiberados: 0, lotesRechazados: 0,
   },
 ];
+
+// ─── DETALLE (para DetalleRecepcionPage) ─────────────────────────────────────
+
+export const MOCK_DETALLE: RecepcionDetalle = {
+  // campos heredados de RecepcionResumen
+  id:                    "rec-001",
+  numeroRecepcion:       "REC-2026-0048",
+  ordenCompraNumero:     "OC-2026-0112",
+  ordenCompraId:         "oc-112",
+  proveedorNombre:       "AviCol S.A.",
+  proveedorId:           "prov-001",
+  fechaRecepcion:        "2026-02-24",
+  horaLlegadaVehiculo:   "07:30:00",
+  placaVehiculo:         "OPQ-451",
+  nombreTransportista:   "Luis García",
+  estado:                EstadoRecepcion.PendienteCalidad,
+  totalLotes:            3,
+  lotesLiberados:        0,
+  lotesRechazados:       0,
+  observacionesGenerales: "Vehículo llegó puntual. Sin novedades en el ingreso.",
+
+  // inspección vehículo
+  inspeccionVehiculo: {
+    temperaturaInicial:      4.2,
+    temperaturaDentroRango:  true,
+    integridadEmpaque:       true,
+    limpiezaVehiculo:        true,
+    presenciaOloresExtranos: false,
+    plagasVisible:           false,
+    documentosTransporteOk:  true,
+    observaciones:           "Compartimento limpio y con temperatura adecuada.",
+    fechaRegistro:           "2026-02-24T07:35:00Z",
+  },
+
+  // lotes recibidos
+  lotes: [
+    {
+      id:                   "lote-001",
+      itemId:               "item-pollo",
+      itemNombre:           "Pollo entero fresco",
+      itemCodigo:           "AVE-001",
+      detalleOcId:          "det-001",
+      numeroLoteProveedor:  "AVI-20260224-A",
+      numeroLoteInterno:    "LI-2026-0301",
+      fechaFabricacion:     "2026-02-23",
+      fechaVencimiento:     "2026-03-01",
+      cantidadRecibida:     120,
+      cantidadEsperada:     120,
+      unidadMedida:         "Kg",
+      temperaturaMedida:    3.8,
+      estadoSensorial:      EstadoSensorial.Aceptable,
+      estadoRotulado:       EstadoRotulado.Conforme,
+      ubicacionDestino:     UbicacionDestino.Almacen,
+      estado:               "PendienteCalidad",
+      documentos: [
+        {
+          id:            "doc-lote-001",
+          tipoDocumento: TipoDocumento.CertificadoAnalisis,
+          nombreArchivo: "COA_AVI_20260224.pdf",
+          urlDescarga:   "#",
+          fechaCarga:    "2026-02-24T07:40:00Z",
+        },
+      ],
+    },
+    {
+      id:                   "lote-002",
+      itemId:               "item-muslo",
+      itemNombre:           "Muslo de pollo",
+      itemCodigo:           "AVE-002",
+      detalleOcId:          "det-002",
+      numeroLoteProveedor:  "AVI-20260224-B",
+      numeroLoteInterno:    "LI-2026-0302",
+      fechaFabricacion:     "2026-02-23",
+      fechaVencimiento:     "2026-03-02",
+      cantidadRecibida:     80,
+      cantidadEsperada:     100,
+      unidadMedida:         "Kg",
+      temperaturaMedida:    4.1,
+      estadoSensorial:      EstadoSensorial.Aceptable,
+      estadoRotulado:       EstadoRotulado.Conforme,
+      ubicacionDestino:     UbicacionDestino.Almacen,
+      estado:               "PendienteCalidad",
+      documentos:           [],
+    },
+    {
+      id:                   "lote-003",
+      itemId:               "item-pechuga",
+      itemNombre:           "Pechuga de pollo sin hueso",
+      itemCodigo:           "AVE-003",
+      detalleOcId:          "det-003",
+      numeroLoteProveedor:  "AVI-20260224-C",
+      numeroLoteInterno:    "LI-2026-0303",
+      fechaFabricacion:     "2026-02-24",
+      fechaVencimiento:     "2026-03-03",
+      cantidadRecibida:     50,
+      cantidadEsperada:     50,
+      unidadMedida:         "Kg",
+      temperaturaMedida:    5.9,
+      estadoSensorial:      EstadoSensorial.Dudoso,
+      estadoRotulado:       EstadoRotulado.Conforme,
+      ubicacionDestino:     UbicacionDestino.Cuarentena,
+      estado:               "PendienteCalidad",
+      documentos:           [],
+    },
+  ],
+
+  // documentos de la recepción
+  documentos: [
+    {
+      id:            "doc-rec-001",
+      tipoDocumento: TipoDocumento.RegistroSanitarioINVIMA,
+      nombreArchivo: "INVIMA_AviCol_2026.pdf",
+      urlDescarga:   "#",
+      fechaCarga:    "2026-02-24T07:38:00Z",
+    },
+    {
+      id:            "doc-rec-002",
+      tipoDocumento: TipoDocumento.CertificadoTransporte,
+      nombreArchivo: "BitacoraTemp_OPQ451_20260224.pdf",
+      urlDescarga:   "#",
+      fechaCarga:    "2026-02-24T07:39:00Z",
+    },
+  ],
+
+  // registros de temperatura
+  temperaturas: [
+    {
+      id:               "temp-001",
+      temperatura:      3.8,
+      unidadMedida:     "°C",
+      fechaRegistro:    "2026-02-24T07:31:00Z",
+      origen:           OrigenTemperatura.Manual,
+      estaFueraDeRango: false,
+      loteId:           "lote-001",
+      loteNumero:       "LI-2026-0301",
+      itemNombre:       "Pollo entero fresco",
+    },
+    {
+      id:               "temp-002",
+      temperatura:      4.1,
+      unidadMedida:     "°C",
+      fechaRegistro:    "2026-02-24T07:32:00Z",
+      origen:           OrigenTemperatura.Bluetooth,
+      estaFueraDeRango: false,
+      loteId:           "lote-002",
+      loteNumero:       "LI-2026-0302",
+      itemNombre:       "Muslo de pollo",
+    },
+    {
+      id:               "temp-003",
+      temperatura:      5.9,
+      unidadMedida:     "°C",
+      fechaRegistro:    "2026-02-24T07:33:00Z",
+      origen:           OrigenTemperatura.Manual,
+      estaFueraDeRango: true,
+      observacion:      "Temperatura ligeramente elevada — lote enviado a cuarentena.",
+      loteId:           "lote-003",
+      loteNumero:       "LI-2026-0303",
+      itemNombre:       "Pechuga de pollo sin hueso",
+    },
+  ],
+};

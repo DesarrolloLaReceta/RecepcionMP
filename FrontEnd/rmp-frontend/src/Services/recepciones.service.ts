@@ -6,6 +6,8 @@ import type {
   RegistrarTemperaturaCommand,
   TipoDocumento,
   EstadoRecepcion,
+  EstadoSensorial,
+  EstadoRotulado,
 } from "../Types/api";
 
 // ─── TIPOS DE RESPUESTA ───────────────────────────────────────────────────────
@@ -61,8 +63,8 @@ export interface LoteRecibido {
   cantidadEsperada: number;
   unidadMedida: string;
   temperaturaMedida?: number;
-  estadoSensorial: number;
-  estadoRotulado: number;
+  estadoSensorial: EstadoSensorial;
+  estadoRotulado: EstadoRotulado;
   ubicacionDestino: number;
   estado: string;
   documentos: DocumentoAdjunto[];
@@ -78,12 +80,17 @@ export interface DocumentoAdjunto {
 
 export interface RegistroTemperatura {
   id: string;
-  temperatura: number;
+  temperatura: number;         
   unidadMedida: string;
-  origen: number;
+  fechaRegistro: string;        
+  origen: number;               
+  estaFueraDeRango: boolean;    
   dispositivoId?: string;
   observacion?: string;
-  fechaRegistro: string;
+  // Campos opcionales que puede proyectar el DTO de respuesta
+  loteId?: string;
+  loteNumero?: string;          
+  itemNombre?: string;         
 }
 
 // ─── TIPOS OC — fuente canónica en ordenes-compra.service ───────────────────

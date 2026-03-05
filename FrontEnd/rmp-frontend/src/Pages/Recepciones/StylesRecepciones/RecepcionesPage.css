@@ -1,0 +1,198 @@
+/* ============================================================
+   RECEPCIONES PAGE — prefix .rp-*
+   Patrón: header + filtros + chips estado + tabla
+   ============================================================ */
+
+/* ── PÁGINA ── */
+.rp-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: fadeSlideUp 0.35s ease both;
+}
+
+/* ── HEADER ── */
+.rp-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  flex-shrink: 0;
+}
+@media (min-width: 640px) {
+  .rp-header { flex-direction: row; align-items: flex-start; justify-content: space-between; }
+}
+.rp-breadcrumb {
+  font-size: var(--text-xs); font-family: var(--font-mono);
+  letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 0.25rem;
+}
+.rp-title { font-size: var(--text-xl); font-weight: 700; color: var(--text-primary); }
+.rp-header-actions { display: flex; align-items: center; gap: 0.625rem; flex-shrink: 0; }
+
+/* ── ERROR BANNER ── */
+.rp-error {
+  padding: 0.75rem 1.25rem; border-radius: var(--radius-lg);
+  background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.15);
+  display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0;
+}
+.rp-error-text { font-size: var(--text-sm); color: #FCA5A5; flex: 1; }
+.rp-error-retry {
+  font-size: var(--text-xs); color: #F87171;
+  background: none; border: none; cursor: pointer; text-decoration: underline; flex-shrink: 0;
+}
+
+/* ── BARRA DE FILTROS ── */
+.rp-filters {
+  display: flex; align-items: center; gap: 0.625rem; flex-wrap: wrap; flex-shrink: 0;
+}
+.rp-search-wrap { position: relative; flex: 1; min-width: 200px; }
+.rp-search-icon {
+  position: absolute; left: 0.75rem; top: 50%;
+  transform: translateY(-50%); pointer-events: none;
+}
+.rp-search-clear {
+  position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); display: flex; align-items: center;
+  transition: color var(--transition-fast);
+}
+.rp-search-clear:hover { color: var(--text-secondary); }
+.rp-input {
+  width: 100%; padding: 0.625rem 2.25rem;
+  border-radius: var(--radius-lg); font-size: var(--text-sm); outline: none;
+  background: rgba(15,23,42,0.80); border: 1px solid rgba(255,255,255,0.07); color: #CBD5E1;
+  transition: border-color var(--transition-fast);
+}
+.rp-input:focus { border-color: rgba(245,158,11,0.30); }
+.rp-select {
+  padding: 0.625rem 0.875rem; border-radius: var(--radius-lg);
+  font-size: var(--text-sm); font-family: var(--font-mono); outline: none;
+  background: rgba(15,23,42,0.80); border: 1px solid rgba(255,255,255,0.07); color: #CBD5E1;
+  cursor: pointer; transition: border-color var(--transition-fast);
+}
+.rp-select:focus { border-color: rgba(245,158,11,0.30); }
+.rp-select[data-empty="true"] { color: var(--text-muted); }
+.rp-select option { background: #0F172A; color: #CBD5E1; }
+.rp-refresh-btn {
+  width: 2.5rem; height: 2.5rem; border-radius: var(--radius-lg); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.rp-refresh-btn:hover:not(:disabled) { background: rgba(255,255,255,0.08); }
+.rp-refresh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.rp-refresh-icon { transition: transform 0.4s; }
+.rp-refresh-icon[data-spinning="true"] { animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── CHIPS DE ESTADO ── */
+.rp-chips-row {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; flex-shrink: 0;
+}
+.rp-count {
+  font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-tertiary);
+}
+.rp-clear-btn {
+  font-size: var(--text-xs); font-family: var(--font-mono); color: var(--primary);
+  background: none; border: none; cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+.rp-clear-btn:hover { opacity: 0.7; }
+.rp-chips { display: flex; gap: 0.375rem; flex-wrap: wrap; margin-left: auto; }
+.rp-chip {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0.25rem 0.625rem; border-radius: var(--radius-md);
+  font-size: var(--text-xs); font-family: var(--font-mono); cursor: pointer;
+  border: none; transition: opacity var(--transition-fast);
+}
+.rp-chip[data-dimmed="true"] { opacity: 0.35; }
+.rp-chip-dot { width: 0.375rem; height: 0.375rem; border-radius: var(--radius-full); flex-shrink: 0; }
+
+/* ── TABLA ── */
+.rp-table-wrap {
+  border-radius: var(--radius-xl); overflow: hidden;
+  background: rgba(15,23,42,0.80); border: 1px solid rgba(255,255,255,0.06);
+}
+.rp-table { width: 100%; border-collapse: collapse; }
+.rp-thead-row { border-bottom: 1px solid rgba(255,255,255,0.06); }
+.rp-th {
+  padding: 0.875rem 1rem; text-align: left;
+}
+.rp-th-label {
+  font-size: var(--text-xs); font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text-tertiary); font-family: var(--font-mono);
+}
+/* Columnas ocultas en móvil / tablet */
+.rp-col-md { display: none; }
+.rp-col-lg { display: none; }
+@media (min-width: 768px) { .rp-col-md { display: table-cell; } }
+@media (min-width: 1024px) { .rp-col-lg { display: table-cell; } }
+
+/* ── FILA ── */
+.rp-row {
+  cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background var(--transition-fast);
+}
+.rp-row:hover { background: rgba(255,255,255,0.025); }
+.rp-row:last-child { border-bottom: none; }
+.rp-td { padding: 0.875rem 1rem; vertical-align: middle; }
+.rp-td-last { padding: 0.875rem 1rem; text-align: right; }
+
+/* Número de recepción */
+.rp-rec-num {
+  font-size: var(--text-sm); font-weight: 700; color: var(--text-primary); font-family: var(--font-mono);
+  transition: color var(--transition-fast);
+}
+.rp-row:hover .rp-rec-num { color: var(--primary); }
+.rp-rec-oc { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.125rem; }
+
+/* Proveedor */
+.rp-prov { font-size: var(--text-sm); color: #CBD5E1; font-weight: 500; }
+
+/* Fecha / hora */
+.rp-fecha { font-size: var(--text-sm); color: #94A3B8; }
+.rp-hora  { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.125rem; }
+
+/* Placa badge */
+.rp-placa {
+  font-size: var(--text-xs); font-family: var(--font-mono);
+  padding: 0.25rem 0.5rem; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.05); color: #64748B;
+}
+
+/* Estado badge */
+.rp-badge {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0.25rem 0.625rem; border-radius: var(--radius-md);
+  font-size: var(--text-xs); font-weight: 600;
+}
+.rp-badge-dot { width: 0.375rem; height: 0.375rem; border-radius: var(--radius-full); flex-shrink: 0; }
+
+/* Chevron */
+.rp-chevron { stroke: var(--text-tertiary); transition: stroke var(--transition-fast); display: inline; }
+.rp-row:hover .rp-chevron { stroke: var(--primary); }
+
+/* Barra de lotes (mini) */
+.rp-lotes-bar {
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.rp-lotes-track {
+  display: flex; height: 6px; border-radius: var(--radius-full); overflow: hidden;
+  width: 5rem; background: rgba(255,255,255,0.06); gap: 1px;
+}
+.rp-lotes-liberados  { height: 100%; background: #4ADE80; }
+.rp-lotes-rechazados { height: 100%; background: #F87171; }
+.rp-lotes-count { font-size: var(--text-xs); font-family: var(--font-mono); color: #64748B; }
+
+/* Skeleton + empty */
+.rp-skeleton-td { padding: 0.875rem 1rem; }
+.rp-skeleton-line {
+  border-radius: var(--radius-sm); background: rgba(255,255,255,0.05);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+.rp-empty {
+  padding: 4rem 1rem; text-align: center;
+  font-size: var(--text-sm); color: var(--text-tertiary);
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
