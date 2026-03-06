@@ -310,3 +310,13 @@ table.ncp-table thead th {
   border: 1px solid rgba(245,158,11,0.10);
   display: flex; flex-direction: column; gap: 0.875rem;
 }
+
+@media (max-width: 1024px) {
+  .ncp-body {
+    flex-direction: column;
+  }
+  .ncp-list {
+    width: 100% !important;
+    max-height: 45vh;
+  }
+}

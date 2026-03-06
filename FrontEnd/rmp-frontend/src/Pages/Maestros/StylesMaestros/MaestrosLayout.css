@@ -136,6 +136,24 @@
   overflow: hidden;
 }
 
+@media (max-width: 1024px) {
+  .ms-body {
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  /* La lista ocupa 100% y limita altura en tablet */
+  .ms-list {
+    width: 100% !important;   /* override del inline style */
+    max-height: 45vh;
+  }
+
+  /* El panel se convierte en full-width debajo */
+  .ms-panel {
+    max-height: 50vh;
+  }
+}
+
 /* ── LISTA ── */
 .ms-list {
   display: flex;

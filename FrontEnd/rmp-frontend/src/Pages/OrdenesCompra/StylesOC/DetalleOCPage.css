@@ -205,3 +205,14 @@
 .ocd-loading-text { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); }
 .ocd-error-text   { font-size: var(--text-sm); color: #FCA5A5; }
 .ocd-back-link    { font-size: var(--text-sm); color: var(--primary); text-decoration: underline; cursor: pointer; background: none; border: none; }
+
+/* Agregar scroll al contenedor de la tabla de ítems */
+.ocd-items-table {
+  overflow-x: auto;  /* agregar */
+}
+
+.ocd-items-header-row,
+.ocd-item-row,
+.ocd-totals-row {
+  min-width: 580px;
+}

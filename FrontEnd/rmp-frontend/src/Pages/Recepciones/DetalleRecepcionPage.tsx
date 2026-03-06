@@ -5,7 +5,7 @@ import { EstadoRecepcion, TipoDocumento, TipoDocumentoLabels, OrigenTemperatura 
 import { ROUTES } from "../../Constants/routes";
 import { formatDate, formatDateTime } from "../../Utils/formatters";
 import { MOCK_DETALLE } from "./MockData";
-import "./StylesPages/DetalleRecepcionPage.css";
+import "./StylesRecepciones/DetalleRecepcionPage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 

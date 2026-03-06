@@ -44,7 +44,8 @@
   display:    none;   /* visible solo en móvil via media query */
 }
 
-@media (max-width: 768px) {
+/* Backdrop — ampliar a 1024px para cubrir iPad Pro también */
+@media (max-width: 1024px) {
   .app-backdrop {
     display: block;
   }
@@ -397,6 +398,18 @@
   border-right: none;
   box-shadow:   none;
 }
+
+/* ── Sidebar como drawer en tablet/móvil ── */
+@media (max-width: 1024px) {
+  .app-sidebar {
+    position: fixed;
+    left:     0;
+    top:      var(--header-height);
+    height:   calc(100vh - var(--header-height));
+    z-index:  40;  /* encima del backdrop (30) */
+  }
+}
+
 
 /* Wrapper interno con ancho fijo para que el contenido no se comprima */
 .sidebar-inner {
