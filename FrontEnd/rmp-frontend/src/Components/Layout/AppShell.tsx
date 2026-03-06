@@ -8,7 +8,7 @@ const OPEN_KEY = "sidebar_open";
 
 export function AppShell() {
   const [open, setOpen] = useState(() =>
-    window.innerWidth >= 768
+    window.innerWidth >= 1024 
       ? localStorage.getItem(OPEN_KEY) !== "false"
       : false
   );
@@ -23,7 +23,7 @@ export function AppShell() {
 
   // Cierra el sidebar automáticamente al reducir la ventana a móvil
   useEffect(() => {
-    const mq      = window.matchMedia("(max-width: 768px)");
+    const mq      = window.matchMedia("(max-width: 1024px)");
     const handler = (e: MediaQueryListEvent) => { if (e.matches) setOpen(false); };
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);

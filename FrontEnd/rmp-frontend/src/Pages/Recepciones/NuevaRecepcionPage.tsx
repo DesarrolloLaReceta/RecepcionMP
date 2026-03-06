@@ -17,7 +17,7 @@ import {
   TextField, SelectField, DateField, NumberField, TextAreaField,
 } from "../../Components/Forms/Index";
 import { MOCK_OC_ABIERTAS } from "../OrdenesCompra/MockData";
-import "./StylesPages/NuevaRecepcionPage.css";
+import "./StylesRecepciones/NuevaRecepcionPage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 const today   = new Date().toISOString().slice(0, 10);
