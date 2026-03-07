@@ -314,9 +314,15 @@ table.ncp-table thead th {
 @media (max-width: 1024px) {
   .ncp-body {
     flex-direction: column;
+    overflow: visible;            /* permite scroll normal en columna */
   }
-  .ncp-list {
+  .ncp-table-wrap {               /* ← clase real */
     width: 100% !important;
     max-height: 45vh;
+    flex: none;                   /* evita que se estire raro */
+  }
+  .ncp-panel {
+    width: 100% !important;       /* panel full-width en tablet */
+    flex-shrink: 1;
   }
 }
