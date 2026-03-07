@@ -192,8 +192,8 @@
   padding:       1.25rem;
   border-radius: var(--radius-lg);
   overflow:      hidden;
-  background:    rgba(15, 23, 42, 0.80);
-  border:        1px solid rgba(255, 255, 255, 0.06);
+  background: var(--dark-bg);
+  border:     1px solid var(--dark-border);
   animation:     fadeSlideUp 0.4s ease both;
   /* animationDelay se pasa inline */
 }
@@ -274,8 +274,8 @@
   overflow:      hidden;
   display:       flex;
   flex-direction: column;
-  background:    rgba(15, 23, 42, 0.80);
-  border:        1px solid rgba(255, 255, 255, 0.06);
+  background: var(--dark-bg);
+  border:     1px solid var(--dark-border);
 }
 
 .db-panel-header {
@@ -283,7 +283,7 @@
   align-items:     center;
   justify-content: space-between;
   padding:         0.875rem 1.25rem;
-  border-bottom:   1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--dark-border);
 }
 
 .db-panel-title-wrap {
@@ -337,7 +337,7 @@
 }
 
 .db-row:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--dark-hover);
 }
 
 .db-row:last-child {
