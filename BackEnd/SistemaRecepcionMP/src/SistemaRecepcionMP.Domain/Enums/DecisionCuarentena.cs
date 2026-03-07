@@ -1,3 +1,4 @@
+namespace SistemaRecepcionMP.Domain.Enums;
 public enum DecisionCuarentena
 {
     LiberadoTrasAnalisis,

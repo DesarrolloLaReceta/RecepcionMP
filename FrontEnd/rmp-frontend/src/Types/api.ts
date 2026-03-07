@@ -6,106 +6,106 @@
 // ─── ENUMS ───────────────────────────────────────────────────────────────────
 
 export enum EstadoOrdenCompra {
-  Borrador    = 0,
-  Abierta     = 1,
-  Cerrada     = 2,
-  Anulada     = 3,
+  Abierta                  = 0,
+  ParcialmenteRecibida     = 1,
+  CompletamenteRecibida    = 2,
+  Cancelada                = 3,
 }
 
 export const EstadoOrdenCompraLabels: Record<EstadoOrdenCompra, string> = {
-  [EstadoOrdenCompra.Borrador]:  "Borrador",
-  [EstadoOrdenCompra.Abierta]:   "Abierta",
-  [EstadoOrdenCompra.Cerrada]:   "Cerrada",
-  [EstadoOrdenCompra.Anulada]:   "Anulada",
+  [EstadoOrdenCompra.Abierta]:  "Abierta",
+  [EstadoOrdenCompra.ParcialmenteRecibida]:   "Parcialmente recibida",
+  [EstadoOrdenCompra.CompletamenteRecibida]:   "Completamente recibida",
+  [EstadoOrdenCompra.Cancelada]:   "Cancelada",
 };
 
 export enum EstadoRecepcion {
-  Iniciada          = 0,
-  InspeccionVehiculo = 1,
-  RegistroLotes     = 2,
-  PendienteCalidad  = 3,
-  Liberada          = 4,
-  Rechazada         = 5,
+  Borrador = 0,
+  EnInspeccion = 1,
+  PendienteLiberacion = 2,
+  Liberada = 3,
+  Rechazada = 4,
+  EnCuarentena = 5
 }
 
 export const EstadoRecepcionLabels: Record<EstadoRecepcion, string> = {
-  [EstadoRecepcion.Iniciada]:           "Iniciada",
-  [EstadoRecepcion.InspeccionVehiculo]: "Inspección vehículo",
-  [EstadoRecepcion.RegistroLotes]:      "Registro de lotes",
-  [EstadoRecepcion.PendienteCalidad]:   "Pendiente calidad",
-  [EstadoRecepcion.Liberada]:           "Liberada",
-  [EstadoRecepcion.Rechazada]:          "Rechazada",
+  [EstadoRecepcion.Borrador]: "Borrador",
+  [EstadoRecepcion.EnInspeccion]: "En inspección",
+  [EstadoRecepcion.PendienteLiberacion]: "Pendiente liberación",
+  [EstadoRecepcion.Liberada]: "Liberada",
+  [EstadoRecepcion.Rechazada]: "Rechazada",
+  [EstadoRecepcion.EnCuarentena]: "En cuarentena",
 };
 
 export enum EstadoRotulado {
   Conforme    = 0,
   NoConforme  = 1,
-  Incompleto  = 2,
+  SinRotulo  = 2,
 }
 
 export const EstadoRotuladoLabels: Record<EstadoRotulado, string> = {
   [EstadoRotulado.Conforme]:   "Conforme",
-  [EstadoRotulado.NoConforme]: "No conforme",
-  [EstadoRotulado.Incompleto]: "Incompleto",
+  [EstadoRotulado.NoConforme]: "No Conforme",
+  [EstadoRotulado.SinRotulo]: "Sin Rotulo",
 };
 
 export enum EstadoSensorial {
-  Aceptable = 0,
-  Dudoso    = 1,
-  Rechazado = 2,
+  Optimo = 0,
+  Aceptable    = 1,
+  Deficiente = 2,
 }
 
 export const EstadoSensorialLabels: Record<EstadoSensorial, string> = {
-  [EstadoSensorial.Aceptable]: "Aceptable",
-  [EstadoSensorial.Dudoso]:    "Dudoso",
-  [EstadoSensorial.Rechazado]: "Rechazado",
+  [EstadoSensorial.Optimo]: "Optimo",
+  [EstadoSensorial.Aceptable]:    "Aceptable",
+  [EstadoSensorial.Deficiente]: "Deficiente",
 };
 
 export enum TipoDocumento {
-  RegistroSanitarioINVIMA    = 0,
-  CertificadoAnalisis        = 1,
-  CertificadoTransporte      = 2,
-  BitacoraTemperatura        = 3,
-  EvidenciaRotulado          = 4,
-  HabilitacionCarnico        = 5,
-  HabilitacionLacteo         = 6,
-  Otro                       = 7,
+  Factura                     = 0,
+  OrdendeCompra               = 1,
+  COA                         = 2,
+  RegistroINVIMA              = 3,
+  CertTransporte              = 4,
+  BitacoraTemperatura         = 5,
+  Rotulado                    = 6,
+  Otros                       = 7,
 }
 
 export const TipoDocumentoLabels: Record<TipoDocumento, string> = {
-  [TipoDocumento.RegistroSanitarioINVIMA]: "Registro sanitario INVIMA",
-  [TipoDocumento.CertificadoAnalisis]:     "Certificado de análisis (COA)",
-  [TipoDocumento.CertificadoTransporte]:   "Certificado de transporte",
-  [TipoDocumento.BitacoraTemperatura]:     "Bitácora de temperatura",
-  [TipoDocumento.EvidenciaRotulado]:       "Evidencia de rotulado",
-  [TipoDocumento.HabilitacionCarnico]:     "Habilitación cárnicos (Dec. 1500)",
-  [TipoDocumento.HabilitacionLacteo]:      "Habilitación lácteos (Dec. 616)",
-  [TipoDocumento.Otro]:                    "Otro",
+  [TipoDocumento.Factura]: "Factura",
+  [TipoDocumento.OrdendeCompra]: "Orden de compra",
+  [TipoDocumento.COA]: "Certificado de análisis (COA)",
+  [TipoDocumento.RegistroINVIMA]: "Registro INVIMA",
+  [TipoDocumento.CertTransporte]:   "Certificado de transporte",
+  [TipoDocumento.BitacoraTemperatura]: "Bitácora de temperatura",
+  [TipoDocumento.Rotulado]:       "Rotulado",
+  [TipoDocumento.Otros]:                    "Otro",
 };
 
 export enum TipoNoConformidad {
   Merma          = 0,
-  RechazoTotal   = 1,
-  RechazoParcial = 2,
+  RechazoParcial   = 1,
+  RechazoTotal = 2,
   Cuarentena     = 3,
 }
 
 export const TipoNoConformidadLabels: Record<TipoNoConformidad, string> = {
   [TipoNoConformidad.Merma]:          "Merma",
-  [TipoNoConformidad.RechazoTotal]:   "Rechazo total",
-  [TipoNoConformidad.RechazoParcial]: "Rechazo parcial",
+  [TipoNoConformidad.RechazoParcial]:   "Rechazo parcial",
+  [TipoNoConformidad.RechazoTotal]: "Rechazo total",
   [TipoNoConformidad.Cuarentena]:     "Cuarentena",
 };
 
 export enum DecisionLiberacion {
-  Liberar  = 0,
-  Rechazar = 1,
+  Liberado  = 0,
+  RechazadoDefinitivo = 1,
 }
 
 export enum OrigenTemperatura {
   Manual    = 0,
-  Bluetooth = 1,
-  Sensor    = 2,
+  SensorBluetooth = 1,
+  Importado    = 2,
 }
 
 export enum ResultadoItem {
@@ -121,8 +121,8 @@ export const ResultadoItemLabels: Record<ResultadoItem, string> = {
 };
 
 export enum UbicacionDestino {
-  Almacen    = 0,
-  Cuarentena = 1,
+  CD    = 0,
+  CP = 1,
 }
 
 // ─── COMMANDS (request DTOs) ─────────────────────────────────────────────────
