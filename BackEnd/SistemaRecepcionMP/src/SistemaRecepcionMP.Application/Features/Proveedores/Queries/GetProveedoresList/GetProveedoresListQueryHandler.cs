@@ -1,4 +1,5 @@
 using SistemaRecepcionMP.Application.Common.Mappings;
+using SistemaRecepcionMP.Domain.Enums;
 using AutoMapper;
 using SistemaRecepcionMP.Domain.Interfaces;
 using MediatR;
@@ -18,14 +19,24 @@ public sealed class GetProveedoresListQueryHandler
     }
 
     public async Task<IEnumerable<ProveedorResumenDto>> Handle(
-        GetProveedoresListQuery request,
-        CancellationToken cancellationToken)
+    GetProveedoresListQuery request,
+    CancellationToken cancellationToken)
     {
         var proveedores = await _unitOfWork.Proveedores.GetAllAsync();
 
         if (request.SoloActivos)
-            proveedores = proveedores.Where(p => p.Estado);
+            proveedores = proveedores.Where(p => p.Estado == EstadoProveedor.Activo);
 
-        return _mapper.Map<IEnumerable<ProveedorResumenDto>>(proveedores);
+        var lista = proveedores.ToList();
+        var dtos  = _mapper.Map<List<ProveedorResumenDto>>(lista);
+
+        for (int i = 0; i < lista.Count; i++)
+        {
+            dtos[i].Categorias       = ProveedorCalculos.Categorias(lista[i]);
+            dtos[i].TotalRecepciones = ProveedorCalculos.TotalRecepciones(lista[i]);
+            dtos[i].TasaAceptacion   = ProveedorCalculos.TasaAceptacion(lista[i]);
+        }
+
+        return dtos;
     }
 }

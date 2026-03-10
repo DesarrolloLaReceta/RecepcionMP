@@ -1,3 +1,5 @@
+using SistemaRecepcionMP.Domain.Enums;
+
 namespace SistemaRecepcionMP.Domain.Entities;
 
 public class Cuarentena : BaseEntity

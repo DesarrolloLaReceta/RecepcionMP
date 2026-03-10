@@ -33,25 +33,31 @@ export interface Proveedor {
   id: string;
   razonSocial: string;
   nit: string;
-  nombreContacto?: string;
+  telefono?: string;
   emailContacto?: string;
-  telefonoContacto?: string;
   direccion?: string;
-  ciudad?: string;
   estado: EstadoProveedor;
-  categorias: string[];           // nombres de categorías que provee
-  documentos: DocumentoProveedor[];
+  categorias: string[];
+  contactos: {
+    id: string;
+    nombre: string;
+    cargo?: string;
+    telefono?: string;
+    email?: string;
+    esPrincipal: boolean;
+  }[];
+  documentosSanitarios: DocumentoProveedor[];
   totalRecepciones: number;
   ultimaRecepcion?: string;
-  tasaAceptacion?: number;        // % de lotes aceptados
-  createdAt: string;
+  tasaAceptacion?: number;
+  creadoEn: string;
 }
 
 export interface ProveedorResumen {
   id: string;
   razonSocial: string;
   nit: string;
-  ciudad?: string;
+  direccion?: string;
   estado: EstadoProveedor;
   categorias: string[];
   documentosVigentes: number;
@@ -64,11 +70,14 @@ export interface ProveedorResumen {
 export interface CrearProveedorCommand {
   razonSocial: string;
   nit: string;
-  nombreContacto?: string;
+  telefono?: string;
   emailContacto?: string;
-  telefonoContacto?: string;
   direccion?: string;
-  ciudad?: string;
+  // Contacto principal
+  nombreContacto?: string;
+  cargoContacto?: string;
+  telefonoContacto?: string;
+  emailContactoProveedor?: string;
 }
 
 export interface ActualizarProveedorCommand extends CrearProveedorCommand {

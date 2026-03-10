@@ -38,7 +38,24 @@ public sealed class MappingProfile : Profile
     // ─────────────────────────────────────────────────────────────────
     private void AplicarMapeosProveedor()
     {
-        CreateMap<Proveedor, ProveedorResumenDto>();
+        CreateMap<Proveedor, ProveedorResumenDto>()
+            .ForMember(dest => dest.Categorias,
+                opt => opt.Ignore())
+            .ForMember(dest => dest.TotalRecepciones,
+                opt => opt.Ignore())
+            .ForMember(dest => dest.DocumentosVigentes,
+                opt => opt.MapFrom(src => src.DocumentosSanitarios
+                    .Count(d => d.FechaVencimiento >= DateOnly.FromDateTime(DateTime.UtcNow) &&
+                                (d.FechaVencimiento.DayNumber - DateOnly.FromDateTime(DateTime.UtcNow).DayNumber) > 30)))
+            .ForMember(dest => dest.DocumentosPorVencer,
+                opt => opt.MapFrom(src => src.DocumentosSanitarios
+                    .Count(d => d.FechaVencimiento >= DateOnly.FromDateTime(DateTime.UtcNow) &&
+                                (d.FechaVencimiento.DayNumber - DateOnly.FromDateTime(DateTime.UtcNow).DayNumber) <= 30)))
+            .ForMember(dest => dest.DocumentosVencidos,
+                opt => opt.MapFrom(src => src.DocumentosSanitarios
+                    .Count(d => d.FechaVencimiento < DateOnly.FromDateTime(DateTime.UtcNow))))
+            .ForMember(dest => dest.TasaAceptacion,
+                opt => opt.Ignore());
 
         CreateMap<Proveedor, ProveedorDetalleDto>()
             .IncludeBase<Proveedor, ProveedorResumenDto>();

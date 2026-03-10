@@ -1,5 +1,6 @@
 using SistemaRecepcionMP.Application.Common.Behaviours;
 using MediatR;
+using SistemaRecepcionMP.Domain.Enums;
 
 namespace SistemaRecepcionMP.Application.Features.Proveedores.Commands.ActualizarProveedor;
 
@@ -10,7 +11,7 @@ public sealed class ActualizarProveedorCommand : IRequest, IAuditableCommand
     public string? Telefono { get; set; }
     public string? EmailContacto { get; set; }
     public string? Direccion { get; set; }
-    public bool Estado { get; set; }
+    public EstadoProveedor? Estado { get; set; }
 
     // IAuditableCommand
     public string EntidadAfectada => "Proveedor";

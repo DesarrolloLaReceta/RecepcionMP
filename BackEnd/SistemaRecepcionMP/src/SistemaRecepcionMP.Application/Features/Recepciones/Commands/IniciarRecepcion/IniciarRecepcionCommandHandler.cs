@@ -38,9 +38,9 @@ public sealed class IniciarRecepcionCommandHandler : IRequestHandler<IniciarRece
             .GetWithDocumentosSanitariosAsync(oc.ProveedorId)
             ?? throw new ProveedorNotFoundException(oc.ProveedorId);
 
-        if (!proveedor.Estado)
+        if (proveedor.Estado != EstadoProveedor.Activo)
             throw new ProveedorNoHabilitadoException(proveedor.RazonSocial,
-                "El proveedor está inactivo.");
+                $"El proveedor está inactivo y no puede recibir mercancía.");
 
         // 3. Verificar documentos sanitarios del proveedor vigentes
         var documentosVencidos = proveedor.DocumentosSanitarios

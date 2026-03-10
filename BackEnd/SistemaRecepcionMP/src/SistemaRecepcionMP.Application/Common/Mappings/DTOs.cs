@@ -24,7 +24,14 @@ public class ProveedorResumenDto
     public Guid Id { get; set; }
     public string RazonSocial { get; set; } = string.Empty;
     public string Nit { get; set; } = string.Empty;
-    public bool Estado { get; set; }
+    public string? Ciudad { get; set; }
+    public EstadoProveedor Estado { get; set; }
+    public List<string> Categorias { get; set; } = new();
+    public int DocumentosVigentes { get; set; }
+    public int DocumentosPorVencer { get; set; }
+    public int DocumentosVencidos { get; set; }
+    public int TotalRecepciones { get; set; }
+    public double TasaAceptacion { get; set; }
 }
 
 public sealed class ProveedorDetalleDto : ProveedorResumenDto

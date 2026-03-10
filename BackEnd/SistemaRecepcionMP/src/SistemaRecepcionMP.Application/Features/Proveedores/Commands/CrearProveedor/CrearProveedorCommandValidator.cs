@@ -28,5 +28,27 @@ public sealed class CrearProveedorCommandValidator : AbstractValidator<CrearProv
         RuleFor(x => x.Direccion)
             .MaximumLength(300).WithMessage("La dirección no puede superar 300 caracteres.")
             .When(x => x.Direccion is not null);
+
+        // Validaciones para el contacto principal
+        RuleFor(x => x.NombreContacto)
+            .NotEmpty().WithMessage("El nombre del contacto es obligatorio cuando se proporciona información de contacto.")
+            .MaximumLength(100).WithMessage("El nombre del contacto no puede superar 100 caracteres.")
+            .When(x => !string.IsNullOrWhiteSpace(x.NombreContacto) || 
+                      !string.IsNullOrWhiteSpace(x.CargoContacto) || 
+                      !string.IsNullOrWhiteSpace(x.TelefonoContacto) || 
+                      !string.IsNullOrWhiteSpace(x.EmailContactoProveedor));
+
+        RuleFor(x => x.CargoContacto)
+            .MaximumLength(100).WithMessage("El cargo no puede superar 100 caracteres.")
+            .When(x => x.CargoContacto is not null);
+
+        RuleFor(x => x.TelefonoContacto)
+            .MaximumLength(20).WithMessage("El teléfono del contacto no puede superar 20 caracteres.")
+            .When(x => x.TelefonoContacto is not null);
+
+        RuleFor(x => x.EmailContactoProveedor)
+            .EmailAddress().WithMessage("El correo electrónico del contacto no tiene un formato válido.")
+            .MaximumLength(150).WithMessage("El correo del contacto no puede superar 150 caracteres.")
+            .When(x => x.EmailContactoProveedor is not null);
     }
 }

@@ -24,6 +24,17 @@ public sealed class LotesController : BaseController
         return Ok(result);
     }
 
+    /// <summary>
+    /// Retorna todos los lotes pendientes de liberación por Calidad.
+    /// </summary>
+    [HttpGet("pendientes-liberacion")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPendientesLiberacion(CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new GetLotesPendientesLiberacionQuery(), ct);
+        return Ok(result);
+    }
+
     // ── Commands ──────────────────────────────────────────────────────────────
 
     /// <summary>

@@ -14,7 +14,7 @@ import {
 import "./StylesMaestros/MaestrosLayout.css";
 import "./StylesMaestros/ProveedoresPage.css";
 
-const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+const isMock = import.meta.env.VITE_USE_MOCK === "true";
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -52,9 +52,9 @@ function ProveedorRow({
         <div className="pv-row-info">
           <p className="pv-razon-social">{p.razonSocial}</p>
           <p className="pv-nit">{p.nit}</p>
-          {p.categorias.length > 0 && (
+          {(p.categorias?.length ?? 0) > 0 && (
             <div className="pv-cats">
-              {p.categorias.slice(0, 3).map(c => (
+              {p.categorias?.slice(0, 3).map(c => (
                 <span key={c} className="pv-cat-pill">{c}</span>
               ))}
             </div>
@@ -121,7 +121,7 @@ function PanelDetalle({
       <div className="ms-tabs" style={{ marginTop: "0.75rem" }}>
         {([
           { key: "info", label: "Información" },
-          { key: "docs", label: `Documentos (${prov.documentos.length})` },
+          { key: "docs", label: `Documentos (${prov.documentosSanitarios?.length ?? 0})` },
         ] as const).map(t => (
           <button key={t.key} className="ms-tab" data-active={tab === t.key}
             onClick={() => setTab(t.key)}>
@@ -135,12 +135,12 @@ function PanelDetalle({
         {tab === "info" && (
           <div className="ms-info-grid">
             {[
-              { label: "Contacto",     val: prov.nombreContacto },
-              { label: "Teléfono",     val: prov.telefonoContacto },
-              { label: "Email",        val: prov.emailContacto },
-              { label: "Ciudad",       val: prov.ciudad },
+              // Contacto principal viene dentro de contactos[]
+              { label: "Contacto",     val: prov.contactos?.find(c => c.esPrincipal)?.nombre ?? prov.contactos?.[0]?.nombre },
+              { label: "Teléfono",     val: prov.contactos?.find(c => c.esPrincipal)?.telefono ?? prov.telefono },
+              { label: "Email",        val: prov.contactos?.find(c => c.esPrincipal)?.email ?? prov.emailContacto },
               { label: "Dirección",    val: prov.direccion },
-              { label: "Activo desde", val: formatDate(prov.createdAt) },
+              { label: "Activo desde", val: formatDate(prov.creadoEn) },  // era createdAt
             ].filter(f => f.val).map(({ label, val }) => (
               <div key={label} className="ms-info-card">
                 <p className="ms-info-label">{label}</p>
@@ -151,37 +151,38 @@ function PanelDetalle({
         )}
 
         {tab === "docs" && (
-          <>
-            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", lineHeight: 1.6 }}>
-              Vigencias de habilitaciones sanitarias y documentos requeridos.
+        <>
+          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", lineHeight: 1.6 }}>
+            Vigencias de habilitaciones sanitarias y documentos requeridos.
+          </p>
+          {(prov.documentosSanitarios?.length ?? 0) === 0 ? (
+            <p style={{ fontSize: "var(--text-md)", color: "var(--text-tertiary)" }}>
+              Sin documentos registrados.
             </p>
-            {prov.documentos.length === 0 ? (
-              <p style={{ fontSize: "var(--text-md)", color: "var(--text-tertiary)" }}>Sin documentos registrados.</p>
-            ) : (
-              prov.documentos.map(doc => {
-                const color = diasColor(doc.diasParaVencer);
-                return (
-                  <div key={doc.id} className="ms-doc-row">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                    </svg>
-                    <span className="ms-doc-name">{doc.tipo}</span>
-                    <div className="pv-doc-vencimiento">
-                      <span className="ms-doc-dias" style={{ color }}>
-                        {doc.diasParaVencer != null
-                          ? doc.diasParaVencer <= 0
-                            ? "Vencido"
-                            : `${doc.diasParaVencer}d`
-                          : "—"}
-                      </span>
-                    </div>
+          ) : (
+            prov.documentosSanitarios!.map(doc => {
+              const color = diasColor(doc.diasParaVencer);
+              return (
+                <div key={doc.id} className="ms-doc-row">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                    stroke="#475569" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                  <span className="ms-doc-name">{doc.tipo}</span>
+                  <div className="pv-doc-vencimiento">
+                    <span className="ms-doc-dias" style={{ color }}>
+                      {doc.diasParaVencer != null
+                        ? doc.diasParaVencer <= 0 ? "Vencido" : `${doc.diasParaVencer}d`
+                        : "—"}
+                    </span>
                   </div>
-                );
-              })
-            )}
-          </>
-        )}
+                </div>
+              );
+            })
+          )}
+        </>
+      )}
       </div>
     </>
   );
@@ -205,13 +206,14 @@ function ModalNuevo({
     if (!valid) return;
     setSaving(true);
     try {
-      if (!isMock) await proveedoresService.crear(form as CrearProveedorCommand);
-      else await new Promise(r => setTimeout(r, 700));
+      const { id } = isMock
+        ? { id: `prov-${Date.now()}` }
+        : await proveedoresService.crear(form as CrearProveedorCommand);
       onCreado({
-        id: `prov-${Date.now()}`,
+        id,
         razonSocial: form.razonSocial!,
         nit: form.nit!,
-        ciudad: form.ciudad,
+        direccion: form.direccion,
         estado: EstadoProveedor.Activo,
         categorias: [],
         documentosVigentes: 0,
@@ -246,48 +248,34 @@ function ModalNuevo({
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
           <div style={{ gridColumn: "1 / -1" }}>
-            <TextField
-              label="Razón social"
-              required
-              placeholder="Razón social o nombre comercial"
-              value={form.razonSocial ?? ""}
-              onChange={e => upd("razonSocial", e.target.value)}
-            />
+            <TextField label="Razón social" required
+              value={form.razonSocial ?? ""} onChange={e => upd("razonSocial", e.target.value)} />
           </div>
-          <TextField
-            label="NIT"
-            required
-            placeholder="800.000.000-1"
-            value={form.nit ?? ""}
-            onChange={e => upd("nit", e.target.value)}
-          />
-          <TextField
-            label="Ciudad"
-            placeholder="Bogotá"
-            value={form.ciudad ?? ""}
-            onChange={e => upd("ciudad", e.target.value)}
-          />
-          <TextField
-            label="Contacto"
-            placeholder="Nombre del contacto"
-            value={form.nombreContacto ?? ""}
-            onChange={e => upd("nombreContacto", e.target.value)}
-          />
-          <TextField
-            label="Teléfono"
-            placeholder="+57 601 000 0000"
-            value={form.telefonoContacto ?? ""}
-            onChange={e => upd("telefonoContacto", e.target.value)}
-          />
+          <TextField label="NIT" required placeholder="800.000.000-1"
+            value={form.nit ?? ""} onChange={e => upd("nit", e.target.value)} />
+          <TextField label="Teléfono" placeholder="+57 601 000 0000"
+            value={form.telefono ?? ""} onChange={e => upd("telefono", e.target.value)} />
+          <TextField label="Email empresa" type="email"
+            value={form.emailContacto ?? ""} onChange={e => upd("emailContacto", e.target.value)} />
           <div style={{ gridColumn: "1 / -1" }}>
-            <TextField
-              label="Email"
-              type="email"
-              placeholder="contacto@proveedor.com"
-              value={form.emailContacto ?? ""}
-              onChange={e => upd("emailContacto", e.target.value)}
-            />
+            <TextField label="Dirección" placeholder="Cra 1 # 2-3, Bogotá"
+              value={form.direccion ?? ""} onChange={e => upd("direccion", e.target.value)} />
           </div>
+
+          {/* Separador contacto */}
+          <div style={{ gridColumn: "1 / -1", borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}>
+            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginBottom: "0.75rem" }}>
+              Contacto principal (opcional)
+            </p>
+          </div>
+          <TextField label="Nombre contacto"
+            value={form.nombreContacto ?? ""} onChange={e => upd("nombreContacto", e.target.value)} />
+          <TextField label="Cargo"
+            value={form.cargoContacto ?? ""} onChange={e => upd("cargoContacto", e.target.value)} />
+          <TextField label="Teléfono contacto"
+            value={form.telefonoContacto ?? ""} onChange={e => upd("telefonoContacto", e.target.value)} />
+          <TextField label="Email contacto" type="email"
+            value={form.emailContactoProveedor ?? ""} onChange={e => upd("emailContactoProveedor", e.target.value)} />
         </div>
       </div>
     </Modal>

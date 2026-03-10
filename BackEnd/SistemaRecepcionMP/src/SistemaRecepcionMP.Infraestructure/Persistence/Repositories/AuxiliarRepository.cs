@@ -36,7 +36,7 @@ public sealed class NoConformidadRepository
         => await DbSet
             .Include(nc => nc.Causal)
             .Include(nc => nc.LoteRecibido).ThenInclude(l => l!.Item)
-            .Include(nc => nc.AccionesCorrectivas).ThenInclude(a => a.ResponsableId)
+            .Include(nc => nc.AccionesCorrectivas)
             .Where(nc => nc.Estado == estado)
             .OrderByDescending(nc => nc.CreadoEn)
             .ToListAsync();

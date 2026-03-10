@@ -1,5 +1,6 @@
 using SistemaRecepcionMP.Domain.Exceptions.Proveedores;
 using SistemaRecepcionMP.Domain.Interfaces;
+using SistemaRecepcionMP.Domain.Enums;
 using MediatR;
 
 namespace SistemaRecepcionMP.Application.Features.Proveedores.Commands.ActualizarProveedor;
@@ -24,7 +25,8 @@ public sealed class ActualizarProveedorCommandHandler : IRequestHandler<Actualiz
         proveedor.Telefono = request.Telefono?.Trim();
         proveedor.EmailContacto = request.EmailContacto?.Trim().ToLowerInvariant();
         proveedor.Direccion = request.Direccion?.Trim();
-        proveedor.Estado = request.Estado;
+        if (request.Estado.HasValue)
+            proveedor.Estado = request.Estado.Value;
         proveedor.ActualizadoEn = DateTime.UtcNow;
 
         _unitOfWork.Proveedores.Update(proveedor);
