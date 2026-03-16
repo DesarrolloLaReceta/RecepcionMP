@@ -6,6 +6,8 @@ namespace SistemaRecepcionMP.Application.Features.Items.Commands.ActualizarItem;
 public sealed class ActualizarItemCommand : IRequest, IAuditableCommand
 {
     public Guid Id { get; set; }
+    public string CodigoInterno { get; set; } = string.Empty;
+    public Guid CategoriaId { get; set; }
     public string Nombre { get; set; } = string.Empty;
     public string? Descripcion { get; set; }
     public string UnidadMedida { get; set; } = string.Empty;
@@ -14,6 +16,7 @@ public sealed class ActualizarItemCommand : IRequest, IAuditableCommand
     public decimal? TemperaturaMinima { get; set; }
     public decimal? TemperaturaMaxima { get; set; }
     public bool RequiereLoteProveedor { get; set; }
+    public string? CriteriosAceptacion { get; set; }
     public bool Estado { get; set; }
 
     // IAuditableCommand

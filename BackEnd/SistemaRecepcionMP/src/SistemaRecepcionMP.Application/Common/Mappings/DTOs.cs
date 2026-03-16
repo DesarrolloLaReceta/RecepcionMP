@@ -83,12 +83,14 @@ public sealed class CategoriaItemDto
 public class ItemResumenDto
 {
     public Guid Id { get; set; }
+    public Guid CategoriaId { get; set; }
     public string CodigoInterno { get; set; } = string.Empty;
     public string Nombre { get; set; } = string.Empty;
     public string CategoriaNombre { get; set; } = string.Empty;
     public string UnidadMedida { get; set; } = string.Empty;
     public decimal? TemperaturaMinima { get; set; }
     public decimal? TemperaturaMaxima { get; set; }
+    public bool RequiereCadenaFrio { get; set; }
     public bool Estado { get; set; }
 }
 
@@ -98,6 +100,7 @@ public sealed class ItemDetalleDto : ItemResumenDto
     public int VidaUtilDias { get; set; }
     public bool RequiereLoteProveedor { get; set; }
     public CategoriaItemDto Categoria { get; set; } = null!;
+    public List<TipoDocumentoExigidoDto> DocumentosRequeridos { get; set; } = new();
 }
 
 public sealed class TipoDocumentoExigidoDto

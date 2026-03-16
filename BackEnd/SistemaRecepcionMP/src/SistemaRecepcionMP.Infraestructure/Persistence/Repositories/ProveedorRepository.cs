@@ -47,13 +47,12 @@ public sealed class ProveedorRepository : GenericRepository<Proveedor>, IProveed
     public override async Task<IEnumerable<Proveedor>> GetAllAsync()
         => await DbSet
             .Include(p => p.DocumentosSanitarios)
-            .Include(p => p.OrdenesCompra)
-                .ThenInclude(oc => oc.Recepciones)
-                    .ThenInclude(r => r.Lotes)
-            .Include(p => p.OrdenesCompra)
-                .ThenInclude(oc => oc.Detalles)
-                    .ThenInclude(d => d.Item)
-                        .ThenInclude(i => i.Categoria)
+            .Include(p => p.Contactos)
             .OrderBy(p => p.RazonSocial)
             .ToListAsync();
+
+    public async Task AddDocumentoSanitarioAsync(DocumentoSanitarioProveedor documento)
+    {
+        await Context.Set<DocumentoSanitarioProveedor>().AddAsync(documento);
+    }
 }

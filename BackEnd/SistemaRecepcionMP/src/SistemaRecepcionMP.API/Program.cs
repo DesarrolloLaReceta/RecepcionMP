@@ -5,6 +5,7 @@ using SistemaRecepcionMP.Infraestructure.Persistence;
 using SistemaRecepcionMP.Application;
 using SistemaRecepcionMP.Infraestructure;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,10 +47,6 @@ builder.Services.AddCors(options =>
 // ─── Build de la aplicación ───────────────────────────────────────────────────
 var app = builder.Build();
 
-app.UseCors("Dev");
-app.UseAuthentication();
-app.UseAuthorization();
-
 // ─── Migraciones automáticas al arrancar ─────────────────────────────────────
 // Solo en Development — en producción las migraciones se ejecutan por CI/CD.
 if (app.Environment.IsDevelopment())
@@ -74,11 +71,21 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+var wwwrootPath = Path.Combine(
+    builder.Environment.ContentRootPath, "wwwroot");
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwrootPath),
+    RequestPath = ""
+});
+
 // 3. HTTPS redirect
 app.UseHttpsRedirection();
 
 // 4. CORS — antes de autenticación
-app.UseCors("FrontendPolicy");
+//app.UseCors("FrontendPolicy");
+app.UseCors("Dev");
 
 // 5. Autenticación JWT (valida el token de Azure AD)
 app.UseAuthentication();

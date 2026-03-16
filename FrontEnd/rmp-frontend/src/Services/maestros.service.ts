@@ -1,5 +1,7 @@
 import { apiClient } from "./apiClient";
 
+const isMock = import.meta.env.VITE_USE_MOCK === "true";
+
 // ─── ENUMS ────────────────────────────────────────────────────────────────────
 
 export enum EstadoProveedor { Activo = 0, Inactivo = 1, Suspendido = 2 }
@@ -20,13 +22,14 @@ export const EstadoItemLabels: Record<EstadoItem, string> = {
 
 export interface DocumentoProveedor {
   id: string;
-  tipo: string;
-  nombre: string;
-  numeroDocumento?: string;
-  fechaEmision?: string;
-  fechaVencimiento?: string;
-  urlArchivo?: string;
+  tipoDocumento: number;
+  numeroDocumento: string;
+  fechaExpedicion: string;
+  fechaVencimiento: string;
+  adjuntoUrl?: string;
   diasParaVencer?: number;
+  estaVigente?: boolean;
+  estadoVigencia?: number;
 }
 
 export interface Proveedor {
@@ -80,10 +83,16 @@ export interface CrearProveedorCommand {
   emailContactoProveedor?: string;
 }
 
-export interface ActualizarProveedorCommand extends CrearProveedorCommand {
+export interface ActualizarProveedorCommand {
   id: string;
-  estado: EstadoProveedor;
+  razonSocial: string;
+  telefono?: string;
+  emailContacto?: string;
+  direccion?: string;
+  estado?: EstadoProveedor;
 }
+
+
 
 // ─── TIPOS: ITEM ──────────────────────────────────────────────────────────────
 
@@ -91,49 +100,41 @@ export interface DocumentoRequerido {
   tipoDocumento: number;
   nombreTipo: string;
   obligatorio: boolean;
-}
-
-export interface Item {
-  id: string;
-  codigo: string;
-  nombre: string;
   descripcion?: string;
-  categoriaId: string;
-  categoriaNombre: string;
-  unidadMedida: string;
-  estado: EstadoItem;
-  requiereCadenaFrio: boolean;
-  temperaturaMinima?: number;
-  temperaturaMaxima?: number;
-  vidaUtilMinimaDias?: number;
-  documentosRequeridos: DocumentoRequerido[];
-  criteriosAceptacion?: string;
-  createdAt: string;
 }
 
 export interface ItemResumen {
   id: string;
+  categoriaId: string;
   codigo: string;
   nombre: string;
   categoriaNombre: string;
   unidadMedida: string;
-  estado: EstadoItem;
+  estado: boolean;
   requiereCadenaFrio: boolean;
   temperaturaMinima?: number;
   temperaturaMaxima?: number;
   totalLotesRecibidos: number;
 }
 
+export interface Item extends ItemResumen {
+  descripcion?: string;
+  categoriaId: string;
+  vidaUtilDias: number;
+  criteriosAceptacion?: string;
+  documentosRequeridos: DocumentoRequerido[];
+}
+
 export interface CrearItemCommand {
-  codigo: string;
+  codigoInterno: string;
   nombre: string;
   descripcion?: string;
   categoriaId: string;
   unidadMedida: string;
+  vidaUtilDias?: number;
   requiereCadenaFrio: boolean;
   temperaturaMinima?: number;
   temperaturaMaxima?: number;
-  vidaUtilMinimaDias?: number;
   criteriosAceptacion?: string;
 }
 
@@ -144,7 +145,11 @@ export interface Categoria {
   nombre: string;
   descripcion?: string;
   requiereCadenaFrio: boolean;
-  color: string;
+  requierePresenciaCalidad: boolean;
+  vidaUtilMinimaDias: number;
+  rangoTemperaturaMinima?: number;
+  rangoTemperaturaMaxima?: number;
+  color?: string; // opcional — asignado localmente en el frontend
 }
 
 // ─── TIPOS: CHECKLIST ─────────────────────────────────────────────────────────
@@ -187,7 +192,9 @@ export interface ChecklistResumen {
 
 export const proveedoresService = {
   async getAll(): Promise<ProveedorResumen[]> {
-    const { data } = await apiClient.get("/api/Proveedores");
+    const { data } = await apiClient.get("/api/Proveedores", {
+      params: { soloActivos: false }
+    });
     return data;
   },
   async getById(id: string): Promise<Proveedor> {
@@ -201,30 +208,49 @@ export const proveedoresService = {
   async actualizar(cmd: ActualizarProveedorCommand): Promise<void> {
     await apiClient.put(`/api/Proveedores/${cmd.id}`, cmd);
   },
-  async subirDocumento(id: string, tipo: string, archivo: File): Promise<void> {
+  async subirDocumento(
+    id: string,
+    tipoDocumento: string,
+    numeroDocumento: string,
+    fechaExpedicion: string,
+    fechaVencimiento: string,
+    archivo: File
+  ): Promise<void> {
     const form = new FormData();
-    form.append("Tipo", tipo);
+    form.append("TipoDocumento", tipoDocumento);       // número del enum ej: "3"
+    form.append("NumeroDocumento", numeroDocumento);
+    form.append("FechaExpedicion", fechaExpedicion);   // formato YYYY-MM-DD
+    form.append("FechaVencimiento", fechaVencimiento); // formato YYYY-MM-DD
     form.append("Archivo", archivo);
     await apiClient.post(`/api/Proveedores/${id}/documentos`, form, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
+  eliminarDocumentoSanitario: async (
+    proveedorId: string, 
+    documentoId: string
+  ): Promise<void> => {
+    if (isMock) return;
+    await apiClient.delete(
+      `/api/Proveedores/${proveedorId}/documentos/${documentoId}`
+    );
+  },
 };
 
 export const itemsService = {
   async getAll(): Promise<ItemResumen[]> {
-    const { data } = await apiClient.get("/api/Items");
-    return data;
+    const { data } = await apiClient.get("/api/Items", { params: { soloActivos: false } });
+    return data.map((i: any) => ({ ...i, codigo: i.codigoInterno }));
   },
   async getById(id: string): Promise<Item> {
     const { data } = await apiClient.get(`/api/Items/${id}`);
-    return data;
+    return { ...data, codigo: data.codigoInterno };
   },
   async crear(cmd: CrearItemCommand): Promise<{ id: string }> {
     const { data } = await apiClient.post("/api/Items", cmd);
     return data;
   },
-  async actualizar(id: string, cmd: Partial<CrearItemCommand> & { estado?: EstadoItem }): Promise<void> {
+  async actualizar(id: string, cmd: Partial<CrearItemCommand> & { estado?: boolean }): Promise<void> {
     await apiClient.put(`/api/Items/${id}`, cmd);
   },
 };

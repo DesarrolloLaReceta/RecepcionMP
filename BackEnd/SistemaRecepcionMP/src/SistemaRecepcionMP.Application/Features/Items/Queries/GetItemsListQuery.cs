@@ -25,7 +25,7 @@ public sealed class GetItemsListQueryHandler : IRequestHandler<GetItemsListQuery
         GetItemsListQuery request,
         CancellationToken cancellationToken)
     {
-        var items = await _unitOfWork.Items.GetAllAsync();
+        var items = await _unitOfWork.Items.GetAllConCategoriaAsync();
 
         if (request.SoloActivos)
             items = items.Where(i => i.Estado);

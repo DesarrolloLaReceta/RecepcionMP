@@ -1,10 +1,12 @@
 using SistemaRecepcionMP.Application.Features.Proveedores.Commands.ActualizarProveedor;
 using SistemaRecepcionMP.Application.Features.Proveedores.Commands.AgregarDocumentoSanitario;
 using SistemaRecepcionMP.Application.Features.Proveedores.Commands.CrearProveedor;
+using SistemaRecepcionMP.Application.Features.Proveedores.Commands.EliminarDocumentoSanitario;
 using SistemaRecepcionMP.Application.Features.Proveedores.Queries.GetDocumentosPorVencer;
 using SistemaRecepcionMP.Application.Features.Proveedores.Queries.GetProveedorById;
 using SistemaRecepcionMP.Application.Features.Proveedores.Queries.GetProveedoresList;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SistemaRecepcionMP.API.Models;
 
 namespace SistemaRecepcionMP.API.Controllers;
@@ -106,5 +108,15 @@ public sealed class ProveedoresController : BaseController
 
         var documentoId = await Mediator.Send(command, ct);
         return Created(string.Empty, new { id = documentoId });
+    }
+
+    [HttpDelete("{proveedorId:guid}/documentos/{documentoId:guid}")]
+    [Authorize(Roles = "Calidad,Administrador")]
+    public async Task<IActionResult> EliminarDocumento(
+        Guid proveedorId, Guid documentoId, CancellationToken ct)
+    {
+        await Mediator.Send(
+            new EliminarDocumentoSanitarioCommand(proveedorId, documentoId), ct);
+        return NoContent();
     }
 }

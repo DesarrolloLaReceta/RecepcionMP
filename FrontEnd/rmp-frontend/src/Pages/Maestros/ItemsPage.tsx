@@ -2,16 +2,43 @@ import { useState, useCallback, useEffect } from "react";
 import {
   itemsService, categoriasService,
   type ItemResumen, type Item, type Categoria,
-  type CrearItemCommand, EstadoItem,
+  type CrearItemCommand,
 } from "../../Services/maestros.service";
-import { StatusBadge, Button, Modal, ModalFooter } from "../../Components/UI/Index";
+import { Button, Modal, ModalFooter } from "../../Components/UI/Index";
 import { TextField, SelectField, NumberField, TextAreaField } from "../../Components/Forms/Index";
 import { formatTempRange } from "../../Utils/formatters";
 import { MOCK_ITEMS_LIST, MOCK_ITEM_DETALLE, MOCK_CATEGORIAS } from "./MockData";
 import "./StylesMaestros/MaestrosLayout.css";
 import "./StylesMaestros/ItemsPage.css";
 
-const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+const isMock = import.meta.env.VITE_USE_MOCK === "true";
+
+// ─── COLORES CATEGORÍA ────────────────────────────────────────────────────────
+
+const COLORES_CATEGORIA: Record<string, string> = {
+  "Cárnicos":        "#FCA5A5",
+  "Lácteos":         "#93C5FD",
+  "Secos":           "#FCD34D",
+  "Frutas/Verduras": "#86EFAC",
+  "Congelados":      "#C4B5FD",
+};
+
+// ─── TIPOS DE DOCUMENTO ───────────────────────────────────────────────────────
+
+const TIPO_DOCUMENTO_LABELS: Record<number, string> = {
+  0: "Factura",
+  1: "Orden de Compra",
+  2: "Certificado de Análisis (COA)",
+  3: "Registro INVIMA",
+  4: "Certificado de Transporte",
+  5: "Bitácora de Temperatura",
+  6: "Rotulado",
+  7: "Otro",
+};
+
+function colorCategoria(nombre: string): string {
+  return COLORES_CATEGORIA[nombre] ?? "#94A3B8";
+}
 
 // ─── FILA ÍTEM ────────────────────────────────────────────────────────────────
 
@@ -36,7 +63,9 @@ function ItemRow({
         <div className="it-row-info">
           <p className="it-nombre">{item.nombre}</p>
           <div className="it-meta">
-            <span className="it-cat">{item.categoriaNombre}</span>
+            <span className="it-cat" style={{ color: colorCategoria(item.categoriaNombre) }}>
+              {item.categoriaNombre}
+            </span>
             {item.requiereCadenaFrio && (
               <>
                 <svg className="it-frio-icon" width="10" height="10" viewBox="0 0 24 24"
@@ -52,7 +81,14 @@ function ItemRow({
             )}
           </div>
         </div>
-        <StatusBadge domain="item" value={item.estado} size="xs" />
+        <span style={{
+          fontSize: "0.65rem", padding: "0.2rem 0.5rem",
+          borderRadius: "9999px",
+          background: item.estado ? "rgba(134,239,172,0.15)" : "rgba(148,163,184,0.15)",
+          color: item.estado ? "#86EFAC" : "#94A3B8",
+        }}>
+          {item.estado ? "Activo" : "Inactivo"}
+        </span>
       </div>
     </div>
   );
@@ -61,12 +97,82 @@ function ItemRow({
 // ─── PANEL DETALLE ────────────────────────────────────────────────────────────
 
 function PanelDetalle({
-  item, onClose,
+  item, categorias, onClose, onActualizado,
 }: {
   item: Item;
+  categorias: Categoria[];
   onClose: () => void;
+  onActualizado: () => void;
 }) {
-  const [tab, setTab] = useState<"info" | "docs">("info");
+  const [tab, setTab]           = useState<"info" | "docs">("info");
+  const [editando, setEditando] = useState(false);
+  const [saving, setSaving]     = useState(false);
+
+  const [form, setForm] = useState({
+    codigoInterno:      item.codigo,
+    nombre:             item.nombre,
+    descripcion:        item.descripcion ?? "",
+    categoriaId:        item.categoriaId ?? "",
+    unidadMedida:       item.unidadMedida,
+    vidaUtilDias:       item.vidaUtilDias,
+    temperaturaMinima:  item.temperaturaMinima,
+    temperaturaMaxima:  item.temperaturaMaxima,
+    criteriosAceptacion:item.criteriosAceptacion ?? "",
+    requiereCadenaFrio: item.requiereCadenaFrio,
+    estado:             item.estado,
+  });
+
+  console.log("item.categoriaId:", item.categoriaId);
+
+  const upd = (k: keyof typeof form, v: unknown) =>
+    setForm(p => ({ ...p, [k]: v }));
+
+  const guardar = async () => {
+    setSaving(true);
+    try {
+      await itemsService.actualizar(item.id, {
+        codigoInterno:       form.codigoInterno,
+        categoriaId:         form.categoriaId,
+        nombre:              form.nombre,
+        descripcion:         form.descripcion || undefined,
+        unidadMedida:        form.unidadMedida,
+        vidaUtilDias:        form.vidaUtilDias,
+        temperaturaMinima:   form.requiereCadenaFrio ? form.temperaturaMinima : undefined,
+        temperaturaMaxima:   form.requiereCadenaFrio ? form.temperaturaMaxima : undefined,
+        criteriosAceptacion: form.criteriosAceptacion || undefined,
+        estado:              form.estado,
+      });
+      setEditando(false);
+      onActualizado();
+    } catch (error: any) {
+      alert(error.response?.data?.detail ?? "Error al guardar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleEstado = async () => {
+    setSaving(true);
+    try {
+      await itemsService.actualizar(item.id, {
+        codigoInterno:       form.codigoInterno,
+        categoriaId:         form.categoriaId,
+        nombre:              form.nombre,
+        descripcion:         form.descripcion || undefined,
+        unidadMedida:        form.unidadMedida,
+        vidaUtilDias:        form.vidaUtilDias,
+        temperaturaMinima:   form.requiereCadenaFrio ? form.temperaturaMinima : undefined,
+        temperaturaMaxima:   form.requiereCadenaFrio ? form.temperaturaMaxima : undefined,
+        criteriosAceptacion: form.criteriosAceptacion || undefined,
+        estado:              !item.estado,   // ← solo este cambia
+      });
+      onActualizado();
+    } catch (error: any) {
+      alert(error.response?.data?.detail ?? "Error al cambiar estado.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <>
@@ -76,8 +182,44 @@ function PanelDetalle({
           <p className="it-panel-nombre">{item.nombre}</p>
           <p className="it-panel-codigo">{item.codigo} · {item.categoriaNombre}</p>
           <div style={{ marginTop: "0.375rem" }}>
-            <StatusBadge domain="item" value={item.estado} size="sm" />
+            <span style={{
+              fontSize: "0.7rem", padding: "0.25rem 0.625rem",
+              borderRadius: "9999px",
+              background: item.estado ? "rgba(134,239,172,0.15)" : "rgba(148,163,184,0.15)",
+              color: item.estado ? "#86EFAC" : "#94A3B8",
+            }}>
+              {item.estado ? "Activo" : "Inactivo"}
+            </span>
           </div>
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          {!editando && (
+            <>
+              <button
+                onClick={() => setEditando(true)}
+                style={{ fontSize: "0.75rem", padding: "0.25rem 0.625rem", borderRadius: "6px",
+                        background: "var(--surface-2)", border: "1px solid var(--border)",
+                        color: "var(--text-secondary)", cursor: "pointer" }}
+              >
+                Editar
+              </button>
+              <button
+                onClick={toggleEstado}
+                disabled={saving}
+                style={{ fontSize: "0.75rem", padding: "0.25rem 0.625rem", borderRadius: "6px",
+                        background: item.estado ? "rgba(239,68,68,0.08)" : "rgba(134,239,172,0.08)",
+                        border: `1px solid ${item.estado ? "rgba(239,68,68,0.3)" : "rgba(134,239,172,0.3)"}`,
+                        color: item.estado ? "#FCA5A5" : "#86EFAC", cursor: "pointer" }}
+              >
+                {item.estado ? "Inactivar" : "Activar"}
+              </button>
+            </>
+          )}
+          <button className="it-panel-close" onClick={onClose} aria-label="Cerrar panel">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
         </div>
         <button className="it-panel-close" onClick={onClose} aria-label="Cerrar panel">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -90,7 +232,7 @@ function PanelDetalle({
       <div className="ms-tabs" style={{ marginTop: "0.75rem" }}>
         {([
           { key: "info", label: "Información" },
-          { key: "docs", label: `Docs requeridos (${item.documentosRequeridos.length})` },
+          { key: "docs", label: `Docs requeridos (${item.documentosRequeridos?.length ?? 0})` },
         ] as const).map(t => (
           <button key={t.key} className="ms-tab" data-active={tab === t.key}
             onClick={() => setTab(t.key)}>
@@ -100,68 +242,109 @@ function PanelDetalle({
       </div>
 
       <div className="ms-panel-body">
-        {tab === "info" && (
-          <>
-            <div className="ms-info-grid">
-              <div className="ms-info-card">
-                <p className="ms-info-label">Unidad de medida</p>
-                <p className="ms-info-value">{item.unidadMedida}</p>
-              </div>
-              <div className="ms-info-card">
-                <p className="ms-info-label">Vida útil mínima</p>
-                <p className="ms-info-value">
-                  {item.vidaUtilMinimaDias != null ? `${item.vidaUtilMinimaDias} días` : "—"}
-                </p>
-              </div>
-              {item.requiereCadenaFrio && (
-                <div className="ms-info-card" style={{ gridColumn: "1 / -1" }}>
-                  <p className="ms-info-label">Temperatura objetivo</p>
-                  <p className="ms-info-value" style={{ color: "#93C5FD", fontFamily: "var(--font-mono)" }}>
-                    {item.temperaturaMinima != null && item.temperaturaMaxima != null
-                      ? formatTempRange(item.temperaturaMinima, item.temperaturaMaxima)
-                      : "—"}
-                  </p>
-                </div>
-              )}
-              {item.descripcion && (
-                <div className="ms-info-card" style={{ gridColumn: "1 / -1" }}>
-                  <p className="ms-info-label">Descripción</p>
-                  <p className="ms-info-value">{item.descripcion}</p>
-                </div>
-              )}
+        {tab === "info" && editando && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+              <TextField label="Código interno" required
+                value={form.codigoInterno}
+                onChange={e => upd("codigoInterno", e.target.value)} />
+              <TextField label="Nombre" required
+                value={form.nombre}
+                onChange={e => upd("nombre", e.target.value)} />
             </div>
 
-            {item.criteriosAceptacion && (
-              <>
-                <p style={{ fontSize: "var(--text-xs)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-tertiary)" }}>
-                  Criterios de aceptación / rechazo
-                </p>
-                <div className="it-criterios-box">
-                  <p className="it-criterios-text">{item.criteriosAceptacion}</p>
-                </div>
-              </>
+            <div>
+              <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: "0.25rem" }}>
+                Categoría
+              </p>
+              <select value={form.categoriaId}
+                onChange={e => {
+                  const cat = categorias.find(c => c.id === e.target.value);
+                  upd("categoriaId", e.target.value);
+                  upd("requiereCadenaFrio", cat?.requiereCadenaFrio ?? false);
+                  if (!cat?.requiereCadenaFrio) {
+                    upd("temperaturaMinima", undefined);
+                    upd("temperaturaMaxima", undefined);
+                  }
+                }}
+                className="ms-select" style={{ width: "100%" }}>
+                {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+              </select>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+              <TextField label="Unidad de medida"
+                value={form.unidadMedida}
+                onChange={e => upd("unidadMedida", e.target.value)} />
+              <NumberField label="Vida útil (días)" min={1}
+                value={form.vidaUtilDias}
+                onChange={e => upd("vidaUtilDias", Number(e.target.value))} />
+            </div>
+
+            {form.requiereCadenaFrio && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                <NumberField label="T° mínima (°C)"
+                  value={form.temperaturaMinima ?? ""}
+                  onChange={e => upd("temperaturaMinima", e.target.value ? Number(e.target.value) : undefined)} />
+                <NumberField label="T° máxima (°C)"
+                  value={form.temperaturaMaxima ?? ""}
+                  onChange={e => upd("temperaturaMaxima", e.target.value ? Number(e.target.value) : undefined)} />
+              </div>
             )}
-          </>
+
+            <TextField label="Descripción"
+              value={form.descripcion}
+              onChange={e => upd("descripcion", e.target.value)} />
+
+            <TextAreaField label="Criterios de aceptación / rechazo" rows={3}
+              value={form.criteriosAceptacion}
+              onChange={e => upd("criteriosAceptacion", e.target.value)} />
+
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem" }}>
+              <button onClick={() => setEditando(false)}
+                style={{ flex: 1, padding: "0.5rem", borderRadius: "6px",
+                        background: "var(--surface-2)", border: "1px solid var(--border)",
+                        color: "var(--text-secondary)", cursor: "pointer", fontSize: "var(--text-sm)" }}>
+                Cancelar
+              </button>
+              <button onClick={guardar} disabled={saving || !form.nombre.trim() || !form.codigoInterno.trim()}
+                style={{ flex: 1, padding: "0.5rem", borderRadius: "6px",
+                        background: "var(--primary)", border: "none",
+                        color: "#fff", cursor: "pointer", fontSize: "var(--text-sm)",
+                        opacity: saving ? 0.7 : 1 }}>
+                {saving ? "Guardando…" : "Guardar"}
+              </button>
+            </div>
+          </div>
         )}
 
         {tab === "docs" && (
           <>
-            {item.documentosRequeridos.length === 0 ? (
+            {(item.documentosRequeridos?.length ?? 0) === 0 ? (
               <p style={{ fontSize: "var(--text-md)", color: "var(--text-tertiary)" }}>Sin documentos configurados.</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column" }}>
-                {item.documentosRequeridos.map(doc => (
+                {item.documentosRequeridos?.map(doc => (
                   <div key={doc.tipoDocumento} className="it-doc-row">
                     <span
                       className="it-doc-dot"
                       style={{ background: doc.obligatorio ? "#F59E0B" : "#334155" }}
                     />
-                    <span className="it-doc-nombre">{doc.nombreTipo}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <span className="it-doc-nombre">
+                        {TIPO_DOCUMENTO_LABELS[doc.tipoDocumento] ?? `Tipo ${doc.tipoDocumento}`}
+                      </span>
+                      {doc.descripcion && (
+                        <p style={{ fontSize: "0.68rem", color: "var(--text-muted)", margin: "0.1rem 0 0" }}>
+                          {doc.descripcion}
+                        </p>
+                      )}
+                    </div>
                     <span
                       className="it-doc-badge"
                       style={{
                         background: doc.obligatorio ? "rgba(245,158,11,0.08)" : "rgba(255,255,255,0.03)",
-                        color: doc.obligatorio ? "#F59E0B" : "#334155",
+                        color: doc.obligatorio ? "#F59E0B" : "#475569",
                       }}
                     >
                       {doc.obligatorio ? "Obligatorio" : "Opcional"}
@@ -192,27 +375,36 @@ function ModalNuevoItem({
   const [saving, setSaving] = useState(false);
   const upd = (k: keyof CrearItemCommand, v: unknown) =>
     setForm(p => ({ ...p, [k]: v }));
-  const valid = form.codigo?.trim() && form.nombre?.trim() && form.categoriaId;
+  const valid = form.codigoInterno?.trim() && form.nombre?.trim() && form.categoriaId;
 
   const crear = async () => {
     if (!valid) return;
     setSaving(true);
     try {
-      if (!isMock) await itemsService.crear(form as CrearItemCommand);
-      else await new Promise(r => setTimeout(r, 700));
       const cat = categorias.find(c => c.id === form.categoriaId);
+      
+      let realId = `item-${Date.now()}`;
+      if (!isMock) {
+        const result = await itemsService.crear(form as CrearItemCommand);
+        realId = result.id;
+      } else {
+        await new Promise(r => setTimeout(r, 700));
+      }
+
       onCreado({
-        id: `item-${Date.now()}`,
-        codigo: form.codigo!,
+        id: realId,
+        codigo: form.codigoInterno!,
         nombre: form.nombre!,
         categoriaNombre: cat?.nombre ?? "",
         unidadMedida: form.unidadMedida ?? "Kg",
-        estado: EstadoItem.Activo,
+        estado: true,
         requiereCadenaFrio: form.requiereCadenaFrio ?? false,
         temperaturaMinima: form.temperaturaMinima,
         temperaturaMaxima: form.temperaturaMaxima,
         totalLotesRecibidos: 0,
       });
+    } catch (error: any) {
+      console.log("Errores:", JSON.stringify(error.response?.data, null, 2));
     } finally {
       setSaving(false);
     }
@@ -243,8 +435,8 @@ function ModalNuevoItem({
           label="Código"
           required
           placeholder="CAR-001"
-          value={form.codigo ?? ""}
-          onChange={e => upd("codigo", e.target.value)}
+          value={form.codigoInterno ?? ""}
+          onChange={e => upd("codigoInterno", e.target.value)}
         />
         <TextField
           label="Nombre"
@@ -259,8 +451,34 @@ function ModalNuevoItem({
           placeholder="Selecciona categoría"
           options={catOptions}
           value={form.categoriaId ?? ""}
-          onChange={e => upd("categoriaId", e.target.value)}
+          onChange={e => {
+            const cat = categorias.find(c => c.id === e.target.value);
+            upd("categoriaId", e.target.value);
+            upd("requiereCadenaFrio", cat?.requiereCadenaFrio ?? false);
+            upd("vidaUtilDias", cat?.vidaUtilMinimaDias ?? undefined);
+            // Si la categoría no requiere frío, limpia las temperaturas
+            if (!cat?.requiereCadenaFrio) {
+              upd("temperaturaMinima", undefined);
+              upd("temperaturaMaxima", undefined);
+            } else {
+              // Pre-rellena con el rango de la categoría si está disponible
+              upd("temperaturaMinima", cat.rangoTemperaturaMinima ?? undefined);
+              upd("temperaturaMaxima", cat.rangoTemperaturaMaxima ?? undefined);
+            }
+          }}
         />
+        {form.categoriaId && (
+          <span style={{
+            display: "inline-block",
+            width: "8px", height: "8px",
+            borderRadius: "50%",
+            marginTop: "1.25rem", // compensa la altura del label
+            background: colorCategoria(
+              categorias.find(c => c.id === form.categoriaId)?.nombre ?? ""
+            ),
+            flexShrink: 0,
+          }} />
+        )}
         <SelectField
           label="Unidad de medida"
           options={umOptions}
@@ -271,8 +489,8 @@ function ModalNuevoItem({
           label="Vida útil mínima (días)"
           placeholder="7"
           min={1}
-          value={form.vidaUtilMinimaDias ?? ""}
-          onChange={e => upd("vidaUtilMinimaDias", e.target.value ? Number(e.target.value) : undefined)}
+          value={form.vidaUtilDias ?? ""}
+          onChange={e => upd("vidaUtilDias", e.target.value ? Number(e.target.value) : undefined)}
         />
         {/* Toggle cadena de frío */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
@@ -382,7 +600,8 @@ export default function ItemsPage() {
     const q = search.toLowerCase();
     return (
       (filtroCategoria === "" || item.categoriaNombre === filtroCategoria) &&
-      (filtroFrio === "" || (filtroFrio === "si" ? item.requiereCadenaFrio : !item.requiereCadenaFrio)) &&
+      (filtroFrio === "" || 
+        (filtroFrio === "si" ? item.requiereCadenaFrio === true : item.requiereCadenaFrio === false)) &&
       (!q || item.nombre.toLowerCase().includes(q) || item.codigo.toLowerCase().includes(q))
     );
   });
@@ -415,9 +634,9 @@ export default function ItemsPage() {
       <div className="ms-kpi-grid">
         {[
           { label: "Total",         value: lista.length,                                            color: "#CBD5E1" },
-          { label: "Activos",       value: lista.filter(i => i.estado === EstadoItem.Activo).length, color: "#86EFAC" },
+          { label: "Activos",   value: lista.filter(i => i.estado === true).length,  color: "#86EFAC" },
           { label: "Cadena de frío",value: lista.filter(i => i.requiereCadenaFrio).length,           color: "#93C5FD" },
-          { label: "Inactivos",     value: lista.filter(i => i.estado !== EstadoItem.Activo).length, color: "#94A3B8" },
+          { label: "Inactivos", value: lista.filter(i => i.estado === false).length, color: "#94A3B8" },
         ].map(k => (
           <div key={k.label} className="ms-kpi-card">
             <p className="ms-kpi-label">{k.label}</p>
@@ -493,7 +712,20 @@ export default function ItemsPage() {
                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             ) : detalle ? (
-              <PanelDetalle item={detalle} onClose={() => setSelectedId(null)} />
+              <PanelDetalle
+                item={detalle}
+                categorias={categorias}
+                onClose={() => setSelectedId(null)}
+                onActualizado={() => {
+                  cargar();
+                  if (selectedId) {
+                    setLoadingDet(true);
+                    itemsService.getById(selectedId)
+                      .then(d => setDetalle(d))
+                      .finally(() => setLoadingDet(false));
+                  }
+                }}
+              />
             ) : null}
           </div>
         )}

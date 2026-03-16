@@ -81,6 +81,8 @@ public sealed class MappingProfile : Profile
         CreateMap<Item, ItemResumenDto>()
             .ForMember(dest => dest.CategoriaNombre,
                 opt => opt.MapFrom(src => src.Categoria.Nombre))
+            .ForMember(dest => dest.RequiereCadenaFrio,
+                opt => opt.MapFrom(src => src.Categoria.RequiereCadenaFrio))
             .ForMember(dest => dest.TemperaturaMinima,
                 opt => opt.MapFrom(src => src.RangoTemperatura != null
                     ? src.RangoTemperatura.Minima
@@ -91,9 +93,14 @@ public sealed class MappingProfile : Profile
                     : (decimal?)null));
 
         CreateMap<Item, ItemDetalleDto>()
-            .IncludeBase<Item, ItemResumenDto>();
+            .IncludeBase<Item, ItemResumenDto>()
+            .ForMember(dest => dest.DocumentosRequeridos,
+                opt => opt.MapFrom(src => src.Categoria.DocumentosExigidos));
 
-        CreateMap<TipoDocumentoExigidoCategoria, TipoDocumentoExigidoDto>();
+        CreateMap<TipoDocumentoExigidoCategoria, TipoDocumentoExigidoDto>()
+            .ForMember(dest => dest.TipoDocumento, opt => opt.MapFrom(src => src.TipoDocumento))
+            .ForMember(dest => dest.EsObligatorio, opt => opt.MapFrom(src => src.EsObligatorio))
+            .ForMember(dest => dest.Descripcion, opt => opt.MapFrom(src => src.Descripcion));
     }
 
     // ─────────────────────────────────────────────────────────────────

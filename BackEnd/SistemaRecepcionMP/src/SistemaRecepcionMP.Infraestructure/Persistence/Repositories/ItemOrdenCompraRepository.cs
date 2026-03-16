@@ -30,7 +30,24 @@ public sealed class ItemRepository : GenericRepository<Item>, IItemRepository
     public override async Task<Item?> GetByIdAsync(Guid id)
         => await DbSet
             .Include(i => i.Categoria)
+                .ThenInclude(c => c.DocumentosExigidos)
             .FirstOrDefaultAsync(i => i.Id == id);
+    
+    public async Task<IEnumerable<Item>> GetAllConCategoriaAsync()
+        => await DbSet
+            .AsNoTracking()
+            .Include(i => i.Categoria)
+                .ThenInclude(c => c.DocumentosExigidos)
+            .OrderBy(i => i.Nombre)
+            .ToListAsync();
+
+    public async Task<IEnumerable<CategoriaItem>> GetCategoriasAsync()
+    {
+        return await Context.Set<CategoriaItem>()
+            .AsNoTracking()
+            .OrderBy(c => c.Nombre)
+            .ToListAsync();
+    }
 }
 
 public sealed class OrdenCompraRepository : GenericRepository<OrdenCompra>, IOrdenCompraRepository
