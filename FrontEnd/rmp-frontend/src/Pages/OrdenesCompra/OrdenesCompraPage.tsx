@@ -28,9 +28,7 @@ const ESTADO_CFG: Record<EstadoOC, { color: string; bg: string; dot: string }> =
   [EstadoOC.Abierta]:              { color: "#86EFAC", bg: "rgba(34,197,94,0.08)",   dot: "#22C55E" },
   [EstadoOC.ParcialmenteRecibida]: { color: "#FCD34D", bg: "rgba(245,158,11,0.08)",  dot: "#F59E0B" },
   [EstadoOC.TotalmenteRecibida]:   { color: "#93C5FD", bg: "rgba(59,130,246,0.08)",  dot: "#3B82F6" },
-  [EstadoOC.Cerrada]:              { color: "#94A3B8", bg: "rgba(100,116,139,0.08)", dot: "#64748B" },
   [EstadoOC.Cancelada]:            { color: "#94A3B8", bg: "rgba(100,116,139,0.06)", dot: "#475569" },
-  [EstadoOC.Vencida]:              { color: "#FCA5A5", bg: "rgba(239,68,68,0.08)",   dot: "#EF4444" },
 };
 
 // badge estado
@@ -378,7 +376,7 @@ export default function OrdenesCompraPage() {
   const abiertas    = lista.filter(o => o.estado === EstadoOC.Abierta).length;
   const parciales   = lista.filter(o => o.estado === EstadoOC.ParcialmenteRecibida).length;
   const vencidasCnt = lista.filter(o =>
-    isVencida(o.fechaVencimiento) && o.estado !== EstadoOC.Cerrada && o.estado !== EstadoOC.Cancelada && o.estado !== EstadoOC.TotalmenteRecibida
+    isVencida(o.fechaVencimiento) && o.estado !== EstadoOC.Cancelada && o.estado !== EstadoOC.TotalmenteRecibida
   ).length;
 
   const selectedOC = lista.find(o => o.id === selectedId) ?? null;

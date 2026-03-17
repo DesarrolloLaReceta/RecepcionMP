@@ -22,9 +22,7 @@ const ESTADO_CFG: Record<EstadoOC, { color: string; bg: string; dot: string }> =
   [EstadoOC.Abierta]:              { color: "#86EFAC", bg: "rgba(34,197,94,0.08)",   dot: "#22C55E" },
   [EstadoOC.ParcialmenteRecibida]: { color: "#FCD34D", bg: "rgba(245,158,11,0.08)",  dot: "#F59E0B" },
   [EstadoOC.TotalmenteRecibida]:   { color: "#93C5FD", bg: "rgba(59,130,246,0.08)",  dot: "#3B82F6" },
-  [EstadoOC.Cerrada]:              { color: "#94A3B8", bg: "rgba(100,116,139,0.08)", dot: "#64748B" },
   [EstadoOC.Cancelada]:            { color: "#94A3B8", bg: "rgba(100,116,139,0.06)", dot: "#475569" },
-  [EstadoOC.Vencida]:              { color: "#FCA5A5", bg: "rgba(239,68,68,0.08)",   dot: "#EF4444" },
 };
 
 // ── badge estado
@@ -115,7 +113,7 @@ export default function DetalleOCPage() {
   );
 
   // datos derivados
-  const cerrada      = oc.estado === EstadoOC.Cerrada || oc.estado === EstadoOC.Cancelada;
+  const cancelada = oc.estado === EstadoOC.Cancelada || oc.estado === EstadoOC.TotalmenteRecibida;
   const vencida      = isVencida(oc.fechaVencimiento);
   const totalSolicitado = oc.detalles.reduce((s, d) => s + d.cantidadSolicitada, 0);
   const totalRecibido   = oc.detalles.reduce((s, d) => s + d.cantidadRecibida,   0);
@@ -146,7 +144,10 @@ export default function DetalleOCPage() {
       setOc(prev => prev ? { ...prev, estado: EstadoOC.Cancelada } : prev);
       setShowCancelar(false);
       setMotivo("");
-    } finally { setSaving(false); }
+    }  catch (err: any) {
+  console.log("Error cancelar:", JSON.stringify(err.response?.data, null, 2));
+}
+    finally { setSaving(false); }
   };
 
   const handleEliminar = async () => {
@@ -183,7 +184,7 @@ export default function DetalleOCPage() {
         </div>
         <div className="ocd-header-actions">
           <EstadoBadge estado={oc.estado} />
-          {!cerrada && (
+          {!cancelada && (
             <>
               <Button variant="ghost" size="sm"
                 onClick={() => {
@@ -208,7 +209,7 @@ export default function DetalleOCPage() {
               Eliminar
             </Button>
           )}
-          {!cerrada && (
+          {!cancelada && (
             <Button variant="primary" size="sm"
               onClick={() => navigate(`/recepciones/nueva?ocId=${oc.id}`)}
               iconLeft="M12 5v14M5 12h14">
@@ -357,7 +358,7 @@ export default function DetalleOCPage() {
                     <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 000 4h6a2 2 0 000-4M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                   <p className="ocd-tab-empty-text">Sin recepciones registradas para esta OC.</p>
-                  {!cerrada && (
+                  {!cancelada && (
                     <Button variant="secondary" size="sm"
                       onClick={() => navigate(`/recepciones/nueva?ocId=${oc.id}`)}
                       iconLeft="M12 5v14M5 12h14">
