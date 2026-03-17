@@ -110,19 +110,40 @@ public sealed class MappingProfile : Profile
     {
         CreateMap<OrdenCompra, OrdenCompraResumenDto>()
             .ForMember(dest => dest.ProveedorNombre,
-                opt => opt.MapFrom(src => src.Proveedor.RazonSocial));
+                opt => opt.MapFrom(src => src.Proveedor.RazonSocial))
+            .ForMember(dest => dest.ProveedorNit,
+                opt => opt.MapFrom(src => src.Proveedor.Nit))
+            .ForMember(dest => dest.TotalItems,
+                opt => opt.MapFrom(src => src.Detalles.Count))
+            .ForMember(dest => dest.ValorTotal,
+                opt => opt.MapFrom(src => src.Detalles.Sum(d => d.CantidadSolicitada * d.PrecioUnitario)))
+            .ForMember(dest => dest.RequiereCadenaFrio,
+                opt => opt.MapFrom(src => src.Detalles.Any(d => d.Item.Categoria.RequiereCadenaFrio)))
+            .ForMember(dest => dest.Detalles,
+                opt => opt.MapFrom(src => src.Detalles));
 
         CreateMap<OrdenCompra, OrdenCompraDetalleDto>()
             .IncludeBase<OrdenCompra, OrdenCompraResumenDto>();
-
+        
         CreateMap<DetalleOrdenCompra, DetalleOrdenCompraDto>()
             .ForMember(dest => dest.ItemNombre,
                 opt => opt.MapFrom(src => src.Item.Nombre))
             .ForMember(dest => dest.ItemCodigo,
                 opt => opt.MapFrom(src => src.Item.CodigoInterno))
+            .ForMember(dest => dest.CategoriaNombre,
+                opt => opt.MapFrom(src => src.Item.Categoria.Nombre))
+            .ForMember(dest => dest.RequiereCadenaFrio,
+                opt => opt.MapFrom(src => src.Item.Categoria.RequiereCadenaFrio))
+            .ForMember(dest => dest.TemperaturaMinima,
+                opt => opt.MapFrom(src => src.Item.RangoTemperatura != null
+                    ? src.Item.RangoTemperatura.Minima : (decimal?)null))
+            .ForMember(dest => dest.TemperaturaMaxima,
+                opt => opt.MapFrom(src => src.Item.RangoTemperatura != null
+                    ? src.Item.RangoTemperatura.Maxima : (decimal?)null))
+            .ForMember(dest => dest.Subtotal,
+                opt => opt.MapFrom(src => src.CantidadSolicitada * src.PrecioUnitario))
             .ForMember(dest => dest.CantidadPendiente,
-                opt => opt.MapFrom(src =>
-                    src.CantidadSolicitada - src.CantidadRecibida - src.CantidadRechazada));
+                opt => opt.MapFrom(src => src.CantidadSolicitada - src.CantidadRecibida - src.CantidadRechazada));
     }
 
     // ─────────────────────────────────────────────────────────────────

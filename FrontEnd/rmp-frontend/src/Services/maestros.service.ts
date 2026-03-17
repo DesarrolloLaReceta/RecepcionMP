@@ -191,9 +191,9 @@ export interface ChecklistResumen {
 // ─── SERVICIOS ────────────────────────────────────────────────────────────────
 
 export const proveedoresService = {
-  async getAll(): Promise<ProveedorResumen[]> {
+  async getAll(params?: { soloActivos?: boolean }): Promise<ProveedorResumen[]> {
     const { data } = await apiClient.get("/api/Proveedores", {
-      params: { soloActivos: false }
+      params: { soloActivos: params?.soloActivos ?? false }
     });
     return data;
   },
@@ -238,8 +238,10 @@ export const proveedoresService = {
 };
 
 export const itemsService = {
-  async getAll(): Promise<ItemResumen[]> {
-    const { data } = await apiClient.get("/api/Items", { params: { soloActivos: false } });
+  async getAll(params?: { soloActivos?: boolean }): Promise<ItemResumen[]> {
+    const { data } = await apiClient.get("/api/Items", { 
+      params: { soloActivos: params?.soloActivos ?? false }
+    });
     return data.map((i: any) => ({ ...i, codigo: i.codigoInterno }));
   },
   async getById(id: string): Promise<Item> {

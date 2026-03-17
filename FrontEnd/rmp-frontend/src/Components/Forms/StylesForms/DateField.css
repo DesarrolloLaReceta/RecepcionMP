@@ -10,6 +10,7 @@
 */
 .field-date {
   color-scheme: dark;
+  color: var(--text-primary);
 }
 
 
@@ -33,4 +34,17 @@
   font-size:   var(--text-xs);    /* 10px */
   font-family: var(--font-mono);
   /* color llega inline — dinámico */
+}
+
+.field-date::-webkit-calendar-picker-indicator {
+  position:   absolute;
+  top:        0;
+  left:       0;
+  right:      0;
+  bottom:     0;
+  width:      auto;
+  height:     auto;
+  color:      transparent;
+  background: transparent;
+  cursor:     pointer;
 }

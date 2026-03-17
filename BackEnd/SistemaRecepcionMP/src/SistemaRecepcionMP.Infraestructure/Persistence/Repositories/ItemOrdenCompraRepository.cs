@@ -1,6 +1,7 @@
 using SistemaRecepcionMP.Domain.Entities;
 using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using SistemaRecepcionMP.Domain.Enums;
 
 namespace SistemaRecepcionMP.Infraestructure.Persistence.Repositories;
 
@@ -79,6 +80,31 @@ public sealed class OrdenCompraRepository : GenericRepository<OrdenCompra>, IOrd
     public override async Task<OrdenCompra?> GetByIdAsync(Guid id)
         => await DbSet
             .Include(o => o.Proveedor)
-            .Include(o => o.Detalles).ThenInclude(d => d.Item)
+            .Include(o => o.Detalles)
+                .ThenInclude(d => d.Item)
+                .ThenInclude(i => i.Categoria)
             .FirstOrDefaultAsync(o => o.Id == id);
+    
+    public async Task<IEnumerable<OrdenCompra>> GetAllConDetallesAsync(
+        EstadoOrdenCompra? estado = null,
+        Guid? proveedorId = null)
+    {
+        var query = DbSet
+            .AsNoTracking()
+            .Include(o => o.Proveedor)
+            .Include(o => o.Detalles)
+                .ThenInclude(d => d.Item)
+                    .ThenInclude(i => i.Categoria)
+            .AsQueryable();
+
+        if (estado.HasValue)
+            query = query.Where(o => o.Estado == estado.Value);
+
+        if (proveedorId.HasValue)
+            query = query.Where(o => o.ProveedorId == proveedorId.Value);
+
+        return await query
+            .OrderByDescending(o => o.FechaEmision)
+            .ToListAsync();
+    }
 }

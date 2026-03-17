@@ -80,11 +80,14 @@ export interface CrearOCDetalleCommand {
   itemId: string;
   cantidadSolicitada: number;
   precioUnitario: number;
+  unidadMedida: string;
 }
 
 export interface CrearOCCommand {
+  numeroOC: string;
   proveedorId: string;
   fechaEntregaEsperada?: string;
+  fechaEmision?: string;
   notas?: string;
   detalles: CrearOCDetalleCommand[];
 }
@@ -99,7 +102,7 @@ export interface ActualizarOCCommand {
 export const ordenesCompraService = {
   /** Lista completa con filtros — rol Compras / Administrador */
   async getAll(filter?: OrdenesCompraFilter): Promise<OrdenCompraResumen[]> {
-    const { data } = await apiClient.get("/api/OrdenesCompra", {
+    const { data } = await apiClient.get("/api/OrdenesCompra/todas", {
       params: filter ?? {},
     });
     return data;

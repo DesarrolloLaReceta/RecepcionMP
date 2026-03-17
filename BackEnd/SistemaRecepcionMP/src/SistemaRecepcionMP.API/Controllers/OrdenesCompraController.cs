@@ -25,6 +25,19 @@ public sealed class OrdenesCompraController : BaseController
         return Ok(result);
     }
 
+    /// <summary>Lista todas las órdenes de compra, con filtro opcional de estado y proveedor.</summary>
+    [HttpGet("todas")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll(
+        [FromQuery] EstadoOrdenCompra? estado = null,
+        [FromQuery] Guid? proveedorId = null,
+        CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(
+            new GetOrdenesCompraListQuery { Estado = estado, ProveedorId = proveedorId }, ct);
+        return Ok(result);
+    }
+
     /// <summary>Obtiene una orden de compra con sus detalles de ítems.</summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]

@@ -14,19 +14,10 @@ const COP_FMT = new Intl.NumberFormat("es-CO", {
   maximumFractionDigits: 0,
 });
 
-/**
- * Formatea un número como pesos colombianos.
- * @example formatCOP(1250000) → "$ 1.250.000"
- */
 export function formatCOP(valor: number): string {
   return COP_FMT.format(valor);
 }
 
-/**
- * Formatea solo el número con separadores de miles (sin símbolo).
- * @example formatNumber(1250000) → "1.250.000"
- * @example formatNumber(3.14159, 2) → "3,14"
- */
 export function formatNumber(valor: number, decimales = 0): string {
   return new Intl.NumberFormat("es-CO", {
     minimumFractionDigits: decimales,
@@ -36,6 +27,11 @@ export function formatNumber(valor: number, decimales = 0): string {
 
 // ─── FECHAS ────────────────────────────────────────────────────────────────────
 
+/** Parsea un ISO string forzando hora local para fechas sin hora (YYYY-MM-DD). */
+function parseLocalDate(isoString: string): Date {
+  return new Date(isoString.length === 10 ? isoString + "T00:00:00" : isoString);
+}
+
 /**
  * Fecha corta: día + mes abreviado + año.
  * @example formatDate("2026-02-26") → "26 feb 2026"
@@ -44,7 +40,7 @@ export function formatNumber(valor: number, decimales = 0): string {
 export function formatDate(isoString?: string | null): string {
   if (!isoString) return "—";
   try {
-    return new Date(isoString).toLocaleDateString("es-CO", {
+    return parseLocalDate(isoString).toLocaleDateString("es-CO", {
       day:   "2-digit",
       month: "short",
       year:  "numeric",
@@ -80,7 +76,7 @@ export function formatDateTime(isoString?: string | null): string {
 export function formatDateLong(isoString?: string | null): string {
   if (!isoString) return "—";
   try {
-    return new Date(isoString).toLocaleDateString("es-CO", {
+    return parseLocalDate(isoString).toLocaleDateString("es-CO", {
       weekday: "long",
       day:     "numeric",
       month:   "long",
@@ -100,7 +96,7 @@ export function formatDateLong(isoString?: string | null): string {
 export function formatDaysFromNow(isoString?: string | null): string {
   if (!isoString) return "—";
   const hoy  = new Date(); hoy.setHours(0, 0, 0, 0);
-  const dest = new Date(isoString); dest.setHours(0, 0, 0, 0);
+  const dest = parseLocalDate(isoString); dest.setHours(0, 0, 0, 0);
   const dias = Math.round((dest.getTime() - hoy.getTime()) / 86_400_000);
   if (dias === 0)  return "hoy";
   if (dias === 1)  return "mañana";
@@ -111,22 +107,12 @@ export function formatDaysFromNow(isoString?: string | null): string {
 
 // ─── PORCENTAJE ────────────────────────────────────────────────────────────────
 
-/**
- * Porcentaje con decimales opcionales.
- * @example formatPercent(87.2)   → "87,2 %"
- * @example formatPercent(100, 0) → "100 %"
- */
 export function formatPercent(valor: number, decimales = 1): string {
   return `${formatNumber(valor, decimales)} %`;
 }
 
 // ─── CANTIDAD + UNIDAD ─────────────────────────────────────────────────────────
 
-/**
- * Cantidad con su unidad de medida.
- * @example formatQuantity(500, "Kg")  → "500 Kg"
- * @example formatQuantity(1.5, "L")   → "1,5 L"
- */
 export function formatQuantity(cantidad: number, unidad: string): string {
   const decimales = Number.isInteger(cantidad) ? 0 : 2;
   return `${formatNumber(cantidad, decimales)} ${unidad}`;
@@ -134,20 +120,11 @@ export function formatQuantity(cantidad: number, unidad: string): string {
 
 // ─── TEMPERATURA ───────────────────────────────────────────────────────────────
 
-/**
- * Temperatura con unidad.
- * @example formatTemp(3.5) → "3,5 °C"
- * @example formatTemp(undefined) → "—"
- */
 export function formatTemp(valor?: number | null): string {
   if (valor === undefined || valor === null) return "—";
   return `${formatNumber(valor, 1)} °C`;
 }
 
-/**
- * Rango de temperaturas.
- * @example formatTempRange(0, 4) → "0 °C – 4 °C"
- */
 export function formatTempRange(min?: number | null, max?: number | null): string {
   if (min === undefined && max === undefined) return "—";
   return `${min ?? "?"} °C – ${max ?? "?"} °C`;
@@ -155,39 +132,22 @@ export function formatTempRange(min?: number | null, max?: number | null): strin
 
 // ─── TEXTO ─────────────────────────────────────────────────────────────────────
 
-/**
- * Trunca texto largo con elipsis al final.
- * @example truncate("Lorem ipsum dolor sit amet", 20) → "Lorem ipsum dolor si…"
- */
 export function truncate(texto: string, max: number): string {
   if (texto.length <= max) return texto;
   return texto.slice(0, max - 1) + "…";
 }
 
-/**
- * Primera letra en mayúscula, el resto sin cambiar.
- * @example capitalize("harina de trigo") → "Harina de trigo"
- */
 export function capitalize(texto: string): string {
   if (!texto) return "";
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
-/**
- * Convierte un número de lote interno al formato de pantalla.
- * @example formatLoteId("L-2026-0048-01") → "L-2026-0048-01"  (ya correcto)
- */
 export function formatLoteId(id: string): string {
   return id.toUpperCase();
 }
 
 // ─── DURACIÓN ─────────────────────────────────────────────────────────────────
 
-/**
- * Formatea minutos en "X h Y min" o solo "Y min".
- * @example formatDuration(90)  → "1 h 30 min"
- * @example formatDuration(45)  → "45 min"
- */
 export function formatDuration(minutos: number): string {
   if (minutos < 60) return `${minutos} min`;
   const h   = Math.floor(minutos / 60);
@@ -197,13 +157,9 @@ export function formatDuration(minutos: number): string {
 
 // ─── URGENCIA DE VENCIMIENTO ──────────────────────────────────────────────────
 
-/**
- * Color semántico según días restantes para un vencimiento.
- * Devuelve tokens del design system del proyecto.
- */
 export function vencimientoColor(dias: number): { text: string; dot: string } {
-  if (dias < 0)   return { text: "#FCA5A5", dot: "#EF4444" }; // vencido
-  if (dias <= 7)  return { text: "#FCA5A5", dot: "#EF4444" }; // crítico
-  if (dias <= 30) return { text: "#FCD34D", dot: "#F59E0B" }; // advertencia
-  return              { text: "#86EFAC", dot: "#22C55E" };    // ok
+  if (dias < 0)   return { text: "#FCA5A5", dot: "#EF4444" };
+  if (dias <= 7)  return { text: "#FCA5A5", dot: "#EF4444" };
+  if (dias <= 30) return { text: "#FCD34D", dot: "#F59E0B" };
+  return              { text: "#86EFAC", dot: "#22C55E" };
 }
