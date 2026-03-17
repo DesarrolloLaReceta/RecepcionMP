@@ -1,3 +1,4 @@
+import type { EstadoRecepcion } from "../Types/api";
 import { apiClient } from "./apiClient";
 
 // ─── ENUMS ────────────────────────────────────────────────────────────────────
@@ -57,11 +58,16 @@ export interface OrdenCompraResumen {
 }
 
 export interface OrdenCompra extends OrdenCompraResumen {
-  notas?: string;
-  creadoPor: string;
+  observaciones?: string;
+  creadoPorNombre: string;
   aprobadoPor?: string;
-  fechaAprobacion?: string;
-  recepciones: { id: string; numeroRecepcion: string; fecha: string }[];
+  creadoEn: string;
+  recepciones: {
+    id: string;
+    numeroRecepcion: string;
+    fechaRecepcion: string;
+    estado: EstadoRecepcion;
+  }[];
 }
 
 // ─── FILTROS ──────────────────────────────────────────────────────────────────
@@ -126,7 +132,7 @@ export const ordenesCompraService = {
     return data;
   },
 
-  async actualizar(id: string, cmd: ActualizarOCCommand): Promise<void> {
+  async actualizar(id: string, cmd: { fechaEntregaEsperada?: string; observaciones?: string }): Promise<void> {
     await apiClient.put(`/api/OrdenesCompra/${id}`, cmd);
   },
 
@@ -135,10 +141,17 @@ export const ordenesCompraService = {
   },
 
   async cancelar(id: string, motivo: string): Promise<void> {
-    await apiClient.post(`/api/OrdenesCompra/${id}/cancelar`, { motivo });
+    await apiClient.patch(`/api/OrdenesCompra/${id}/estado`, {
+      nuevoEstado: 4,  // EstadoOC.Cancelada
+      motivo,
+    });
   },
 
   async cerrar(id: string): Promise<void> {
     await apiClient.post(`/api/OrdenesCompra/${id}/cerrar`);
+  },
+
+  async eliminar(id: string): Promise<void> {
+    await apiClient.delete(`/api/OrdenesCompra/${id}`);
   },
 };

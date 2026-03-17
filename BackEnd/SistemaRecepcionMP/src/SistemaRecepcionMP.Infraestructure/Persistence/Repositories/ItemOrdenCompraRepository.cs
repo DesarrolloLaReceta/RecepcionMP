@@ -80,6 +80,8 @@ public sealed class OrdenCompraRepository : GenericRepository<OrdenCompra>, IOrd
     public override async Task<OrdenCompra?> GetByIdAsync(Guid id)
         => await DbSet
             .Include(o => o.Proveedor)
+            .Include(o => o.UsuarioCreador)
+            .Include(o => o.Recepciones)
             .Include(o => o.Detalles)
                 .ThenInclude(d => d.Item)
                 .ThenInclude(i => i.Categoria)

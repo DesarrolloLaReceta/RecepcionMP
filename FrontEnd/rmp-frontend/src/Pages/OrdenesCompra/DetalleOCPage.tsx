@@ -6,11 +6,13 @@ import {
   EstadoOC, EstadoOCLabels,
 } from "../../Services/ordenes-compra.service";
 import { Button } from "../../Components/UI/Index";
-import { formatDate, formatDateTime, formatCOP } from "../../Utils/formatters";
+import { formatDate, formatCOP } from "../../Utils/formatters";
 import { MOCK_OC_DETALLE } from "./MockData";
 import "./StylesOC/DetalleOCPage.css";
 
-const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+const isMock = import.meta.env.VITE_USE_MOCK === "true";
+
+import { DateField, TextAreaField} from "../../Components/Forms/Index";
 
 // ── helpers
 function isVencida(fecha?: string) { return !!fecha && new Date(fecha) < new Date(); }
@@ -70,6 +72,15 @@ export default function DetalleOCPage() {
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
   const [tab,     setTab]     = useState<"items" | "recepciones">("items");
+  const [saving,         setSaving]         = useState(false);
+  const [showEditar,     setShowEditar]     = useState(false);
+  const [showCancelar,   setShowCancelar]   = useState(false);
+  const [showEliminar,   setShowEliminar]   = useState(false);
+  const [motivo,         setMotivo]         = useState("");
+  const [formEdit,       setFormEdit]       = useState({
+    fechaEntregaEsperada: oc?.fechaEntregaEsperada ?? "",
+    observaciones:        oc?.observaciones ?? "",
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -104,7 +115,6 @@ export default function DetalleOCPage() {
   );
 
   // datos derivados
-  const cfg          = ESTADO_CFG[oc.estado];
   const cerrada      = oc.estado === EstadoOC.Cerrada || oc.estado === EstadoOC.Cancelada;
   const vencida      = isVencida(oc.fechaVencimiento);
   const totalSolicitado = oc.detalles.reduce((s, d) => s + d.cantidadSolicitada, 0);
@@ -112,6 +122,40 @@ export default function DetalleOCPage() {
   const totalPendiente  = oc.detalles.reduce((s, d) => s + d.cantidadPendiente,  0);
   const totalValor      = oc.detalles.reduce((s, d) => s + d.subtotal,            0);
   const pct = totalSolicitado > 0 ? Math.round((totalRecibido / totalSolicitado) * 100) : 0;
+  const handleActualizar = async () => {
+    setSaving(true);
+    try {
+      await ordenesCompraService.actualizar(oc!.id, {
+        fechaEntregaEsperada: formEdit.fechaEntregaEsperada || undefined,
+        observaciones:        formEdit.observaciones || undefined,
+      });
+      setOc(prev => prev ? {
+        ...prev,
+        fechaEntregaEsperada: formEdit.fechaEntregaEsperada || undefined,
+        observaciones:        formEdit.observaciones || undefined,
+      } : prev);
+      setShowEditar(false);
+    } finally { setSaving(false); }
+  };
+
+  const handleCancelar = async () => {
+    if (!motivo.trim()) return;
+    setSaving(true);
+    try {
+      await ordenesCompraService.cancelar(oc!.id, motivo);
+      setOc(prev => prev ? { ...prev, estado: EstadoOC.Cancelada } : prev);
+      setShowCancelar(false);
+      setMotivo("");
+    } finally { setSaving(false); }
+  };
+
+  const handleEliminar = async () => {
+    setSaving(true);
+    try {
+      await ordenesCompraService.eliminar(oc!.id);
+      setTimeout(() => navigate("/ordenes-compra"), 1200);
+    } finally { setSaving(false); }
+  };
 
   return (
     <div className="ocd-page">
@@ -139,6 +183,31 @@ export default function DetalleOCPage() {
         </div>
         <div className="ocd-header-actions">
           <EstadoBadge estado={oc.estado} />
+          {!cerrada && (
+            <>
+              <Button variant="ghost" size="sm"
+                onClick={() => {
+                  setFormEdit({
+                    fechaEntregaEsperada: oc.fechaEntregaEsperada ?? "",
+                    observaciones:        oc.observaciones ?? "",
+                  });
+                  setShowEditar(true);
+                }}>
+                Editar
+              </Button>
+              <Button variant="danger" size="sm"
+                onClick={() => setShowCancelar(true)}>
+                Cancelar OC
+              </Button>
+            </>
+          )}
+          {oc.estado === EstadoOC.Abierta && oc.recepciones.length === 0 && (
+            <Button variant="ghost" size="sm"
+              onClick={() => setShowEliminar(true)}
+              style={{ color: "#FCA5A5", borderColor: "rgba(239,68,68,0.3)" }}>
+              Eliminar
+            </Button>
+          )}
           {!cerrada && (
             <Button variant="primary" size="sm"
               onClick={() => navigate(`/recepciones/nueva?ocId=${oc.id}`)}
@@ -191,16 +260,16 @@ export default function DetalleOCPage() {
                 : "—"
               }
             />
-            <DataRow label="Creado por"         val={oc.creadoPor} />
+            <DataRow label="Creado por"         val={oc.creadoPorNombre} />
             <DataRow label="Aprobado por"       val={oc.aprobadoPor ?? "Pendiente"} />
-            <DataRow label="Fecha aprobación"   val={formatDateTime(oc.fechaAprobacion)} />
+            <DataRow label="Creado el"   val={formatDate(oc.creadoEn)} />
           </Section>
 
-          {oc.notas && (
+          {oc.observaciones && (
             <div className="ocd-notas-box"
               style={{ margin: 0, borderRadius: "var(--radius-xl)" }}>
-              <p className="ocd-notas-label">Notas</p>
-              <p className="ocd-notas-texto">{oc.notas}</p>
+              <p className="ocd-notas-label">Observaciones</p>
+              <p className="ocd-notas-texto">{oc.observaciones}</p>
             </div>
           )}
         </div>
@@ -303,7 +372,7 @@ export default function DetalleOCPage() {
                     <a key={rec.id} className="ocd-rec-card" href={`/recepciones/${rec.id}`}>
                       <div>
                         <p className="ocd-rec-num">{rec.numeroRecepcion}</p>
-                        <p className="ocd-rec-fecha">{formatDate(rec.fecha)}</p>
+                        <p className="ocd-rec-fecha">{formatDate(rec.fechaRecepcion)}</p>
                       </div>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
                         strokeWidth="2" strokeLinecap="round">
@@ -317,6 +386,79 @@ export default function DetalleOCPage() {
         </div>
 
       </div>
+      {/* ── MODAL EDITAR ── */}
+      {showEditar && (
+        <div className="ocd-modal-overlay" onClick={() => setShowEditar(false)}>
+          <div className="ocd-modal" onClick={e => e.stopPropagation()}>
+            <p className="ocd-modal-title">Editar orden de compra</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+              <DateField label="Fecha entrega esperada"
+                value={formEdit.fechaEntregaEsperada}
+                onChange={e => setFormEdit(p => ({ ...p, fechaEntregaEsperada: e.target.value }))} />
+              <TextAreaField label="Observaciones" rows={3}
+                value={formEdit.observaciones}
+                onChange={e => setFormEdit(p => ({ ...p, observaciones: e.target.value }))} />
+            </div>
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.25rem" }}>
+              <button onClick={() => setShowEditar(false)} className="ocd-modal-btn-sec">
+                Cancelar
+              </button>
+              <button onClick={handleActualizar} disabled={saving} className="ocd-modal-btn-pri">
+                {saving ? "Guardando…" : "Guardar cambios"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL CANCELAR ── */}
+      {showCancelar && (
+        <div className="ocd-modal-overlay" onClick={() => setShowCancelar(false)}>
+          <div className="ocd-modal" onClick={e => e.stopPropagation()}>
+            <p className="ocd-modal-title">Cancelar orden de compra</p>
+            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginTop: "0.5rem" }}>
+              Esta acción cambiará el estado a Cancelada. Ingresa el motivo.
+            </p>
+            <div style={{ marginTop: "1rem" }}>
+              <TextAreaField label="Motivo *" rows={3}
+                value={motivo}
+                onChange={e => setMotivo(e.target.value)}
+                placeholder="Ej: Proveedor no disponible, cambio de requerimientos…" />
+            </div>
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.25rem" }}>
+              <button onClick={() => { setShowCancelar(false); setMotivo(""); }} className="ocd-modal-btn-sec">
+                Volver
+              </button>
+              <button onClick={handleCancelar} disabled={saving || !motivo.trim()}
+                style={{ opacity: !motivo.trim() ? 0.5 : 1 }}
+                className="ocd-modal-btn-danger">
+                {saving ? "Cancelando…" : "Confirmar cancelación"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL ELIMINAR ── */}
+      {showEliminar && (
+        <div className="ocd-modal-overlay" onClick={() => setShowEliminar(false)}>
+          <div className="ocd-modal" onClick={e => e.stopPropagation()}>
+            <p className="ocd-modal-title">Eliminar orden de compra</p>
+            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginTop: "0.5rem" }}>
+              Se eliminará permanentemente <strong style={{ color: "var(--text-primary)" }}>{oc.numeroOC}</strong>.
+              Esta acción no se puede deshacer.
+            </p>
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.25rem" }}>
+              <button onClick={() => setShowEliminar(false)} className="ocd-modal-btn-sec">
+                Cancelar
+              </button>
+              <button onClick={handleEliminar} disabled={saving} className="ocd-modal-btn-danger">
+                {saving ? "Eliminando…" : "Eliminar definitivamente"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

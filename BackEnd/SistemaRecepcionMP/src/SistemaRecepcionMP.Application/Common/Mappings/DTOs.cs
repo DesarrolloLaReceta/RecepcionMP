@@ -133,7 +133,9 @@ public class OrdenCompraResumenDto
 public sealed class OrdenCompraDetalleDto : OrdenCompraResumenDto
 {
     public string? Observaciones { get; set; }
-    public List<DetalleOrdenCompraDto> Detalles { get; set; } = new();
+    public string? CreadoPorNombre { get; set; } = string.Empty;
+    public DateTime CreadoEn { get; set; }
+    public List<RecepcionResumenDto> Recepciones { get; set; } = new();
 }
 
 public sealed class DetalleOrdenCompraDto

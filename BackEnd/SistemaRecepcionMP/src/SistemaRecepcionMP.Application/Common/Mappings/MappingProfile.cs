@@ -123,7 +123,12 @@ public sealed class MappingProfile : Profile
                 opt => opt.MapFrom(src => src.Detalles));
 
         CreateMap<OrdenCompra, OrdenCompraDetalleDto>()
-            .IncludeBase<OrdenCompra, OrdenCompraResumenDto>();
+            .IncludeBase<OrdenCompra, OrdenCompraResumenDto>()
+            .ForMember(dest => dest.CreadoPorNombre,
+                opt => opt.MapFrom(src => src.UsuarioCreador.Nombre))
+            .ForMember(dest => dest.Recepciones,
+                opt => opt.MapFrom(src => src.Recepciones));
+
         
         CreateMap<DetalleOrdenCompra, DetalleOrdenCompraDto>()
             .ForMember(dest => dest.ItemNombre,
@@ -144,6 +149,14 @@ public sealed class MappingProfile : Profile
                 opt => opt.MapFrom(src => src.CantidadSolicitada * src.PrecioUnitario))
             .ForMember(dest => dest.CantidadPendiente,
                 opt => opt.MapFrom(src => src.CantidadSolicitada - src.CantidadRecibida - src.CantidadRechazada));
+
+        CreateMap<Recepcion, RecepcionResumenDto>()
+            .ForMember(dest => dest.NumeroRecepcion,
+                opt => opt.MapFrom(src => src.NumeroRecepcion))
+            .ForMember(dest => dest.FechaRecepcion,
+                opt => opt.MapFrom(src => src.FechaRecepcion))
+            .ForMember(dest => dest.Estado,
+                opt => opt.MapFrom(src => src.Estado));
     }
 
     // ─────────────────────────────────────────────────────────────────
