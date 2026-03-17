@@ -300,9 +300,11 @@ public sealed class ChecklistBPMDto
 {
     public Guid Id { get; set; }
     public string Nombre { get; set; } = string.Empty;
+    public Guid CategoriaId { get; set; }
     public string CategoriaNombre { get; set; } = string.Empty;
     public int Version { get; set; }
     public bool Estado { get; set; }
+    public DateTime CreadoEn { get; set; }
     public List<ItemChecklistDto> Items { get; set; } = new();
 }
 
@@ -313,6 +315,10 @@ public sealed class ItemChecklistDto
     public string? Descripcion { get; set; }
     public bool EsCritico { get; set; }
     public int Orden { get; set; }
+    public TipoCriterio TipoCriterio { get; set; }
+    public decimal? ValorMinimo { get; set; }
+    public decimal? ValorMaximo { get; set; }
+    public string? Unidad { get; set; }
 }
 
 public sealed class ResultadoChecklistDto

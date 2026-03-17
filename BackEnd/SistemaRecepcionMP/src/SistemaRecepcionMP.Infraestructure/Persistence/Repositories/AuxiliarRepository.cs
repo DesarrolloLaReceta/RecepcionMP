@@ -25,6 +25,21 @@ public sealed class CheckListBPMRepository : GenericRepository<ChecklistBPM>, IC
             .Where(c => c.CategoriaId == categoriaId)
             .OrderByDescending(c => c.Version)
             .FirstOrDefaultAsync();
+
+    public async Task<IEnumerable<ChecklistBPM>> GetAllConItemsAsync()
+        => await Context.Set<ChecklistBPM>()
+            .AsNoTracking()
+            .Include(c => c.Categoria)
+            .Include(c => c.Items.OrderBy(i => i.Orden))
+            .OrderBy(c => c.Categoria.Nombre)
+            .ThenByDescending(c => c.Version)
+            .ToListAsync();
+
+    public async Task<ChecklistBPM?> GetByIdConItemsAsync(Guid id)
+        => await Context.Set<ChecklistBPM>()
+            .Include(c => c.Categoria)
+            .Include(c => c.Items.OrderBy(i => i.Orden))
+            .FirstOrDefaultAsync(c => c.Id == id);
 }
 
 public sealed class NoConformidadRepository

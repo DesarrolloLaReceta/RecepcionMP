@@ -7,6 +7,25 @@ namespace SistemaRecepcionMP.API.Controllers;
 public sealed class ChecklistsController : BaseController
 {
     // ── Queries ───────────────────────────────────────────────────────────────
+    /// <summary>
+    /// Obtiene todos los checklists BPM.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetAll(CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new GetChecklistsListQuery(), ct);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Obtiene un checklist BPM por su ID.
+    /// </summary>
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new GetChecklistByIdQuery(id), ct);
+        return Ok(result);
+    }
 
     /// <summary>
     /// Obtiene el checklist BPM activo para una categoría de ítem.
@@ -72,6 +91,30 @@ public sealed class ChecklistsController : BaseController
         CancellationToken ct = default)
     {
         await Mediator.Send(command, ct);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Actualiza los criterios de un checklist BPM.
+    /// </summary>
+    [HttpPut("{id:guid}/criterios")]
+    public async Task<IActionResult> ActualizarCriterios(
+        Guid id,
+        [FromBody] ActualizarCriteriosCommand command,
+        CancellationToken ct = default)
+    {
+        command.ChecklistId = id;
+        await Mediator.Send(command, ct);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Publica un checklist BPM.
+    /// </summary>
+    [HttpPost("{id:guid}/publicar")]
+    public async Task<IActionResult> Publicar(Guid id, CancellationToken ct = default)
+    {
+        await Mediator.Send(new PublicarChecklistCommand { ChecklistId = id }, ct);
         return NoContent();
     }
 }
