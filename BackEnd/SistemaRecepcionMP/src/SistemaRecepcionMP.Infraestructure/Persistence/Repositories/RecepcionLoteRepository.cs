@@ -112,12 +112,13 @@ public sealed class LoteRecibidoRepository : GenericRepository<LoteRecibido>, IL
             .FirstOrDefaultAsync(l => l.CodigoLoteInterno == codigoLoteInterno);
 
     public async Task<IEnumerable<LoteRecibido>> GetByEstadoAsync(EstadoLote estado)
-        => await DbSet
-            .Include(l => l.Item).ThenInclude(i => i!.Categoria)
-            .Include(l => l.Recepcion).ThenInclude(r => r!.Proveedor)
-            .Where(l => l.Estado == estado)
-            .OrderByDescending(l => l.FechaRegistro)
-            .ToListAsync();
+    => await DbSet
+        .Include(l => l.Item).ThenInclude(i => i!.Categoria)
+        .Include(l => l.Item).ThenInclude(i => i!.RangoTemperatura) // ← agregar
+        .Include(l => l.Recepcion).ThenInclude(r => r!.Proveedor)
+        .Where(l => l.Estado == estado)
+        .OrderByDescending(l => l.FechaRegistro)
+        .ToListAsync();
     
     public async Task<IEnumerable<LoteRecibido>> GetByItemAsync(Guid itemId)
         => await DbSet

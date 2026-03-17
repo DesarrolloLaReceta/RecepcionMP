@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SistemaRecepcionMP.Infraestructure.Persistence;
 
@@ -11,9 +12,11 @@ using SistemaRecepcionMP.Infraestructure.Persistence;
 namespace SistemaRecepcionMP.Infraestructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260310190803_EstadoProveedorEnumToInt")]
+    partial class EstadoProveedorEnumToInt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -203,33 +206,29 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Cargo")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("EsPrincipal")
                         .HasColumnType("bit");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ProveedorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Telefono")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProveedorId");
 
-                    b.ToTable("ContactosProveedor", (string)null);
+                    b.ToTable("ContactosProveedor");
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.Cuarentena", b =>
@@ -376,8 +375,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AdjuntoUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("FechaExpedicion")
                         .HasColumnType("date");
@@ -387,8 +385,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
                     b.Property<string>("NumeroDocumento")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ProveedorId")
                         .HasColumnType("uniqueidentifier");
@@ -400,7 +397,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
                     b.HasIndex("ProveedorId");
 
-                    b.ToTable("DocumentosSanitariosProveedor", (string)null);
+                    b.ToTable("DocumentosSanitariosProveedor");
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.Factura", b =>
@@ -816,33 +813,28 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Direccion")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailContacto")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Estado")
                         .HasColumnType("int");
 
                     b.Property<string>("Nit")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RazonSocial")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Telefono")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Proveedores", (string)null);
+                    b.ToTable("Proveedores");
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.Recepcion", b =>
@@ -1422,7 +1414,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.Proveedor", "Proveedor")
                         .WithMany("OrdenesCompra")
                         .HasForeignKey("ProveedorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "UsuarioCreador")

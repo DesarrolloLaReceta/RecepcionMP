@@ -11,6 +11,13 @@ public sealed class CrearProveedorCommand : IRequest<Guid>, IAuditableCommand
     public string? EmailContacto { get; set; }
     public string? Direccion { get; set; }
 
+    // Campos adicionales para contacto
+    public string? NombreContacto { get; set; }
+    public string? CargoContacto { get; set; }
+    public string? TelefonoContacto { get; set; }
+    public string? EmailContactoProveedor { get; set; }
+
+
     // IAuditableCommand
     public string EntidadAfectada => "Proveedor";
     public string RegistroId => Nit;

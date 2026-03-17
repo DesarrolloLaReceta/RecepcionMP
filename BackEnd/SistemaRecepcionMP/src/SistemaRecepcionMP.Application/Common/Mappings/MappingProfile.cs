@@ -38,7 +38,24 @@ public sealed class MappingProfile : Profile
     // ─────────────────────────────────────────────────────────────────
     private void AplicarMapeosProveedor()
     {
-        CreateMap<Proveedor, ProveedorResumenDto>();
+        CreateMap<Proveedor, ProveedorResumenDto>()
+            .ForMember(dest => dest.Categorias,
+                opt => opt.Ignore())
+            .ForMember(dest => dest.TotalRecepciones,
+                opt => opt.Ignore())
+            .ForMember(dest => dest.DocumentosVigentes,
+                opt => opt.MapFrom(src => src.DocumentosSanitarios
+                    .Count(d => d.FechaVencimiento >= DateOnly.FromDateTime(DateTime.UtcNow) &&
+                                (d.FechaVencimiento.DayNumber - DateOnly.FromDateTime(DateTime.UtcNow).DayNumber) > 30)))
+            .ForMember(dest => dest.DocumentosPorVencer,
+                opt => opt.MapFrom(src => src.DocumentosSanitarios
+                    .Count(d => d.FechaVencimiento >= DateOnly.FromDateTime(DateTime.UtcNow) &&
+                                (d.FechaVencimiento.DayNumber - DateOnly.FromDateTime(DateTime.UtcNow).DayNumber) <= 30)))
+            .ForMember(dest => dest.DocumentosVencidos,
+                opt => opt.MapFrom(src => src.DocumentosSanitarios
+                    .Count(d => d.FechaVencimiento < DateOnly.FromDateTime(DateTime.UtcNow))))
+            .ForMember(dest => dest.TasaAceptacion,
+                opt => opt.Ignore());
 
         CreateMap<Proveedor, ProveedorDetalleDto>()
             .IncludeBase<Proveedor, ProveedorResumenDto>();
@@ -64,6 +81,8 @@ public sealed class MappingProfile : Profile
         CreateMap<Item, ItemResumenDto>()
             .ForMember(dest => dest.CategoriaNombre,
                 opt => opt.MapFrom(src => src.Categoria.Nombre))
+            .ForMember(dest => dest.RequiereCadenaFrio,
+                opt => opt.MapFrom(src => src.Categoria.RequiereCadenaFrio))
             .ForMember(dest => dest.TemperaturaMinima,
                 opt => opt.MapFrom(src => src.RangoTemperatura != null
                     ? src.RangoTemperatura.Minima
@@ -74,9 +93,14 @@ public sealed class MappingProfile : Profile
                     : (decimal?)null));
 
         CreateMap<Item, ItemDetalleDto>()
-            .IncludeBase<Item, ItemResumenDto>();
+            .IncludeBase<Item, ItemResumenDto>()
+            .ForMember(dest => dest.DocumentosRequeridos,
+                opt => opt.MapFrom(src => src.Categoria.DocumentosExigidos));
 
-        CreateMap<TipoDocumentoExigidoCategoria, TipoDocumentoExigidoDto>();
+        CreateMap<TipoDocumentoExigidoCategoria, TipoDocumentoExigidoDto>()
+            .ForMember(dest => dest.TipoDocumento, opt => opt.MapFrom(src => src.TipoDocumento))
+            .ForMember(dest => dest.EsObligatorio, opt => opt.MapFrom(src => src.EsObligatorio))
+            .ForMember(dest => dest.Descripcion, opt => opt.MapFrom(src => src.Descripcion));
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -86,19 +110,53 @@ public sealed class MappingProfile : Profile
     {
         CreateMap<OrdenCompra, OrdenCompraResumenDto>()
             .ForMember(dest => dest.ProveedorNombre,
-                opt => opt.MapFrom(src => src.Proveedor.RazonSocial));
+                opt => opt.MapFrom(src => src.Proveedor.RazonSocial))
+            .ForMember(dest => dest.ProveedorNit,
+                opt => opt.MapFrom(src => src.Proveedor.Nit))
+            .ForMember(dest => dest.TotalItems,
+                opt => opt.MapFrom(src => src.Detalles.Count))
+            .ForMember(dest => dest.ValorTotal,
+                opt => opt.MapFrom(src => src.Detalles.Sum(d => d.CantidadSolicitada * d.PrecioUnitario)))
+            .ForMember(dest => dest.RequiereCadenaFrio,
+                opt => opt.MapFrom(src => src.Detalles.Any(d => d.Item.Categoria.RequiereCadenaFrio)))
+            .ForMember(dest => dest.Detalles,
+                opt => opt.MapFrom(src => src.Detalles));
 
         CreateMap<OrdenCompra, OrdenCompraDetalleDto>()
-            .IncludeBase<OrdenCompra, OrdenCompraResumenDto>();
+            .IncludeBase<OrdenCompra, OrdenCompraResumenDto>()
+            .ForMember(dest => dest.CreadoPorNombre,
+                opt => opt.MapFrom(src => src.UsuarioCreador.Nombre))
+            .ForMember(dest => dest.Recepciones,
+                opt => opt.MapFrom(src => src.Recepciones));
 
+        
         CreateMap<DetalleOrdenCompra, DetalleOrdenCompraDto>()
             .ForMember(dest => dest.ItemNombre,
                 opt => opt.MapFrom(src => src.Item.Nombre))
             .ForMember(dest => dest.ItemCodigo,
                 opt => opt.MapFrom(src => src.Item.CodigoInterno))
+            .ForMember(dest => dest.CategoriaNombre,
+                opt => opt.MapFrom(src => src.Item.Categoria.Nombre))
+            .ForMember(dest => dest.RequiereCadenaFrio,
+                opt => opt.MapFrom(src => src.Item.Categoria.RequiereCadenaFrio))
+            .ForMember(dest => dest.TemperaturaMinima,
+                opt => opt.MapFrom(src => src.Item.RangoTemperatura != null
+                    ? src.Item.RangoTemperatura.Minima : (decimal?)null))
+            .ForMember(dest => dest.TemperaturaMaxima,
+                opt => opt.MapFrom(src => src.Item.RangoTemperatura != null
+                    ? src.Item.RangoTemperatura.Maxima : (decimal?)null))
+            .ForMember(dest => dest.Subtotal,
+                opt => opt.MapFrom(src => src.CantidadSolicitada * src.PrecioUnitario))
             .ForMember(dest => dest.CantidadPendiente,
-                opt => opt.MapFrom(src =>
-                    src.CantidadSolicitada - src.CantidadRecibida - src.CantidadRechazada));
+                opt => opt.MapFrom(src => src.CantidadSolicitada - src.CantidadRecibida - src.CantidadRechazada));
+
+        CreateMap<Recepcion, RecepcionResumenDto>()
+            .ForMember(dest => dest.NumeroRecepcion,
+                opt => opt.MapFrom(src => src.NumeroRecepcion))
+            .ForMember(dest => dest.FechaRecepcion,
+                opt => opt.MapFrom(src => src.FechaRecepcion))
+            .ForMember(dest => dest.Estado,
+                opt => opt.MapFrom(src => src.Estado));
     }
 
     // ─────────────────────────────────────────────────────────────────

@@ -14,7 +14,7 @@ import {
 import "./StylesMaestros/MaestrosLayout.css";
 import "./StylesMaestros/ProveedoresPage.css";
 
-const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+const isMock = import.meta.env.VITE_USE_MOCK === "true";
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -52,9 +52,9 @@ function ProveedorRow({
         <div className="pv-row-info">
           <p className="pv-razon-social">{p.razonSocial}</p>
           <p className="pv-nit">{p.nit}</p>
-          {p.categorias.length > 0 && (
+          {(p.categorias?.length ?? 0) > 0 && (
             <div className="pv-cats">
-              {p.categorias.slice(0, 3).map(c => (
+              {p.categorias?.slice(0, 3).map(c => (
                 <span key={c} className="pv-cat-pill">{c}</span>
               ))}
             </div>
@@ -69,21 +69,113 @@ function ProveedorRow({
   );
 }
 
+// ─── TIPOS AUXILIARES ─────────────────────────────────────────────────────────
+
+interface FormEdicion {
+  razonSocial: string;
+  telefono: string;
+  emailContacto: string;
+  direccion: string;
+  estado: EstadoProveedor;
+}
+
+interface FormDocumento {
+  tipoDocumento: string;
+  numeroDocumento: string;
+  fechaExpedicion: string;
+  fechaVencimiento: string;
+  archivo: File | null;
+}
+
 // ─── PANEL DETALLE ────────────────────────────────────────────────────────────
 
 function PanelDetalle({
-  prov, onClose,
+  prov, onClose, onActualizado,
 }: {
   prov: Proveedor;
   onClose: () => void;
+  onActualizado: () => void;
 }) {
-  const [tab, setTab] = useState<"info" | "docs">("info");
+  const [tab, setTab]             = useState<"info" | "docs">("info");
+  const [editando, setEditando]   = useState(false);
+  const [saving, setSaving]       = useState(false);
+  const [subiendoDoc, setSubiendoDoc] = useState(false);
+  const [mostrarFormDoc, setMostrarFormDoc] = useState(false);
+  const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
+
+  const TipoDocumentoOptions = [
+    { value: 0, label: "Factura" },
+    { value: 1, label: "Orden de Compra" },
+    { value: 2, label: "Certificado de Análisis (COA)" },
+    { value: 3, label: "Registro INVIMA" },
+    { value: 4, label: "Certificado de Transporte" },
+    { value: 5, label: "Bitácora de Temperatura" },
+    { value: 6, label: "Rotulado" },
+    { value: 7, label: "Otro" },
+  ];
+
+  const [form, setForm] = useState<FormEdicion>({
+    razonSocial:   prov.razonSocial,
+    telefono:      prov.telefono ?? "",
+    emailContacto: prov.emailContacto ?? "",
+    direccion:     prov.direccion ?? "",
+    estado:        prov.estado,
+  });
+
+  const [formDoc, setFormDoc] = useState<FormDocumento>({
+    tipoDocumento:   "",
+    numeroDocumento: "",
+    fechaExpedicion: "",
+    fechaVencimiento:"",
+    archivo:         null,
+  });
+
+  const upd = (k: keyof FormEdicion, v: string | EstadoProveedor) =>
+    setForm(p => ({ ...p, [k]: v }));
+
+  const updDoc = (k: keyof FormDocumento, v: string | File | null) =>
+    setFormDoc(p => ({ ...p, [k]: v }));
+
+  const guardar = async () => {
+    setSaving(true);
+    try {
+      await proveedoresService.actualizar({
+        id:            prov.id,
+        razonSocial:   form.razonSocial,
+        telefono:      form.telefono || undefined,
+        emailContacto: form.emailContacto || undefined,
+        direccion:     form.direccion || undefined,
+        estado:        form.estado,
+      });
+      setEditando(false);
+      onActualizado();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const subirDocumento = async () => {
+    if (!formDoc.archivo || !formDoc.tipoDocumento || 
+        !formDoc.numeroDocumento || !formDoc.fechaExpedicion || 
+        !formDoc.fechaVencimiento) return;
+    setSubiendoDoc(true);
+    try {
+      await proveedoresService.subirDocumento(prov.id, formDoc.tipoDocumento, formDoc.numeroDocumento, formDoc.fechaExpedicion, formDoc.fechaVencimiento, formDoc.archivo);
+      setMostrarFormDoc(false);
+      setFormDoc({ tipoDocumento: "", numeroDocumento: "", fechaExpedicion: "", fechaVencimiento: "", archivo: null });
+      onActualizado();
+    } finally {
+      setSubiendoDoc(false);
+    }
+  };
+
+  const contactoPrincipal = prov.contactos?.find(c => c.esPrincipal) ?? prov.contactos?.[0];
 
   const kpis = [
-    { label: "Recepciones", val: String(prov.totalRecepciones ?? 0),                                                    color: "#CBD5E1" },
-    { label: "Tasa acept.",  val: prov.tasaAceptacion != null ? `${prov.tasaAceptacion.toFixed(1)}%` : "—",
+    { label: "Recepciones", val: String(prov.totalRecepciones ?? 0), color: "#CBD5E1" },
+    { label: "Tasa acept.", val: prov.tasaAceptacion != null ? `${prov.tasaAceptacion.toFixed(1)}%` : "—",
       color: prov.tasaAceptacion != null ? (prov.tasaAceptacion >= 95 ? "#86EFAC" : prov.tasaAceptacion >= 80 ? "#FCD34D" : "#FCA5A5") : "#64748B" },
-    { label: "Última rec.",  val: formatDate(prov.ultimaRecepcion),                                                     color: "#94A3B8" },
+    { label: "Última rec.", val: formatDate(prov.ultimaRecepcion), color: "#94A3B8" },
   ];
 
   return (
@@ -98,11 +190,25 @@ function PanelDetalle({
             <StatusBadge domain="proveedor" value={prov.estado} size="sm" />
           </div>
         </div>
-        <button className="pv-panel-close" onClick={onClose} aria-label="Cerrar panel">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        </button>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          {!editando && (
+            <button
+              className="ms-btn-icon"
+              onClick={() => setEditando(true)}
+              title="Editar proveedor"
+              style={{ fontSize: "0.75rem", padding: "0.25rem 0.625rem", borderRadius: "6px",
+                       background: "var(--surface-2)", border: "1px solid var(--border)",
+                       color: "var(--text-secondary)", cursor: "pointer" }}
+            >
+              Editar
+            </button>
+          )}
+          <button className="pv-panel-close" onClick={onClose} aria-label="Cerrar panel">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Mini KPIs */}
@@ -121,10 +227,10 @@ function PanelDetalle({
       <div className="ms-tabs" style={{ marginTop: "0.75rem" }}>
         {([
           { key: "info", label: "Información" },
-          { key: "docs", label: `Documentos (${prov.documentos.length})` },
+          { key: "docs", label: `Documentos (${prov.documentosSanitarios?.length ?? 0})` },
         ] as const).map(t => (
           <button key={t.key} className="ms-tab" data-active={tab === t.key}
-            onClick={() => setTab(t.key)}>
+            onClick={() => { setTab(t.key); setEditando(false); }}>
             {t.label}
           </button>
         ))}
@@ -132,50 +238,299 @@ function PanelDetalle({
 
       {/* Contenido */}
       <div className="ms-panel-body">
-        {tab === "info" && (
+
+        {/* ── TAB INFO ── */}
+        {tab === "info" && !editando && (
           <div className="ms-info-grid">
+            {/* Datos del proveedor */}
             {[
-              { label: "Contacto",     val: prov.nombreContacto },
-              { label: "Teléfono",     val: prov.telefonoContacto },
-              { label: "Email",        val: prov.emailContacto },
-              { label: "Ciudad",       val: prov.ciudad },
-              { label: "Dirección",    val: prov.direccion },
-              { label: "Activo desde", val: formatDate(prov.createdAt) },
+              { label: "Teléfono empresa",  val: prov.telefono },
+              { label: "Email empresa",     val: prov.emailContacto },
+              { label: "Dirección",         val: prov.direccion },
+              { label: "Activo desde",      val: formatDate(prov.creadoEn) },
             ].filter(f => f.val).map(({ label, val }) => (
               <div key={label} className="ms-info-card">
                 <p className="ms-info-label">{label}</p>
                 <p className="ms-info-value">{val}</p>
               </div>
             ))}
+
+            {/* Contacto principal */}
+            {contactoPrincipal && (
+              <>
+                <div className="ms-info-card" style={{ gridColumn: "1 / -1" }}>
+                  <p className="ms-info-label" style={{ color: "var(--primary)", fontWeight: 600 }}>
+                    Contacto principal
+                  </p>
+                </div>
+                {[
+                  { label: "Nombre",  val: contactoPrincipal.nombre },
+                  { label: "Cargo",   val: contactoPrincipal.cargo },
+                  { label: "Teléfono", val: contactoPrincipal.telefono },
+                  { label: "Email",   val: contactoPrincipal.email },
+                ].filter(f => f.val).map(({ label, val }) => (
+                  <div key={label} className="ms-info-card">
+                    <p className="ms-info-label">{label}</p>
+                    <p className="ms-info-value">{val}</p>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         )}
 
+        {/* ── MODO EDICIÓN ── */}
+        {tab === "info" && editando && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <TextField label="Razón social" required
+              value={form.razonSocial}
+              onChange={e => upd("razonSocial", e.target.value)} />
+            <TextField label="Teléfono"
+              value={form.telefono}
+              onChange={e => upd("telefono", e.target.value)} />
+            <TextField label="Email" type="email"
+              value={form.emailContacto}
+              onChange={e => upd("emailContacto", e.target.value)} />
+            <TextField label="Dirección"
+              value={form.direccion}
+              onChange={e => upd("direccion", e.target.value)} />
+
+            {/* Estado */}
+            <div>
+              <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: "0.25rem" }}>
+                Estado
+              </p>
+              <select
+                value={form.estado}
+                onChange={e => upd("estado", Number(e.target.value) as EstadoProveedor)}
+                className="ms-select"
+                style={{ width: "100%" }}
+              >
+                {Object.entries(EstadoProveedorLabels).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Acciones */}
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem" }}>
+              <button
+                onClick={() => setEditando(false)}
+                style={{ flex: 1, padding: "0.5rem", borderRadius: "6px",
+                         background: "var(--surface-2)", border: "1px solid var(--border)",
+                         color: "var(--text-secondary)", cursor: "pointer", fontSize: "var(--text-sm)" }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={guardar}
+                disabled={saving || !form.razonSocial.trim()}
+                style={{ flex: 1, padding: "0.5rem", borderRadius: "6px",
+                         background: "var(--primary)", border: "none",
+                         color: "#fff", cursor: "pointer", fontSize: "var(--text-sm)",
+                         opacity: saving ? 0.7 : 1 }}
+              >
+                {saving ? "Guardando…" : "Guardar"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB DOCS ── */}
         {tab === "docs" && (
           <>
-            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", lineHeight: 1.6 }}>
-              Vigencias de habilitaciones sanitarias y documentos requeridos.
-            </p>
-            {prov.documentos.length === 0 ? (
-              <p style={{ fontSize: "var(--text-md)", color: "var(--text-tertiary)" }}>Sin documentos registrados.</p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+              <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+                Vigencias de habilitaciones sanitarias.
+              </p>
+              <button
+                onClick={() => setMostrarFormDoc(v => !v)}
+                style={{ fontSize: "0.7rem", padding: "0.25rem 0.625rem", borderRadius: "6px",
+                         background: "var(--surface-2)", border: "1px solid var(--border)",
+                         color: "var(--text-secondary)", cursor: "pointer", whiteSpace: "nowrap" }}
+              >
+                {mostrarFormDoc ? "Cancelar" : "+ Subir documento"}
+              </button>
+            </div>
+
+            {/* Form subir documento */}
+            {mostrarFormDoc && (
+              <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)",
+                            borderRadius: "8px", padding: "0.75rem",
+                            display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                
+                {/* ← Reemplaza el TextField de tipo */}
+                <div>
+                  <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: "0.25rem" }}>
+                    Tipo de documento
+                  </p>
+                  <select
+                    value={formDoc.tipoDocumento}
+                    onChange={e => updDoc("tipoDocumento", e.target.value)}
+                    className="ms-select"
+                    style={{ width: "100%" }}
+                  >
+                    <option value="">Seleccionar tipo…</option>
+                    {TipoDocumentoOptions.map(t => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <TextField label="Número de documento"
+                  value={formDoc.numeroDocumento}
+                  onChange={e => updDoc("numeroDocumento", e.target.value)} />
+                <TextField label="Fecha expedición" type="date"
+                  value={formDoc.fechaExpedicion}
+                  onChange={e => updDoc("fechaExpedicion", e.target.value)} />
+                <TextField label="Fecha vencimiento" type="date"
+                  value={formDoc.fechaVencimiento}
+                  onChange={e => updDoc("fechaVencimiento", e.target.value)} />
+
+                <div>
+                  <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: "0.25rem" }}>
+                    Archivo (PDF, JPG, PNG — máx. 10MB)
+                  </p>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={e => updDoc("archivo", e.target.files?.[0] ?? null)}
+                    style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}
+                  />
+                </div>
+
+                <button
+                  onClick={subirDocumento}
+                  disabled={subiendoDoc || !formDoc.archivo || !formDoc.tipoDocumento ||
+                            !formDoc.numeroDocumento || !formDoc.fechaExpedicion || !formDoc.fechaVencimiento}
+                  style={{ padding: "0.5rem", borderRadius: "6px",
+                          background: "var(--primary)", border: "none",
+                          color: "#fff", cursor: "pointer", fontSize: "var(--text-sm)",
+                          opacity: subiendoDoc ? 0.7 : 1, marginTop: "0.25rem" }}
+                >
+                  {subiendoDoc ? "Subiendo…" : "Subir documento"}
+                </button>
+              </div>
+            )}
+
+            {/* Lista de documentos */}
+            {(prov.documentosSanitarios?.length ?? 0) === 0 ? (
+              <p style={{ fontSize: "var(--text-md)", color: "var(--text-tertiary)" }}>
+                Sin documentos registrados.
+              </p>
             ) : (
-              prov.documentos.map(doc => {
+              prov.documentosSanitarios!.map(doc => {
+                console.log("Documento:", doc);
                 const color = diasColor(doc.diasParaVencer);
+                const urlArchivo = doc.adjuntoUrl
+                  ? `http://localhost:5013${doc.adjuntoUrl}`
+                  : null;
+
                 return (
-                  <div key={doc.id} className="ms-doc-row">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <div key={doc.id} className="ms-doc-row" style={{position: "relative"}}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                      stroke="#475569" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                       <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                       <polyline points="14 2 14 8 20 8" />
                     </svg>
-                    <span className="ms-doc-name">{doc.tipo}</span>
+                    <span className="ms-doc-name" style={{ flex: 1 }}>{doc.tipoDocumento}</span>
                     <div className="pv-doc-vencimiento">
                       <span className="ms-doc-dias" style={{ color }}>
                         {doc.diasParaVencer != null
-                          ? doc.diasParaVencer <= 0
-                            ? "Vencido"
-                            : `${doc.diasParaVencer}d`
+                          ? doc.diasParaVencer <= 0 ? "Vencido" : `${doc.diasParaVencer}d`
                           : "—"}
                       </span>
                     </div>
+                    {urlArchivo && (
+                      <div style={{ display: "flex", gap: "0.25rem", marginLeft: "0.5rem" }}>
+                        <a
+                          href={urlArchivo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Ver documento"
+                          style={{ color: "var(--text-muted)", lineHeight: 1 }}
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        </a>
+                        <a
+                          href={urlArchivo}
+                          download
+                          title="Descargar documento"
+                          style={{ color: "var(--text-muted)", lineHeight: 1 }}
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </svg>
+                        </a>
+                      </div>
+                    )}
+                    {/* Botón eliminar */}
+                    <button
+                      onClick={() => setDeletingDocId(doc.id)}
+                      title="Eliminar documento"
+                      style={{ background: "none", border: "none", cursor: "pointer",
+                               color: "#FCA5A5", padding: "0 0.125rem", lineHeight: 1,
+                               marginLeft: "0.125rem" }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6l-1 14H6L5 6" />
+                        <path d="M10 11v6M14 11v6" />
+                        <path d="M9 6V4h6v2" />
+                      </svg>
+                    </button>
+
+                    {/* Confirmación inline */}
+                    {deletingDocId === doc.id && (
+                      <div style={{ position: "absolute", inset: 0,
+                                    background: "var(--surface)", border: "1px solid var(--border)",
+                                    borderRadius: "8px", display: "flex", flexDirection: "column",
+                                    alignItems: "center", justifyContent: "center",
+                                    gap: "0.5rem", zIndex: 10, padding: "0.75rem" }}>
+                        <p style={{ fontSize: "var(--text-sm)", textAlign: "center",
+                                    color: "var(--text-primary)", fontWeight: 500, margin: 0 }}>
+                          ¿Eliminar este documento?
+                        </p>
+                        <p style={{ fontSize: "0.7rem", color: "var(--text-muted)", margin: 0 }}>
+                          Esta acción no se puede deshacer.
+                        </p>
+                        <div style={{ display: "flex", gap: "0.5rem" }}>
+                          <button
+                            onClick={() => setDeletingDocId(null)}
+                            style={{ padding: "0.25rem 0.75rem", borderRadius: "6px",
+                                     background: "var(--surface-2)", border: "1px solid var(--border)",
+                                     color: "var(--text-secondary)", cursor: "pointer",
+                                     fontSize: "0.7rem" }}
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await proveedoresService.eliminarDocumentoSanitario(prov.id, doc.id);
+                                setDeletingDocId(null);
+                                onActualizado();
+                              } catch {
+                                alert("Error al eliminar el documento.");
+                              }
+                            }}
+                            style={{ padding: "0.25rem 0.75rem", borderRadius: "6px",
+                                     background: "#EF4444", border: "none",
+                                     color: "#fff", cursor: "pointer", fontSize: "0.7rem" }}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -205,13 +560,14 @@ function ModalNuevo({
     if (!valid) return;
     setSaving(true);
     try {
-      if (!isMock) await proveedoresService.crear(form as CrearProveedorCommand);
-      else await new Promise(r => setTimeout(r, 700));
+      const { id } = isMock
+        ? { id: `prov-${Date.now()}` }
+        : await proveedoresService.crear(form as CrearProveedorCommand);
       onCreado({
-        id: `prov-${Date.now()}`,
+        id,
         razonSocial: form.razonSocial!,
         nit: form.nit!,
-        ciudad: form.ciudad,
+        direccion: form.direccion,
         estado: EstadoProveedor.Activo,
         categorias: [],
         documentosVigentes: 0,
@@ -246,48 +602,34 @@ function ModalNuevo({
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
           <div style={{ gridColumn: "1 / -1" }}>
-            <TextField
-              label="Razón social"
-              required
-              placeholder="Razón social o nombre comercial"
-              value={form.razonSocial ?? ""}
-              onChange={e => upd("razonSocial", e.target.value)}
-            />
+            <TextField label="Razón social" required
+              value={form.razonSocial ?? ""} onChange={e => upd("razonSocial", e.target.value)} />
           </div>
-          <TextField
-            label="NIT"
-            required
-            placeholder="800.000.000-1"
-            value={form.nit ?? ""}
-            onChange={e => upd("nit", e.target.value)}
-          />
-          <TextField
-            label="Ciudad"
-            placeholder="Bogotá"
-            value={form.ciudad ?? ""}
-            onChange={e => upd("ciudad", e.target.value)}
-          />
-          <TextField
-            label="Contacto"
-            placeholder="Nombre del contacto"
-            value={form.nombreContacto ?? ""}
-            onChange={e => upd("nombreContacto", e.target.value)}
-          />
-          <TextField
-            label="Teléfono"
-            placeholder="+57 601 000 0000"
-            value={form.telefonoContacto ?? ""}
-            onChange={e => upd("telefonoContacto", e.target.value)}
-          />
+          <TextField label="NIT" required placeholder="800.000.000-1"
+            value={form.nit ?? ""} onChange={e => upd("nit", e.target.value)} />
+          <TextField label="Teléfono" placeholder="+57 601 000 0000"
+            value={form.telefono ?? ""} onChange={e => upd("telefono", e.target.value)} />
+          <TextField label="Email empresa" type="email"
+            value={form.emailContacto ?? ""} onChange={e => upd("emailContacto", e.target.value)} />
           <div style={{ gridColumn: "1 / -1" }}>
-            <TextField
-              label="Email"
-              type="email"
-              placeholder="contacto@proveedor.com"
-              value={form.emailContacto ?? ""}
-              onChange={e => upd("emailContacto", e.target.value)}
-            />
+            <TextField label="Dirección" placeholder="Cra 1 # 2-3, Bogotá"
+              value={form.direccion ?? ""} onChange={e => upd("direccion", e.target.value)} />
           </div>
+
+          {/* Separador contacto */}
+          <div style={{ gridColumn: "1 / -1", borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}>
+            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginBottom: "0.75rem" }}>
+              Contacto principal (opcional)
+            </p>
+          </div>
+          <TextField label="Nombre contacto"
+            value={form.nombreContacto ?? ""} onChange={e => upd("nombreContacto", e.target.value)} />
+          <TextField label="Cargo"
+            value={form.cargoContacto ?? ""} onChange={e => upd("cargoContacto", e.target.value)} />
+          <TextField label="Teléfono contacto"
+            value={form.telefonoContacto ?? ""} onChange={e => upd("telefonoContacto", e.target.value)} />
+          <TextField label="Email contacto" type="email"
+            value={form.emailContactoProveedor ?? ""} onChange={e => upd("emailContactoProveedor", e.target.value)} />
         </div>
       </div>
     </Modal>
@@ -462,7 +804,20 @@ export default function ProveedoresPage() {
                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             ) : detalle ? (
-              <PanelDetalle prov={detalle} onClose={() => setSelectedId(null)} />
+              <PanelDetalle
+                prov={detalle}
+                onClose={() => setSelectedId(null)}
+                onActualizado={() => {
+                  // Recarga la lista y el detalle
+                  cargar();
+                  if (selectedId) {
+                    setLoadingDet(true);
+                    proveedoresService.getById(selectedId)
+                      .then(d => setDetalle(d))
+                      .finally(() => setLoadingDet(false));
+                  }
+                }}
+              />
             ) : null}
           </div>
         )}

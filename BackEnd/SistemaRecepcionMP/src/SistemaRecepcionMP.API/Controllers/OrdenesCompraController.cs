@@ -1,5 +1,6 @@
 using SistemaRecepcionMP.Application.Features.OrdenesCompra.Commands.ActualizarEstadoOC;
 using SistemaRecepcionMP.Application.Features.OrdenesCompra.Commands.CrearOrdenCompra;
+using SistemaRecepcionMP.Application.Features.OrdenesCompra.Commands;
 using SistemaRecepcionMP.Application.Features.OrdenesCompra.Queries;
 using SistemaRecepcionMP.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,19 @@ public sealed class OrdenesCompraController : BaseController
     {
         var result = await Mediator.Send(
             new GetOrdenesAbiertasQuery { ProveedorId = proveedorId }, ct);
+        return Ok(result);
+    }
+
+    /// <summary>Lista todas las órdenes de compra, con filtro opcional de estado y proveedor.</summary>
+    [HttpGet("todas")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll(
+        [FromQuery] EstadoOrdenCompra? estado = null,
+        [FromQuery] Guid? proveedorId = null,
+        CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(
+            new GetOrdenesCompraListQuery { Estado = estado, ProveedorId = proveedorId }, ct);
         return Ok(result);
     }
 
@@ -77,6 +91,32 @@ public sealed class OrdenesCompraController : BaseController
     {
         command.Id = id;
         await Mediator.Send(command, ct);
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Actualizar(
+        Guid id,
+        [FromBody] ActualizarOCCommand command,
+        CancellationToken ct = default)
+    {
+        command.Id = id;
+        await Mediator.Send(command, ct);
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Eliminar(
+        Guid id,
+        CancellationToken ct = default)
+    {
+        await Mediator.Send(new EliminarOCCommand { Id = id }, ct);
         return NoContent();
     }
 }

@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using SistemaRecepcionMP.Infraestructure.Persistence;
 using SistemaRecepcionMP.Application;
 using SistemaRecepcionMP.Infraestructure;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,35 @@ builder.Services
     .AddApi(builder.Configuration)
     .AddApplication()
     .AddInfraestructure(builder.Configuration, builder.Environment);
+
+
+
+
+
+// ─── Autenticación ─────────────────────────────────────────────────────────
+// En desarrollo, se usa un handler que simula autenticación para facilitar pruebas sin depender de Azure AD.
+if (builder.Environment.IsDevelopment())
+{
+    // En desarrollo, todos los requests se tratan como autenticados
+    builder.Services.AddAuthentication("DevAuth")
+        .AddScheme<AuthenticationSchemeOptions, DevAuthHandler>(
+            "DevAuth", null);
+}
+else
+{
+    // En producción va Entra ID (cuando esté listo)
+    builder.Services.AddAuthentication();
+}
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Dev", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // ─── Build de la aplicación ───────────────────────────────────────────────────
 var app = builder.Build();
@@ -24,7 +55,6 @@ if (app.Environment.IsDevelopment())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await db.Database.MigrateAsync();
 }
-
 // ─── Pipeline HTTP — el orden importa ────────────────────────────────────────
 
 // 1. Manejo global de excepciones — siempre primero para capturar todo
@@ -41,11 +71,21 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+var wwwrootPath = Path.Combine(
+    builder.Environment.ContentRootPath, "wwwroot");
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwrootPath),
+    RequestPath = ""
+});
+
 // 3. HTTPS redirect
 app.UseHttpsRedirection();
 
 // 4. CORS — antes de autenticación
-app.UseCors("FrontendPolicy");
+//app.UseCors("FrontendPolicy");
+app.UseCors("Dev");
 
 // 5. Autenticación JWT (valida el token de Azure AD)
 app.UseAuthentication();

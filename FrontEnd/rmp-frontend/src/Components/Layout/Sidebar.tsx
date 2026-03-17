@@ -138,8 +138,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   return (
     <aside
       className="app-sidebar"
-      data-open={open}
-      aria-hidden={!open}
+        data-open={open}
+        inert={!open}
     >
       {/* Wrapper con ancho fijo — evita que el contenido se comprima al animar */}
       <div className="sidebar-inner">

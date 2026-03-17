@@ -1,6 +1,7 @@
 using SistemaRecepcionMP.Domain.Entities;
 using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using SistemaRecepcionMP.Domain.Enums;
 
 namespace SistemaRecepcionMP.Infraestructure.Persistence.Repositories;
 
@@ -12,15 +13,9 @@ public sealed class ProveedorRepository : GenericRepository<Proveedor>, IProveed
         => await DbSet
             .FirstOrDefaultAsync(p => p.Nit == nit);
 
-    public async Task<Proveedor?> GetWithDocumentosSanitariosAsync(Guid proveedorId)
-        => await DbSet
-            .Include(p => p.DocumentosSanitarios)
-            .Include(p => p.Contactos)
-            .FirstOrDefaultAsync(p => p.Id == proveedorId);
-
     public async Task<IEnumerable<Proveedor>> GetActivosAsync()
         => await DbSet
-            .Where(p => p.Estado)
+            .Where(p => p.Estado == EstadoProveedor.Activo)
             .OrderBy(p => p.RazonSocial)
             .ToListAsync();
 
@@ -34,5 +29,30 @@ public sealed class ProveedorRepository : GenericRepository<Proveedor>, IProveed
             .Where(d => d.FechaVencimiento <= fechaLimite)
             .OrderBy(d => d.FechaVencimiento)
             .ToListAsync();
+    }
+
+    public async Task<Proveedor?> GetWithDocumentosSanitariosAsync(Guid proveedorId)
+    => await DbSet
+        .Include(p => p.DocumentosSanitarios)
+        .Include(p => p.Contactos)
+        .Include(p => p.OrdenesCompra)
+            .ThenInclude(oc => oc.Recepciones)
+                .ThenInclude(r => r.Lotes)
+        .Include(p => p.OrdenesCompra)
+            .ThenInclude(oc => oc.Detalles)
+                .ThenInclude(d => d.Item)
+                    .ThenInclude(i => i.Categoria)
+        .FirstOrDefaultAsync(p => p.Id == proveedorId);
+
+    public override async Task<IEnumerable<Proveedor>> GetAllAsync()
+        => await DbSet
+            .Include(p => p.DocumentosSanitarios)
+            .Include(p => p.Contactos)
+            .OrderBy(p => p.RazonSocial)
+            .ToListAsync();
+
+    public async Task AddDocumentoSanitarioAsync(DocumentoSanitarioProveedor documento)
+    {
+        await Context.Set<DocumentoSanitarioProveedor>().AddAsync(documento);
     }
 }

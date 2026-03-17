@@ -12,13 +12,13 @@ import {
   type ProveedorResumen, type ItemResumen,
 } from "../../Services/maestros.service";
 import { Button, Modal, ModalFooter } from "../../Components/UI/Index";
-import { SelectField, DateField, NumberField, TextAreaField } from "../../Components/Forms/Index";
+import { SelectField, DateField, NumberField, TextAreaField, TextField } from "../../Components/Forms/Index";
 import { formatDate, formatCOP } from "../../Utils/formatters";
 import { MOCK_OC_TODAS } from "./MockData";
 import { MOCK_PROVEEDORES_LIST, MOCK_ITEMS_LIST } from "../Maestros/MockData";
 import "./StylesOC/OrdenesCompraPage.css";
 
-const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+const isMock = import.meta.env.VITE_USE_MOCK === "true";
 
 // ── helpers
 function isVencida(fecha?: string) { return !!fecha && new Date(fecha) < new Date(); }
@@ -87,6 +87,8 @@ function PanelResumen({ oc, onVerDetalle, onClose }: {
   const pendiente  = oc.detalles.reduce((s, d) => s + d.cantidadPendiente,  0);
   const pct = solicitado > 0 ? Math.round((recibido / solicitado) * 100) : 0;
 
+  console.log("detalles OC:", oc.detalles, "solicitado:", solicitado);
+
   return (
     <>
       {/* Header */}
@@ -129,9 +131,10 @@ function PanelResumen({ oc, onVerDetalle, onClose }: {
       <div className="oc-panel-kpis">
         <div className="oc-kpi-mini-grid">
           {[
-            { label: "Valor total",  val: formatCOP(oc.valorTotal),              color: "#CBD5E1" },
-            { label: "Pendiente",    val: `${pendiente.toLocaleString()} uds`,   color: pendiente > 0 ? "#FCD34D" : "#86EFAC" },
-            { label: "Entrega esp.", val: formatDate(oc.fechaEntregaEsperada),   color: "#94A3B8" },
+            { label: "Valor total",  val: formatCOP(oc.valorTotal),            color: "#CBD5E1" },
+            { label: "Pendiente",    val: `${pendiente.toLocaleString()} uds`, color: pendiente > 0 ? "#FCD34D" : "#86EFAC" },
+            { label: "Emisión",      val: formatDate(oc.fechaEmision),         color: "#94A3B8" },  // ← cambia Entrega esp. por Emisión
+            { label: "Entrega esp.", val: formatDate(oc.fechaEntregaEsperada), color: "#94A3B8" },  // ← agrega esta línea
           ].map(k => (
             <div key={k.label} className="oc-kpi-mini">
               <p className="oc-kpi-mini-val" style={{ color: k.color }}>{k.val}</p>
@@ -194,7 +197,9 @@ function ModalNuevaOC({ proveedores, items, onClose, onCreada }: {
   onClose: () => void;
   onCreada: (oc: OrdenCompraResumen) => void;
 }) {
+  const [numeroOC, setNumeroOC] = useState("");
   const [proveedorId,   setProveedorId]   = useState("");
+  const [fechaEmision,  setFechaEmision]  = useState(new Date().toISOString().slice(0, 10));
   const [fechaEntrega,  setFechaEntrega]  = useState("");
   const [notas,         setNotas]         = useState("");
   const [detalles,      setDetalles]      = useState<DetalleForm[]>([{ itemId: "", cantidad: "", precioUnitario: "" }]);
@@ -208,20 +213,24 @@ function ModalNuevaOC({ proveedores, items, onClose, onCreada }: {
   const provOptions = proveedores.map(p => ({ value: p.id, label: `${p.razonSocial} — ${p.nit}` }));
   const itemOptions = items.map(i => ({ value: i.id, label: `${i.codigo} · ${i.nombre}` }));
 
-  const valid = proveedorId && detalles.every(d => d.itemId && Number(d.cantidad) > 0 && Number(d.precioUnitario) > 0);
+  const valid = numeroOC.trim() && proveedorId && fechaEmision &&
+    detalles.every(d => d.itemId && Number(d.cantidad) > 0 && Number(d.precioUnitario) > 0);
 
   const handleCrear = async () => {
     if (!valid) return;
     setSaving(true);
     try {
       const cmd: CrearOCCommand = {
+        numeroOC,
         proveedorId,
+        fechaEmision,
         fechaEntregaEsperada: fechaEntrega || undefined,
         notas: notas || undefined,
         detalles: detalles.map(d => ({
           itemId: d.itemId,
           cantidadSolicitada: Number(d.cantidad),
           precioUnitario: Number(d.precioUnitario),
+          unidadMedida: items.find(x => x.id === d.itemId)?.unidadMedida ?? "Kg",
         })),
       };
       let oc: OrdenCompraResumen;
@@ -255,8 +264,13 @@ function ModalNuevaOC({ proveedores, items, onClose, onCreada }: {
         const { id } = await ordenesCompraService.crear(cmd);
         oc = await ordenesCompraService.getById(id) as unknown as OrdenCompraResumen;
       }
+      console.log("Enviando OC:", JSON.stringify(cmd, null, 2));
       onCreada(oc);
-    } finally { setSaving(false); }
+    } catch (error: any) {
+  console.log("Error crear OC:", JSON.stringify(error.response?.data, null, 2));
+  alert("Error al crear la OC");
+}
+    finally { setSaving(false); }
   };
 
   return (
@@ -266,10 +280,20 @@ function ModalNuevaOC({ proveedores, items, onClose, onCreada }: {
       footer={<ModalFooter onCancel={onClose} onConfirm={handleCrear} loading={saving} disabled={!valid} confirmLabel="Crear OC" />}>
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-          <SelectField label="Proveedor" required options={provOptions}
-            value={proveedorId} onChange={e => setProveedorId(e.target.value)} />
+          <TextField label="Número OC" required placeholder="OC-2026-001"
+            value={numeroOC} onChange={e => setNumeroOC(e.target.value)} />
+          <SelectField 
+            label="Proveedor" 
+            required 
+            placeholder="Seleccionar proveedor"
+            options={provOptions}
+            value={proveedorId}
+            onChange={e => setProveedorId(e.target.value)} 
+          />
           <DateField label="Fecha de entrega esperada"
             value={fechaEntrega} onChange={e => setFechaEntrega(e.target.value)} />
+          <DateField label="Fecha emisión" required
+            value={fechaEmision} onChange={e => setFechaEmision(e.target.value)} />
         </div>
 
         {/* Ítems */}
@@ -286,8 +310,14 @@ function ModalNuevaOC({ proveedores, items, onClose, onCreada }: {
         <div className="oc-modal-detalle-list">
           {detalles.map((d, idx) => (
             <div key={idx} className="oc-detalle-row">
-              <SelectField label={idx === 0 ? "Ítem" : undefined} options={itemOptions}
-                required value={d.itemId} onChange={e => updDetalle(idx, "itemId", e.target.value)} />
+              <SelectField 
+                label={idx === 0 ? "Ítem" : undefined} 
+                placeholder="Seleccionar ítem..."
+                options={itemOptions}
+                required 
+                value={d.itemId} 
+                onChange={e => updDetalle(idx, "itemId", e.target.value)} 
+              />
               <NumberField label={idx === 0 ? "Cantidad" : undefined}
                 placeholder="0" min={1}
                 value={d.cantidad} onChange={e => updDetalle(idx, "cantidad", e.target.value)} />
@@ -329,8 +359,8 @@ export default function OrdenesCompraPage() {
     try {
       const [ocs, provs, its] = await Promise.all([
         isMock ? Promise.resolve(MOCK_OC_TODAS) : ordenesCompraService.getAll(),
-        isMock ? Promise.resolve(MOCK_PROVEEDORES_LIST) : proveedoresService.getAll(),
-        isMock ? Promise.resolve(MOCK_ITEMS_LIST)       : itemsService.getAll(),
+        isMock ? Promise.resolve(MOCK_PROVEEDORES_LIST) : proveedoresService.getAll({ soloActivos: true }),
+        isMock ? Promise.resolve(MOCK_ITEMS_LIST) : itemsService.getAll({ soloActivos: true }),
       ]);
       setLista(ocs); setProveedores(provs); setItems(its);
     } catch { setError("No se pudo cargar las órdenes de compra."); }

@@ -2,6 +2,7 @@ using SistemaRecepcionMP.Application.Common.Exceptions;
 using SistemaRecepcionMP.Domain.Entities;
 using SistemaRecepcionMP.Domain.Exceptions.Proveedores;
 using SistemaRecepcionMP.Domain.Interfaces;
+using SistemaRecepcionMP.Domain.Enums;
 using MediatR;
 
 namespace SistemaRecepcionMP.Application.Features.OrdenesCompra.Commands.CrearOrdenCompra;
@@ -33,9 +34,9 @@ public sealed class CrearOrdenCompraCommandHandler : IRequestHandler<CrearOrdenC
         var proveedor = await _unitOfWork.Proveedores.GetByIdAsync(request.ProveedorId)
             ?? throw new ProveedorNotFoundException(request.ProveedorId);
 
-        if (!proveedor.Estado)
+        if (proveedor.Estado != EstadoProveedor.Activo)
             throw new ProveedorNoHabilitadoException(proveedor.RazonSocial,
-                "El proveedor está inactivo.");
+                $"El proveedor está inactivo y no puede ser asociado a una OC.");
 
         // Verificar que todos los ítems existen y están activos
         foreach (var detalle in request.Detalles)

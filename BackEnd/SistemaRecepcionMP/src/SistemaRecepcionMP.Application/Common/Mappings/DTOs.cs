@@ -24,7 +24,14 @@ public class ProveedorResumenDto
     public Guid Id { get; set; }
     public string RazonSocial { get; set; } = string.Empty;
     public string Nit { get; set; } = string.Empty;
-    public bool Estado { get; set; }
+    public string? Ciudad { get; set; }
+    public EstadoProveedor Estado { get; set; }
+    public List<string> Categorias { get; set; } = new();
+    public int DocumentosVigentes { get; set; }
+    public int DocumentosPorVencer { get; set; }
+    public int DocumentosVencidos { get; set; }
+    public int TotalRecepciones { get; set; }
+    public double TasaAceptacion { get; set; }
 }
 
 public sealed class ProveedorDetalleDto : ProveedorResumenDto
@@ -76,12 +83,14 @@ public sealed class CategoriaItemDto
 public class ItemResumenDto
 {
     public Guid Id { get; set; }
+    public Guid CategoriaId { get; set; }
     public string CodigoInterno { get; set; } = string.Empty;
     public string Nombre { get; set; } = string.Empty;
     public string CategoriaNombre { get; set; } = string.Empty;
     public string UnidadMedida { get; set; } = string.Empty;
     public decimal? TemperaturaMinima { get; set; }
     public decimal? TemperaturaMaxima { get; set; }
+    public bool RequiereCadenaFrio { get; set; }
     public bool Estado { get; set; }
 }
 
@@ -91,6 +100,7 @@ public sealed class ItemDetalleDto : ItemResumenDto
     public int VidaUtilDias { get; set; }
     public bool RequiereLoteProveedor { get; set; }
     public CategoriaItemDto Categoria { get; set; } = null!;
+    public List<TipoDocumentoExigidoDto> DocumentosRequeridos { get; set; } = new();
 }
 
 public sealed class TipoDocumentoExigidoDto
@@ -108,29 +118,43 @@ public class OrdenCompraResumenDto
 {
     public Guid Id { get; set; }
     public string NumeroOC { get; set; } = string.Empty;
+    public Guid ProveedorId { get; set; }
     public string ProveedorNombre { get; set; } = string.Empty;
+    public string ProveedorNit { get; set; } = string.Empty;
     public DateOnly FechaEmision { get; set; }
     public DateOnly? FechaEntregaEsperada { get; set; }
     public EstadoOrdenCompra Estado { get; set; }
+    public int TotalItems { get; set; }
+    public decimal ValorTotal { get; set; }
+    public bool RequiereCadenaFrio { get; set; }
+    public List<DetalleOrdenCompraDto> Detalles { get; set; } = new();
 }
 
 public sealed class OrdenCompraDetalleDto : OrdenCompraResumenDto
 {
     public string? Observaciones { get; set; }
-    public List<DetalleOrdenCompraDto> Detalles { get; set; } = new();
+    public string? CreadoPorNombre { get; set; } = string.Empty;
+    public DateTime CreadoEn { get; set; }
+    public List<RecepcionResumenDto> Recepciones { get; set; } = new();
 }
 
 public sealed class DetalleOrdenCompraDto
 {
     public Guid Id { get; set; }
+    public Guid ItemId { get; set; }
     public string ItemCodigo { get; set; } = string.Empty;
     public string ItemNombre { get; set; } = string.Empty;
+    public string CategoriaNombre { get; set; } = string.Empty;
     public decimal CantidadSolicitada { get; set; }
     public decimal CantidadRecibida { get; set; }
     public decimal CantidadRechazada { get; set; }
     public decimal CantidadPendiente { get; set; }
     public string UnidadMedida { get; set; } = string.Empty;
     public decimal PrecioUnitario { get; set; }
+    public decimal Subtotal { get; set; }
+    public bool RequiereCadenaFrio { get; set; }
+    public decimal? TemperaturaMinima { get; set; }
+    public decimal? TemperaturaMaxima { get; set; }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

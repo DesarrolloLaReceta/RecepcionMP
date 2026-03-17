@@ -149,9 +149,25 @@ public sealed class LocalFileStorageService : IFileStorageService
         string url,
         CancellationToken cancellationToken = default)
     {
-        var uri = new Uri(url);
-        var rutaCompleta = Path.Combine(_basePath, uri.Segments[2].TrimEnd('/'));
-        if (File.Exists(rutaCompleta)) File.Delete(rutaCompleta);
+        // url llega como: /uploads/documentos-sanitarios/guid/TipoDoc/guid_filename.pdf
+        // _basePath apunta a: wwwroot/uploads
+        // Quitamos el prefijo "/uploads/" para obtener la ruta relativa dentro de _basePath
+        var relativePath = url.TrimStart('/');
+        if (relativePath.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase))
+            relativePath = relativePath.Substring("uploads/".Length);
+
+        var rutaCompleta = Path.Combine(_basePath, relativePath.Replace('/', Path.DirectorySeparatorChar));
+
+        if (File.Exists(rutaCompleta))
+        {
+            File.Delete(rutaCompleta);
+            _logger.LogInformation("Archivo eliminado localmente: {Ruta}", rutaCompleta);
+        }
+        else
+        {
+            _logger.LogWarning("Archivo no encontrado al intentar eliminar: {Ruta}", rutaCompleta);
+        }
+
         return Task.CompletedTask;
     }
 

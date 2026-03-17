@@ -26,5 +26,9 @@ public sealed class ActualizarProveedorCommandValidator : AbstractValidator<Actu
         RuleFor(x => x.Direccion)
             .MaximumLength(300).WithMessage("La dirección no puede superar 300 caracteres.")
             .When(x => x.Direccion is not null);
+            
+        RuleFor(x => x.Estado)
+            .IsInEnum().WithMessage("El estado proporcionado no es válido. Los valores permitidos son: Activo, Inactivo, Suspendido.")
+            .When(x => x.Estado.HasValue);
     }
 }

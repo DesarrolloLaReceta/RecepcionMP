@@ -216,3 +216,68 @@
 .ocd-totals-row {
   min-width: 580px;
 }
+.ocd-modal-overlay {
+  position:        fixed;
+  inset:           0;
+  background:      rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index:         50;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         1rem;
+}
+
+.ocd-modal {
+  background:    var(--surface);
+  border:        1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding:       1.5rem;
+  width:         100%;
+  max-width:     420px;
+  box-shadow:    0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+.ocd-modal-title {
+  font-size:   var(--text-lg);
+  font-weight: 700;
+  color:       var(--text-primary);
+}
+
+.ocd-modal-btn-sec {
+  flex:          1;
+  padding:       0.5rem;
+  border-radius: 6px;
+  background:    var(--surface-2);
+  border:        1px solid var(--border);
+  color:         var(--text-secondary);
+  cursor:        pointer;
+  font-size:     var(--text-sm);
+}
+
+.ocd-modal-btn-pri {
+  flex:          1;
+  padding:       0.5rem;
+  border-radius: 6px;
+  background:    var(--primary);
+  border:        none;
+  color:         #fff;
+  cursor:        pointer;
+  font-size:     var(--text-sm);
+}
+
+.ocd-modal-btn-danger {
+  flex:          1;
+  padding:       0.5rem;
+  border-radius: 6px;
+  background:    rgba(239, 68, 68, 0.12);
+  border:        1px solid rgba(239, 68, 68, 0.3);
+  color:         #FCA5A5;
+  cursor:        pointer;
+  font-size:     var(--text-sm);
+}
+
+.ocd-modal-btn-danger:disabled {
+  opacity: 0.5;
+  cursor:  not-allowed;
+}

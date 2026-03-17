@@ -2,11 +2,13 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { PublicClientApplication, InteractionRequiredAuthError } from "@azure/msal-browser";
 import { msalConfig, silentRequest, loginRequest } from "../Auth/msalConfig";
 
-// ─── INSTANCIA MSAL (compartida con MsalProvider) ────────────────────────────
-// Esta instancia la exporta main.tsx. La importamos aquí para interceptores.
-// Si usas un singleton distinto, reemplaza esta referencia.
+// ─── INSTANCIA MSAL (solo si NO es dev sin Azure) ─────────────────────────
+const isDev = import.meta.env.DEV && import.meta.env.VITE_USE_MOCK === "false";
+
 export const msalInstance = new PublicClientApplication(msalConfig);
-await msalInstance.initialize();
+if (!isDev) {
+  await msalInstance.initialize();
+}
 
 // ─── CLIENTE AXIOS ───────────────────────────────────────────────────────────
 
@@ -21,14 +23,43 @@ export const apiClient = axios.create({
 
 // ─── INTERCEPTOR: inyectar token Bearer automáticamente ──────────────────────
 
+// apiClient.interceptors.request.use(
+//   async (config: InternalAxiosRequestConfig) => {
+//     const account = msalInstance.getActiveAccount();
+
+//     if (!account) {
+//       // Sin cuenta activa → no inyectamos token (el backend devolverá 401)
+//       return config;
+//     }
+
+//     try {
+//       const result = await msalInstance.acquireTokenSilent({
+//         ...silentRequest,
+//         account,
+//       });
+//       config.headers["Authorization"] = `Bearer ${result.accessToken}`;
+//     } catch (error) {
+//       if (error instanceof InteractionRequiredAuthError) {
+//         // Requiere interacción → redirigir a login
+//         await msalInstance.acquireTokenRedirect(loginRequest);
+//       }
+//     }
+
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const account = msalInstance.getActiveAccount();
 
-    if (!account) {
-      // Sin cuenta activa → no inyectamos token (el backend devolverá 401)
-      return config;
+    // ── Modo desarrollo sin Azure: no inyectamos token ──────────────────
+    if (import.meta.env.DEV) {
+      return config; // El backend DevAuthHandler no necesita token
     }
+
+    // ── Producción: flujo MSAL normal ────────────────────────────────────
+    const account = msalInstance.getActiveAccount();
+    if (!account) return config;
 
     try {
       const result = await msalInstance.acquireTokenSilent({
@@ -38,7 +69,6 @@ apiClient.interceptors.request.use(
       config.headers["Authorization"] = `Bearer ${result.accessToken}`;
     } catch (error) {
       if (error instanceof InteractionRequiredAuthError) {
-        // Requiere interacción → redirigir a login
         await msalInstance.acquireTokenRedirect(loginRequest);
       }
     }
@@ -50,11 +80,25 @@ apiClient.interceptors.request.use(
 
 // ─── INTERCEPTOR: manejo global de errores ────────────────────────────────────
 
+// apiClient.interceptors.response.use(
+//   (response) => response,
+//   (error: AxiosError) => {
+//     if (error.response?.status === 401) {
+//       // Token expirado o inválido → forzar login
+//       msalInstance.loginRedirect(loginRequest);
+//     }
+
+//     if (error.response?.status === 403) {
+//       console.warn("[API] Acceso denegado — rol insuficiente");
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Token expirado o inválido → forzar login
+    if (error.response?.status === 401 && !import.meta.env.DEV) {
       msalInstance.loginRedirect(loginRequest);
     }
 

@@ -19,12 +19,17 @@ public sealed class GetProveedorByIdQueryHandler
     }
 
     public async Task<ProveedorDetalleDto> Handle(
-        GetProveedorByIdQuery request,
-        CancellationToken cancellationToken)
+    GetProveedorByIdQuery request,
+    CancellationToken cancellationToken)
     {
         var proveedor = await _unitOfWork.Proveedores.GetWithDocumentosSanitariosAsync(request.Id)
             ?? throw new ProveedorNotFoundException(request.Id);
 
-        return _mapper.Map<ProveedorDetalleDto>(proveedor);
+        var dto = _mapper.Map<ProveedorDetalleDto>(proveedor);
+        dto.Categorias        = ProveedorCalculos.Categorias(proveedor);
+        dto.TotalRecepciones  = ProveedorCalculos.TotalRecepciones(proveedor);
+        dto.TasaAceptacion    = ProveedorCalculos.TasaAceptacion(proveedor);
+
+        return dto;
     }
 }

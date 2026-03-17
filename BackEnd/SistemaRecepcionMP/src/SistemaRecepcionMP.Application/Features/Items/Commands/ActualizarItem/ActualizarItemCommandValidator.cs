@@ -8,6 +8,15 @@ public sealed class ActualizarItemCommandValidator : AbstractValidator<Actualiza
     {
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage("El ID del ítem es obligatorio.");
+        
+        RuleFor(x => x.CodigoInterno)
+            .NotEmpty().WithMessage("El código interno es obligatorio.")
+            .MaximumLength(50)
+            .Matches(@"^[A-Za-z0-9\-_]+$")
+            .WithMessage("El código solo puede contener letras, números, guiones y guiones bajos.");
+
+        RuleFor(x => x.CategoriaId)
+            .NotEmpty().WithMessage("La categoría es obligatoria.");
 
         RuleFor(x => x.Nombre)
             .NotEmpty().WithMessage("El nombre del ítem es obligatorio.")

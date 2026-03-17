@@ -1,6 +1,7 @@
 using SistemaRecepcionMP.Domain.Entities;
 using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using SistemaRecepcionMP.Domain.Enums;
 
 namespace SistemaRecepcionMP.Infraestructure.Persistence.Repositories;
 
@@ -30,7 +31,24 @@ public sealed class ItemRepository : GenericRepository<Item>, IItemRepository
     public override async Task<Item?> GetByIdAsync(Guid id)
         => await DbSet
             .Include(i => i.Categoria)
+                .ThenInclude(c => c.DocumentosExigidos)
             .FirstOrDefaultAsync(i => i.Id == id);
+    
+    public async Task<IEnumerable<Item>> GetAllConCategoriaAsync()
+        => await DbSet
+            .AsNoTracking()
+            .Include(i => i.Categoria)
+                .ThenInclude(c => c.DocumentosExigidos)
+            .OrderBy(i => i.Nombre)
+            .ToListAsync();
+
+    public async Task<IEnumerable<CategoriaItem>> GetCategoriasAsync()
+    {
+        return await Context.Set<CategoriaItem>()
+            .AsNoTracking()
+            .OrderBy(c => c.Nombre)
+            .ToListAsync();
+    }
 }
 
 public sealed class OrdenCompraRepository : GenericRepository<OrdenCompra>, IOrdenCompraRepository
@@ -62,6 +80,33 @@ public sealed class OrdenCompraRepository : GenericRepository<OrdenCompra>, IOrd
     public override async Task<OrdenCompra?> GetByIdAsync(Guid id)
         => await DbSet
             .Include(o => o.Proveedor)
-            .Include(o => o.Detalles).ThenInclude(d => d.Item)
+            .Include(o => o.UsuarioCreador)
+            .Include(o => o.Recepciones)
+            .Include(o => o.Detalles)
+                .ThenInclude(d => d.Item)
+                .ThenInclude(i => i.Categoria)
             .FirstOrDefaultAsync(o => o.Id == id);
+    
+    public async Task<IEnumerable<OrdenCompra>> GetAllConDetallesAsync(
+        EstadoOrdenCompra? estado = null,
+        Guid? proveedorId = null)
+    {
+        var query = DbSet
+            .AsNoTracking()
+            .Include(o => o.Proveedor)
+            .Include(o => o.Detalles)
+                .ThenInclude(d => d.Item)
+                    .ThenInclude(i => i.Categoria)
+            .AsQueryable();
+
+        if (estado.HasValue)
+            query = query.Where(o => o.Estado == estado.Value);
+
+        if (proveedorId.HasValue)
+            query = query.Where(o => o.ProveedorId == proveedorId.Value);
+
+        return await query
+            .OrderByDescending(o => o.FechaEmision)
+            .ToListAsync();
+    }
 }

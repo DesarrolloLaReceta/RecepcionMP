@@ -21,14 +21,13 @@ public sealed class AgregarDocumentoSanitarioCommandHandler
     }
 
     public async Task<Guid> Handle(
-        AgregarDocumentoSanitarioCommand request,
-        CancellationToken cancellationToken)
+    AgregarDocumentoSanitarioCommand request,
+    CancellationToken cancellationToken)
     {
-        // Verificar que el proveedor existe
-        var proveedor = await _unitOfWork.Proveedores.GetByIdAsync(request.ProveedorId)
+
+        var proveedor = await _unitOfWork.Proveedores.GetWithDocumentosSanitariosAsync(request.ProveedorId)
             ?? throw new ProveedorNotFoundException(request.ProveedorId);
 
-        // Subir el archivo al almacenamiento
         var nombreUnico = $"{request.ProveedorId}/{request.TipoDocumento}/{Guid.NewGuid()}_{request.NombreArchivo}";
         var urlAdjunto = await _fileStorage.SubirArchivoAsync(
             request.ContenidoArchivo,
@@ -38,7 +37,7 @@ public sealed class AgregarDocumentoSanitarioCommandHandler
 
         var documento = new DocumentoSanitarioProveedor
         {
-            ProveedorId = proveedor.Id,
+            ProveedorId = request.ProveedorId,
             TipoDocumento = request.TipoDocumento,
             NumeroDocumento = request.NumeroDocumento.Trim(),
             FechaExpedicion = request.FechaExpedicion,
@@ -46,9 +45,7 @@ public sealed class AgregarDocumentoSanitarioCommandHandler
             AdjuntoUrl = urlAdjunto
         };
 
-        // Se agrega a la colección del proveedor — EF Core lo inserta automáticamente
-        proveedor.DocumentosSanitarios.Add(documento);
-        _unitOfWork.Proveedores.Update(proveedor);
+        await _unitOfWork.Proveedores.AddDocumentoSanitarioAsync(documento);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return documento.Id;
