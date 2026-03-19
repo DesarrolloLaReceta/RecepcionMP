@@ -139,7 +139,6 @@ export interface CrearItemCommand {
 }
 
 // ─── TIPOS: CATEGORÍA ─────────────────────────────────────────────────────────
-
 export interface Categoria {
   id: string;
   nombre: string;
@@ -149,17 +148,30 @@ export interface Categoria {
   vidaUtilMinimaDias: number;
   rangoTemperaturaMinima?: number;
   rangoTemperaturaMaxima?: number;
-  color?: string; // opcional — asignado localmente en el frontend
+  color?: string;
 }
 
 // ─── TIPOS: CHECKLIST ─────────────────────────────────────────────────────────
 
+export enum TipoCriterio {
+  SiNo     = 0,
+  Numerico = 1,
+  Texto    = 2,
+}
+
+export const TipoCriterioLabels: Record<TipoCriterio, string> = {
+  [TipoCriterio.SiNo]:     "Sí / No",
+  [TipoCriterio.Numerico]: "Numérico",
+  [TipoCriterio.Texto]:    "Texto libre",
+};
+
 export interface CriterioChecklist {
   id: string;
   orden: number;
-  descripcion: string;
-  obligatorio: boolean;
-  tipoCriterio: "SiNo" | "Numerico" | "Texto";
+  criterio: string;
+  descripcion?: string;
+  esCritico: boolean;
+  tipoCriterio: TipoCriterio;
   valorMinimo?: number;
   valorMaximo?: number;
   unidad?: string;
@@ -171,21 +183,21 @@ export interface Checklist {
   categoriaId: string;
   categoriaNombre: string;
   version: number;
-  activo: boolean;
-  criterios: CriterioChecklist[];
-  createdAt: string;
-  updatedAt: string;
+  estado: boolean;
+  creadoEn: string;
+  items: CriterioChecklist[];
 }
 
 export interface ChecklistResumen {
   id: string;
   nombre: string;
+  categoriaId: string;
   categoriaNombre: string;
   version: number;
-  activo: boolean;
+  estado: boolean;
   totalCriterios: number;
   obligatorios: number;
-  updatedAt: string;
+  creadoEn: string;
 }
 
 // ─── SERVICIOS ────────────────────────────────────────────────────────────────
@@ -267,20 +279,68 @@ export const categoriasService = {
 export const checklistsService = {
   async getAll(): Promise<ChecklistResumen[]> {
     const { data } = await apiClient.get("/api/Checklists");
-    return data;
+    return data.map((c: any) => ({
+      ...c,
+      totalCriterios: c.totalCriterios ?? c.items?.length ?? 0,
+      obligatorios:   c.obligatorios   ?? c.items?.filter((i: any) => i.esCritico).length ?? 0,
+    }));
   },
+
   async getById(id: string): Promise<Checklist> {
     const { data } = await apiClient.get(`/api/Checklists/${id}`);
     return data;
   },
-  async crear(payload: Omit<Checklist, "id" | "version" | "createdAt" | "updatedAt">): Promise<{ id: string }> {
-    const { data } = await apiClient.post("/api/Checklists", payload);
+
+  async crear(payload: { nombre: string; categoriaId: string; items: Omit<CriterioChecklist, "id">[] }): Promise<{ id: string }> {
+    const { data } = await apiClient.post("/api/Checklists", {
+      nombre:      payload.nombre,
+      categoriaId: payload.categoriaId,
+      items:       payload.items.map(i => ({
+        criterio:     i.criterio,
+        descripcion:  i.descripcion,
+        esCritico:    i.esCritico,
+        orden:        i.orden,
+        tipoCriterio: i.tipoCriterio,
+        valorMinimo:  i.valorMinimo,
+        valorMaximo:  i.valorMaximo,
+        unidad:       i.unidad,
+      })),
+    });
     return data;
   },
+
   async actualizarCriterios(id: string, criterios: Omit<CriterioChecklist, "id">[]): Promise<void> {
-    await apiClient.put(`/api/Checklists/${id}/criterios`, { criterios });
+    await apiClient.put(`/api/Checklists/${id}/criterios`, {
+      criterios: criterios.map(c => ({
+        criterio:     c.criterio,
+        descripcion:  c.descripcion,
+        esCritico:    c.esCritico,
+        orden:        c.orden,
+        tipoCriterio: c.tipoCriterio,
+        valorMinimo:  c.valorMinimo,
+        valorMaximo:  c.valorMaximo,
+        unidad:       c.unidad,
+      })),
+    });
   },
+
   async publicar(id: string): Promise<void> {
     await apiClient.post(`/api/Checklists/${id}/publicar`);
+  },
+
+  async actualizarChecklist(id: string, payload: { nombre: string; categoriaId: string }): Promise<void> {
+    await apiClient.put(`/api/Checklists/${id}`, payload);
+  },
+
+  async desactivar(id: string): Promise<void> {
+    await apiClient.patch(`/api/Checklists/${id}/desactivar`);
+  },
+
+  async activar(id: string): Promise<void> {
+    await apiClient.patch(`/api/Checklists/${id}/activar`);
+  },
+
+  async eliminar(id: string): Promise<void> {
+    await apiClient.delete(`/api/Checklists/${id}`);
   },
 };

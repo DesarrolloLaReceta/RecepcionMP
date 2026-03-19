@@ -100,3 +100,37 @@ public sealed class CerrarNoConformidadCommandHandler : IRequestHandler<CerrarNo
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
+
+public sealed class CerrarNCDirectoCommand : IRequest, IAuditableCommand
+{
+    public Guid NoConformidadId { get; set; }
+    public string? Observaciones { get; set; }
+
+    public string EntidadAfectada => "NoConformidad";
+    public string RegistroId => NoConformidadId.ToString();
+}
+
+public sealed class CerrarNCDirectoCommandHandler : IRequestHandler<CerrarNCDirectoCommand>
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public CerrarNCDirectoCommandHandler(IUnitOfWork unitOfWork)
+        => _unitOfWork = unitOfWork;
+
+    public async Task Handle(CerrarNCDirectoCommand request, CancellationToken cancellationToken)
+    {
+        var nc = await _unitOfWork.NoConformidades.GetByIdAsync(request.NoConformidadId)
+            ?? throw new AppValidationException("NoConformidadId",
+                $"No se encontró la NC '{request.NoConformidadId}'.");
+
+        if (nc.Estado == EstadoNoConformidad.Cerrada)
+            throw new AppValidationException("NoConformidadId", "La NC ya está cerrada.");
+
+        nc.Estado              = EstadoNoConformidad.Cerrada;
+        nc.ObservacionesCierre = request.Observaciones?.Trim();
+        nc.FechaCierre         = DateTime.UtcNow;
+
+        _unitOfWork.NoConformidades.Update(nc);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+}

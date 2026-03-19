@@ -36,27 +36,28 @@ public sealed class ActualizarCriteriosCommandHandler : IRequestHandler<Actualiz
 
     public async Task Handle(ActualizarCriteriosCommand request, CancellationToken cancellationToken)
     {
-        var checklist = await _unitOfWork.Checklists.GetByIdConItemsAsync(request.ChecklistId)
-            ?? throw new KeyNotFoundException($"Checklist {request.ChecklistId} no encontrado.");
+        if (!await _unitOfWork.Checklists.ExisteAsync(request.ChecklistId))
+            throw new KeyNotFoundException($"Checklist {request.ChecklistId} no encontrado.");
 
-        // Elimina los ítems anteriores y reemplaza
-        checklist.Items.Clear();
-        foreach (var c in request.Criterios.OrderBy(c => c.Orden))
-        {
-            checklist.Items.Add(new ItemChecklist
+        await _unitOfWork.Checklists.RemoverItemsAsync(request.ChecklistId);
+
+        var nuevosItems = request.Criterios
+            .OrderBy(c => c.Orden)
+            .Select(c => new ItemChecklist
             {
-                Criterio    = c.Criterio.Trim(),
-                Descripcion = c.Descripcion?.Trim(),
-                EsCritico   = c.EsCritico,
-                Orden       = c.Orden,
+                ChecklistId  = request.ChecklistId,
+                Criterio     = c.Criterio.Trim(),
+                Descripcion  = c.Descripcion?.Trim(),
+                EsCritico    = c.EsCritico,
+                Orden        = c.Orden,
                 TipoCriterio = c.TipoCriterio,
-                ValorMinimo = c.ValorMinimo,
-                ValorMaximo = c.ValorMaximo,
-                Unidad      = c.Unidad,
-            });
-        }
+                ValorMinimo  = c.ValorMinimo,
+                ValorMaximo  = c.ValorMaximo,
+                Unidad       = c.Unidad,
+            })
+            .ToList();
 
-        _unitOfWork.Checklists.Update(checklist);
+        await _unitOfWork.Checklists.AgregarItemsAsync(nuevosItems);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

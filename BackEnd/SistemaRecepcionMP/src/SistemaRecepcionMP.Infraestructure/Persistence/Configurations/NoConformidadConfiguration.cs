@@ -6,46 +6,37 @@ namespace SistemaRecepcionMP.Infraestructure.Persistence.Configurations;
 
 public sealed class NoConformidadConfiguration : IEntityTypeConfiguration<NoConformidad>
 {
-    public void Configure(EntityTypeBuilder<NoConformidad> builder)
+     public void Configure(EntityTypeBuilder<NoConformidad> builder)
     {
         builder.ToTable("NoConformidades");
-
         builder.HasKey(n => n.Id);
 
-        builder.Property(n => n.Tipo)
-            .IsRequired()
-            .HasConversion<string>()
-            .HasMaxLength(50);
+        builder.Property(n => n.Numero)
+            .IsRequired().HasMaxLength(20);
+
+        builder.Property(n => n.Titulo)
+            .IsRequired().HasMaxLength(200);
 
         builder.Property(n => n.Descripcion)
-            .IsRequired()
+            .IsRequired().HasMaxLength(500);
+
+        builder.Property(n => n.AsignadoA)
+            .HasMaxLength(200);
+
+        builder.Property(n => n.CausaRaiz)
+            .HasMaxLength(500);
+
+        builder.Property(n => n.ObservacionesCierre)
             .HasMaxLength(500);
 
         builder.Property(n => n.CantidadAfectada)
-            .IsRequired()
-            .HasColumnType("decimal(12,3)");
+            .HasPrecision(18, 4);
 
-        builder.Property(n => n.Estado)
-            .IsRequired()
-            .HasConversion<string>()
-            .HasMaxLength(50);
+        builder.HasIndex(n => n.Numero).IsUnique();
 
-        builder.Property(n => n.CreadoEn)
-            .IsRequired();
-
-        builder.HasOne(n => n.Causal)
-            .WithMany()
-            .HasForeignKey(n => n.CausalId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(n => n.UsuarioCreador)
-            .WithMany()
-            .HasForeignKey(n => n.CreadoPor)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasMany(n => n.AccionesCorrectivas)
-            .WithOne(a => a.NoConformidad)
-            .HasForeignKey(a => a.NoConformidadId)
+        builder.HasMany(n => n.Comentarios)
+            .WithOne(c => c.NoConformidad)
+            .HasForeignKey(c => c.NoConformidadId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
@@ -122,5 +113,22 @@ public sealed class BitacoraAuditoriaConfiguration : IEntityTypeConfiguration<Bi
         // Sin índice en ValorAnterior/ValorNuevo — son columnas de solo escritura
         builder.HasIndex(b => new { b.EntidadAfectada, b.RegistroId });
         builder.HasIndex(b => b.FechaHora);
+    }
+}
+
+public sealed class ComentarioNoConformidadConfiguration : IEntityTypeConfiguration<ComentarioNoConformidad>
+{
+    public void Configure(EntityTypeBuilder<ComentarioNoConformidad> builder)
+    {
+        builder.ToTable("ComentariosNoConformidad");
+        builder.HasKey(c => c.Id);
+
+        builder.Property(c => c.Texto)
+            .IsRequired().HasMaxLength(1000);
+
+        builder.HasOne(c => c.Autor)
+            .WithMany()
+            .HasForeignKey(c => c.AutorId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -43,9 +43,9 @@ public sealed class CrearChecklistCommandValidator : AbstractValidator<CrearChec
             .NotEmpty().WithMessage("La categoría es obligatoria.");
 
         RuleFor(x => x.Items)
-            .NotEmpty().WithMessage("El checklist debe tener al menos un ítem.")
             .Must(items => items.Select(i => i.Orden).Distinct().Count() == items.Count)
-            .WithMessage("Los ítems no pueden tener el mismo número de orden.");
+            .WithMessage("Los ítems no pueden tener el mismo número de orden.")
+            .When(x => x.Items != null && x.Items.Any());
 
         RuleForEach(x => x.Items).SetValidator(new ItemChecklistRequestValidator());
     }
@@ -101,7 +101,7 @@ public sealed class CrearChecklistCommandHandler : IRequestHandler<CrearChecklis
             Nombre = request.Nombre.Trim(),
             CategoriaId = request.CategoriaId,
             Version = version,
-            Estado = true,
+            Estado = false,
             CreadoEn = DateTime.UtcNow
         };
 

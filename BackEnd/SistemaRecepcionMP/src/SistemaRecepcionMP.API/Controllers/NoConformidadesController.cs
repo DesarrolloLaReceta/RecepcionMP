@@ -103,4 +103,61 @@ public sealed class NoConformidadesController : BaseController
         await Mediator.Send(command, ct);
         return NoContent();
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll(
+        [FromQuery] EstadoNoConformidad? estado = null,
+        [FromQuery] TipoNoConformidad? tipo = null,
+        [FromQuery] PrioridadNoConformidad? prioridad = null,
+        CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new GetNoConformidadesListQuery
+        {
+            Estado   = estado,
+            Tipo     = tipo,
+            Prioridad = prioridad,
+        }, ct);
+        return Ok(result);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new GetNoConformidadByIdQuery(id), ct);
+        return Ok(result);
+    }
+
+    [HttpPost("{id:guid}/comentarios")]
+    public async Task<IActionResult> AgregarComentario(
+        Guid id,
+        [FromBody] AgregarComentarioNCCommand command,
+        CancellationToken ct = default)
+    {
+        command.NoConformidadId = id;
+        var comentarioId = await Mediator.Send(command, ct);
+        return Created(string.Empty, new { id = comentarioId });
+    }
+
+    [HttpPost("{id:guid}/cerrar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Cerrar(
+        Guid id,
+        [FromBody] CerrarNCDirectoCommand command,
+        CancellationToken ct = default)
+    {
+        command.NoConformidadId = id;
+        await Mediator.Send(command, ct);
+        return NoContent();
+    }
+
+    /// <summary>Lista las causales activas para el formulario de NC.</summary>
+    [HttpGet("causales")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCausales(CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new GetCausalesNCQuery(), ct);
+        return Ok(result);
+    }
 }

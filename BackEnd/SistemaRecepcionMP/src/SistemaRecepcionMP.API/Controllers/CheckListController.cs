@@ -1,5 +1,5 @@
 using SistemaRecepcionMP.Application.Features.Checklists.Commands;
-using SistemaRecepcionMP.Application.Features.Checklists.Queries;
+using SistemaRecepcionMP.Application.Features.CheckList.Queries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SistemaRecepcionMP.API.Controllers;
@@ -115,6 +115,36 @@ public sealed class ChecklistsController : BaseController
     public async Task<IActionResult> Publicar(Guid id, CancellationToken ct = default)
     {
         await Mediator.Send(new PublicarChecklistCommand { ChecklistId = id }, ct);
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Actualizar(
+        Guid id, [FromBody] ActualizarCheckListCommand command, CancellationToken ct = default)
+    {
+        command.ChecklistId = id;
+        await Mediator.Send(command, ct);
+        return NoContent();
+    }
+
+    [HttpPatch("{id:guid}/desactivar")]
+    public async Task<IActionResult> Desactivar(Guid id, CancellationToken ct = default)
+    {
+        await Mediator.Send(new PublicarChecklistCommand { ChecklistId = id, Activar = false }, ct);
+        return NoContent();
+    }
+
+    [HttpPatch("{id:guid}/activar")]
+    public async Task<IActionResult> Activar(Guid id, CancellationToken ct = default)
+    {
+        await Mediator.Send(new PublicarChecklistCommand { ChecklistId = id, Activar = true }, ct);
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Eliminar(Guid id, CancellationToken ct = default)
+    {
+        await Mediator.Send(new EliminarCheckListCommand { ChecklistId = id }, ct);
         return NoContent();
     }
 }

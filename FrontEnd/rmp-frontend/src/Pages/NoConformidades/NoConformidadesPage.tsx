@@ -9,6 +9,7 @@ import {
   type AgregarAccionCommand,
   type AccionCorrectiva,
 } from "../../Services/no-conformidades.service";
+import { apiClient } from "../../Services/apiClient";
 import { Button, Modal, ModalFooter } from "../../Components/UI/Index";
 import {
   TextField, SelectField, DateField,
@@ -18,7 +19,7 @@ import { formatDate, formatDateTime } from "../../Utils/formatters";
 import { MOCK_NC } from "./MockData";
 import "./StylesNoC/NoConformidadesPage.css";
 
-const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+const isMock = import.meta.env.VITE_USE_MOCK === "true";
 
 // helpers
 function diasRestantes(f?: string): number | null {
@@ -27,11 +28,11 @@ function diasRestantes(f?: string): number | null {
 }
 
 const ESTADO_CFG: Record<EstadoNC, { color: string; bg: string; dot: string }> = {
-  [EstadoNC.Abierta]:     { color: "#FCA5A5", bg: "rgba(239,68,68,0.08)",   dot: "#EF4444" },
-  [EstadoNC.EnAnalisis]:  { color: "#93C5FD", bg: "rgba(59,130,246,0.08)",  dot: "#3B82F6" },
-  [EstadoNC.EnEjecucion]: { color: "#FCD34D", bg: "rgba(245,158,11,0.08)",  dot: "#F59E0B" },
-  [EstadoNC.Cerrada]:     { color: "#86EFAC", bg: "rgba(34,197,94,0.08)",   dot: "#22C55E" },
-  [EstadoNC.Anulada]:     { color: "#94A3B8", bg: "rgba(100,116,139,0.1)",  dot: "#64748B" },
+  [EstadoNC.Abierta]:    { color: "#FCA5A5", bg: "rgba(239,68,68,0.08)",   dot: "#EF4444" },
+  [EstadoNC.EnAnalisis]: { color: "#93C5FD", bg: "rgba(59,130,246,0.08)",  dot: "#3B82F6" },
+  [EstadoNC.EnProceso]:  { color: "#FCD34D", bg: "rgba(245,158,11,0.08)",  dot: "#F59E0B" },
+  [EstadoNC.Cerrada]:    { color: "#86EFAC", bg: "rgba(34,197,94,0.08)",   dot: "#22C55E" },
+  [EstadoNC.Anulada]:    { color: "#94A3B8", bg: "rgba(100,116,139,0.1)",  dot: "#64748B" },
 };
 const PRIORIDAD_CFG: Record<PrioridadNC, { color: string; bg: string; border: string }> = {
   [PrioridadNC.Baja]:    { color: "#86EFAC", bg: "rgba(34,197,94,0.06)",  border: "rgba(34,197,94,0.15)"  },
@@ -115,17 +116,20 @@ function DetallePanel({ nc, onClose, onAgregarAccion, onCerrar, saving }: {
   const [activeTab,      setActiveTab]      = useState<"acciones" | "comentarios">("acciones");
   const [showAccionForm, setShowAccionForm] = useState(false);
   const [showCierreForm, setShowCierreForm] = useState(false);
-  const [accion,  setAccion]  = useState({ descripcion: "", responsable: "", fechaCompromiso: "" });
+  // accion usa descripcionAccion y responsableId alineados con backend
+  const [accion,    setAccion]    = useState({ descripcionAccion: "", responsableId: "", fechaCompromiso: "" });
   const [obsCierre, setObsCierre] = useState("");
   const cerrada = nc.estado === EstadoNC.Cerrada || nc.estado === EstadoNC.Anulada;
   const ec = ESTADO_CFG[nc.estado];
   const pc = PRIORIDAD_CFG[nc.prioridad];
+
   const submitAccion = () => {
-    if (!accion.descripcion || !accion.responsable || !accion.fechaCompromiso) return;
+    if (!accion.descripcionAccion || !accion.responsableId || !accion.fechaCompromiso) return;
     onAgregarAccion({ ncId: nc.id, ...accion });
-    setAccion({ descripcion: "", responsable: "", fechaCompromiso: "" });
+    setAccion({ descripcionAccion: "", responsableId: "", fechaCompromiso: "" });
     setShowAccionForm(false);
   };
+
   return (
     <>
       <div className="ncp-panel-header">
@@ -143,6 +147,7 @@ function DetallePanel({ nc, onClose, onAgregarAccion, onCerrar, saving }: {
           </span>
         </div>
       </div>
+
       <div className="ncp-panel-tabs">
         {([
           { key: "acciones",    label: `Acciones CAPA (${nc.accionesCorrectivas.length})` },
@@ -152,6 +157,7 @@ function DetallePanel({ nc, onClose, onAgregarAccion, onCerrar, saving }: {
             onClick={() => setActiveTab(t.key)}>{t.label}</button>
         ))}
       </div>
+
       <div className="ncp-panel-scroll">
         {activeTab === "acciones" && (
           <>
@@ -165,19 +171,19 @@ function DetallePanel({ nc, onClose, onAgregarAccion, onCerrar, saving }: {
             {showAccionForm && (
               <div className="ncp-form-box">
                 <TextAreaField label="Descripción" required placeholder="Describe la acción…" rows={2}
-                  value={accion.descripcion}
-                  onChange={e => setAccion(p => ({ ...p, descripcion: e.target.value }))} />
+                  value={accion.descripcionAccion}
+                  onChange={e => setAccion(p => ({ ...p, descripcionAccion: e.target.value }))} />
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-                  <TextField label="Responsable" required placeholder="Nombre y área"
-                    value={accion.responsable}
-                    onChange={e => setAccion(p => ({ ...p, responsable: e.target.value }))} />
+                  <TextField label="ID Responsable" required placeholder="GUID del responsable"
+                    value={accion.responsableId}
+                    onChange={e => setAccion(p => ({ ...p, responsableId: e.target.value }))} />
                   <DateField label="Fecha compromiso" required
                     min={new Date().toISOString().slice(0, 10)}
                     value={accion.fechaCompromiso}
                     onChange={e => setAccion(p => ({ ...p, fechaCompromiso: e.target.value }))} />
                 </div>
                 <Button variant="secondary" size="sm" fullWidth loading={saving}
-                  disabled={!accion.descripcion || !accion.responsable || !accion.fechaCompromiso}
+                  disabled={!accion.descripcionAccion || !accion.responsableId || !accion.fechaCompromiso}
                   onClick={submitAccion}>
                   Agregar acción
                 </Button>
@@ -211,13 +217,14 @@ function DetallePanel({ nc, onClose, onAgregarAccion, onCerrar, saving }: {
             ? <p style={{ fontSize: "var(--text-sm)", color: "var(--text-tertiary)", textAlign: "center", padding: "1rem" }}>Sin comentarios.</p>
             : nc.comentarios.map(c => (
               <div key={c.id} className="ncp-comment">
-                <p className="ncp-comment-autor">{c.autor}</p>
+                <p className="ncp-comment-autor">{c.autorNombre}</p>
                 <p className="ncp-comment-texto">{c.texto}</p>
                 <p className="ncp-comment-fecha">{formatDateTime(c.fechaRegistro)}</p>
               </div>
             ))
         )}
       </div>
+
       {!cerrada && (
         <div className="ncp-panel-footer">
           {showCierreForm ? (
@@ -237,10 +244,7 @@ function DetallePanel({ nc, onClose, onAgregarAccion, onCerrar, saving }: {
               Cerrar no conformidad
             </Button>
           )}
-          <p className="ncp-footer-meta">
-            Creada: {formatDateTime(nc.creadoEn)}
-            {nc.actualizadoEn ? ` · Actualizada: ${formatDateTime(nc.actualizadoEn)}` : ""}
-          </p>
+          <p className="ncp-footer-meta">Creada: {formatDateTime(nc.creadoEn)}</p>
         </div>
       )}
     </>
@@ -251,21 +255,73 @@ function DetallePanel({ nc, onClose, onAgregarAccion, onCerrar, saving }: {
 function ModalCrear({ onClose, onCrear, saving }: {
   onClose: () => void; onCrear: (cmd: CrearNCCommand) => void; saving: boolean;
 }) {
+
+  const [causales, setCausales] = useState<{ id: string; nombre: string }[]>([]);
+  const [lotes, setLotes] = useState<{ id: string; label: string }[]>([]);
+
+  useEffect(() => {
+    apiClient.get("/api/NoConformidades/causales")
+      .then(r => setCausales(r.data))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    apiClient.get("/api/Lotes/pendientes-liberacion")
+      .then(r => setLotes(
+        r.data.map((l: { id: string; numeroLoteInterno: string; itemNombre: string }) => ({
+          id:    l.id,
+          label: `${l.numeroLoteInterno} — ${l.itemNombre}`,
+        }))
+      ))
+      .catch(() => {});
+  }, []);
+
   const [form, setForm] = useState<CrearNCCommand>({
-    tipo: TipoNC.Rechazo, prioridad: PrioridadNC.Media,
-    titulo: "", descripcion: "", proveedorId: "", loteId: "", recepcionId: "",
-    cantidadAfectada: undefined, unidadMedida: "", fechaLimite: "",
-    asignadoA: "", notificarProveedor: false,
+    loteRecibidoId:   "",
+    titulo:           "",
+    tipo:             TipoNC.RechazoTotal,
+    prioridad:        PrioridadNC.Media,
+    causalId:         "",
+    descripcion:      "",
+    cantidadAfectada: 0,
+    asignadoA:        undefined,
+    fechaLimite:      undefined,
   });
-  const upd = <K extends keyof CrearNCCommand>(k: K, v: CrearNCCommand[K]) => setForm(p => ({ ...p, [k]: v }));
-  const valid = form.descripcion.trim().length > 5;
+
+  const upd = <K extends keyof CrearNCCommand>(k: K, v: CrearNCCommand[K]) =>
+    setForm(p => ({ ...p, [k]: v }));
+
+  const isGuid = (s: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s.trim());
+
+
+  const valid =
+    form.titulo.trim().length > 0 &&
+    form.descripcion.trim().length > 5 &&
+    form.loteRecibidoId.trim().length > 0
+    isGuid(form.causalId) &&
+    form.cantidadAfectada > 0;
+
   const tipoOptions      = Object.entries(TipoNCLabels).map(([k, v]) => ({ value: k, label: v }));
   const prioridadOptions = Object.entries(PrioridadNCLabels).map(([k, v]) => ({ value: k, label: v }));
+
   return (
     <Modal open onClose={onClose} title="Nueva no conformidad"
       icon="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
       size="lg"
-      footer={<ModalFooter onCancel={onClose} onConfirm={() => onCrear(form)} loading={saving} disabled={!valid} confirmLabel="Registrar NC" />}>
+      footer={<ModalFooter 
+        onCancel={onClose} 
+        onConfirm={() => onCrear({
+          ...form,
+          loteRecibidoId:   form.loteRecibidoId.trim(),
+          causalId:         form.causalId.trim(),
+          asignadoA:        form.asignadoA?.trim() || undefined,
+          fechaLimite:      form.fechaLimite || undefined,
+        })}
+        loading={saving} 
+        disabled={!valid} 
+        confirmLabel="Registrar NC" 
+        />}>
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
           <SelectField label="Tipo de NC" required options={tipoOptions}
@@ -278,29 +334,33 @@ function ModalCrear({ onClose, onCrear, saving }: {
         <TextAreaField label="Descripción" required rows={3}
           placeholder="Describe detalladamente la no conformidad…"
           value={form.descripcion} onChange={e => upd("descripcion", e.target.value)} />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
-          <NumberField label="Cantidad afectada" placeholder="0" min={0}
-            value={form.cantidadAfectada ?? ""}
-            onChange={e => upd("cantidadAfectada", e.target.value ? Number(e.target.value) : undefined)} />
-          <TextField label="Unidad de medida" placeholder="Kg, L, Unidad…"
-            value={form.unidadMedida ?? ""} onChange={e => upd("unidadMedida", e.target.value)} />
-          <DateField label="Fecha límite"
-            value={form.fechaLimite ?? ""} onChange={e => upd("fechaLimite", e.target.value)} />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+          <SelectField
+            label="Lote"
+            required
+            options={[
+              { value: "", label: "Selecciona un lote..." },
+              ...lotes.map(l => ({ value: l.id, label: l.label }))
+            ]}
+            value={form.loteRecibidoId}
+            onChange={e => upd("loteRecibidoId", e.target.value)}
+          />
+          <SelectField
+            label="Causal"
+            required
+            options={causales.map(c => ({ value: c.id, label: c.nombre }))}
+            value={form.causalId}
+            onChange={e => upd("causalId", e.target.value)}
+          />
         </div>
-        <TextField label="Asignado a" placeholder="Nombre del responsable"
-          value={form.asignadoA ?? ""} onChange={e => upd("asignadoA", e.target.value)} />
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <button type="button"
-            onClick={() => upd("notificarProveedor", !form.notificarProveedor)}
-            style={{ width: "2.25rem", height: "1.25rem", borderRadius: "var(--radius-full)",
-              background: form.notificarProveedor ? "#F59E0B" : "rgba(255,255,255,0.08)",
-              border: "none", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}
-            aria-pressed={form.notificarProveedor} aria-label="Notificar al proveedor">
-            <span style={{ position: "absolute", top: "0.125rem", width: "1rem", height: "1rem",
-              borderRadius: "var(--radius-full)", background: "#fff",
-              left: form.notificarProveedor ? "1.125rem" : "0.125rem", transition: "left 0.2s" }} />
-          </button>
-          <span style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>Notificar al proveedor</span>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
+          <NumberField label="Cantidad afectada" required placeholder="0" min={0}
+            value={form.cantidadAfectada}
+            onChange={e => upd("cantidadAfectada", Number(e.target.value))} />
+          <DateField label="Fecha límite"
+            value={form.fechaLimite ?? ""} onChange={e => upd("fechaLimite", e.target.value || undefined)} />
+          <TextField label="Asignado a" placeholder="Nombre del responsable"
+            value={form.asignadoA ?? ""} onChange={e => upd("asignadoA", e.target.value || undefined)} />
         </div>
       </div>
     </Modal>
@@ -309,20 +369,22 @@ function ModalCrear({ onClose, onCrear, saving }: {
 
 // página principal
 export default function NoConformidadesPage() {
-  const [ncs,            setNcs]            = useState<NoConformidad[]>([]);
-  const [loading,        setLoading]        = useState(true);
-  const [error,          setError]          = useState<string | null>(null);
-  const [selected,       setSelected]       = useState<NoConformidad | null>(null);
-  const [showCrear,      setShowCrear]      = useState(false);
-  const [saving,         setSaving]         = useState(false);
-  const [search,         setSearch]         = useState("");
-  const [filtroEstado,   setFiltroEstado]   = useState<EstadoNC | "">("");
-  const [filtroPrioridad,setFiltroPrioridad]= useState<PrioridadNC | "">("");
+  const [ncs,             setNcs]             = useState<NoConformidad[]>([]);
+  const [loading,         setLoading]         = useState(true);
+  const [error,           setError]           = useState<string | null>(null);
+  const [selected,        setSelected]        = useState<NoConformidad | null>(null);
+  const [showCrear,       setShowCrear]       = useState(false);
+  const [saving,          setSaving]          = useState(false);
+  const [search,          setSearch]          = useState("");
+  const [filtroEstado,    setFiltroEstado]    = useState<EstadoNC | "">("");
+  const [filtroPrioridad, setFiltroPrioridad] = useState<PrioridadNC | "">("");
 
   const cargar = useCallback(async () => {
     setLoading(true); setError(null);
-    try { const data = isMock ? MOCK_NC : await noConformidadesService.getAll(); setNcs(data); }
-    catch { setError("No se pudo cargar las no conformidades."); }
+    try {
+      const data = isMock ? MOCK_NC : await noConformidadesService.getAll();
+      setNcs(data);
+    } catch { setError("No se pudo cargar las no conformidades."); }
     finally { setLoading(false); }
   }, []);
   useEffect(() => { cargar(); }, [cargar]);
@@ -341,8 +403,9 @@ export default function NoConformidadesPage() {
   });
 
   const abiertas  = ncs.filter(n => n.estado === EstadoNC.Abierta).length;
-  const enGestion = ncs.filter(n => n.estado === EstadoNC.EnEjecucion || n.estado === EstadoNC.EnAnalisis).length;
-  const criticas  = ncs.filter(n => n.prioridad === PrioridadNC.Critica && n.estado !== EstadoNC.Cerrada && n.estado !== EstadoNC.Anulada).length;
+  const enGestion = ncs.filter(n => n.estado === EstadoNC.EnProceso || n.estado === EstadoNC.EnAnalisis).length;
+  const criticas  = ncs.filter(n => n.prioridad === PrioridadNC.Critica &&
+    n.estado !== EstadoNC.Cerrada && n.estado !== EstadoNC.Anulada).length;
 
   const handleCrear = async (cmd: CrearNCCommand) => {
     setSaving(true);
@@ -350,16 +413,29 @@ export default function NoConformidadesPage() {
       if (isMock) {
         await new Promise(r => setTimeout(r, 700));
         const nueva: NoConformidad = {
-          id: `nc-mock-${Date.now()}`, numero: `NC-2026-${String(ncs.length + 1).padStart(4, "0")}`,
-          tipo: cmd.tipo, prioridad: cmd.prioridad, estado: EstadoNC.Abierta,
-          titulo: cmd.titulo, descripcion: cmd.descripcion,
-          detectadoPor: "Usuario actual", fechaDeteccion: new Date().toISOString().slice(0, 10),
-          accionesCorrectivas: [], cantidadAfectada: cmd.cantidadAfectada,
-          unidadMedida: cmd.unidadMedida, fechaLimite: cmd.fechaLimite,
-          notificarProveedor: cmd.notificarProveedor, creadoEn: new Date().toISOString(), comentarios: [],
+          id:                  `nc-mock-${Date.now()}`,
+          numero:              `NC-2026-${String(ncs.length + 1).padStart(4, "0")}`,
+          titulo:              cmd.titulo,
+          tipo:                cmd.tipo,
+          prioridad:           cmd.prioridad,
+          estado:              EstadoNC.Abierta,
+          descripcion:         cmd.descripcion,
+          causalNombre:        "—",
+          creadoEn:            new Date().toISOString(),
+          creadoPorNombre:     "Usuario actual",
+          cantidadAfectada:    cmd.cantidadAfectada,
+          asignadoA:           cmd.asignadoA,
+          fechaLimite:         cmd.fechaLimite,
+          totalAcciones:       0,
+          accionesPendientes:  0,
+          accionesCorrectivas: [],
+          comentarios:         [],
         };
         setNcs(p => [nueva, ...p]);
-      } else { await noConformidadesService.crear(cmd); await cargar(); }
+      } else {
+        await noConformidadesService.crear(cmd);
+        await cargar();
+      }
       setShowCrear(false);
     } catch { setError("Error al crear la no conformidad."); }
     finally { setSaving(false); }
@@ -370,13 +446,21 @@ export default function NoConformidadesPage() {
     try {
       if (isMock) {
         await new Promise(r => setTimeout(r, 500));
-        const nueva: AccionCorrectiva = { id: `ac-${Date.now()}`, descripcion: cmd.descripcion,
-          responsable: cmd.responsable, fechaCompromiso: cmd.fechaCompromiso, estado: "Pendiente" };
+        const nueva: AccionCorrectiva = {
+          id:               `ac-${Date.now()}`,
+          descripcion:      cmd.descripcionAccion,
+          responsable:      cmd.responsableId,
+          fechaCompromiso:  cmd.fechaCompromiso,
+          estado:           "Pendiente",
+        };
         const patch = (n: NoConformidad) => n.id === cmd.ncId
           ? { ...n, accionesCorrectivas: [...n.accionesCorrectivas, nueva] } : n;
         setNcs(p => p.map(patch));
         setSelected(p => p && p.id === cmd.ncId ? patch(p) : p);
-      } else { await noConformidadesService.agregarAccion(cmd); await cargar(); }
+      } else {
+        await noConformidadesService.agregarAccion(cmd);
+        await cargar();
+      }
     } catch { setError("No se pudo agregar la acción."); }
     finally { setSaving(false); }
   };
@@ -390,7 +474,10 @@ export default function NoConformidadesPage() {
           ? { ...n, estado: EstadoNC.Cerrada, fechaCierre: new Date().toISOString().slice(0, 10) } : n;
         setNcs(p => p.map(patch));
         setSelected(p => p && p.id === cmd.ncId ? patch(p) : p);
-      } else { await noConformidadesService.cerrar({ ncId: cmd.ncId, observaciones: cmd.observaciones }); await cargar(); }
+      } else {
+        await noConformidadesService.cerrar({ ncId: cmd.ncId, observaciones: cmd.observaciones });
+        await cargar();
+      }
     } catch { setError("No se pudo cerrar la NC."); }
     finally { setSaving(false); }
   };
@@ -408,10 +495,13 @@ export default function NoConformidadesPage() {
         </div>
         <div className="ncp-header-actions">
           <Button variant="ghost" size="sm" loading={loading} onClick={cargar}
-            iconLeft="M1 4v6h6M23 20v-6h-6M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"
-            >Actualizar</Button>
+            iconLeft="M1 4v6h6M23 20v-6h-6M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15">
+            Actualizar
+          </Button>
           <Button variant="primary" size="sm" onClick={() => setShowCrear(true)}
-            iconLeft="M12 5v14M5 12h14">Nueva NC</Button>
+            iconLeft="M12 5v14M5 12h14">
+            Nueva NC
+          </Button>
         </div>
       </div>
 
@@ -439,8 +529,10 @@ export default function NoConformidadesPage() {
 
       <div className="ncp-filters">
         <div className="ncp-search-wrap">
-          <svg className="ncp-search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" aria-hidden="true">
-            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+          <svg className="ncp-search-icon" width="12" height="12" viewBox="0 0 24 24"
+            fill="none" stroke="#475569" strokeWidth="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
           </svg>
           <input type="text" placeholder="Buscar número, proveedor, ítem…"
             value={search} onChange={e => setSearch(e.target.value)}
@@ -467,7 +559,7 @@ export default function NoConformidadesPage() {
               <thead>
                 <tr>
                   <th style={{ width: 2, padding: 0 }} />
-                  {[["N.° / Tipo"], ["Proveedor"], ["Prioridad"], ["Estado"], ["Límite"], ["CAPA"]].map(([label]) => (
+                  {["N.° / Tipo", "Proveedor / Ítem", "Prioridad", "Estado", "Límite", "CAPA"].map(label => (
                     <th key={label} style={{ padding: "0.875rem 1rem" }}>
                       <span className="ncp-th-label">{label}</span>
                     </th>
@@ -487,11 +579,17 @@ export default function NoConformidadesPage() {
                     </tr>
                   ))
                   : filtered.length === 0
-                  ? (<tr><td colSpan={8}><div className="ncp-empty"><p className="ncp-empty-text">
-                      {search || filtroEstado !== "" || filtroPrioridad !== ""
-                        ? "Sin resultados para este filtro."
-                        : "No hay no conformidades registradas."}
-                    </p></div></td></tr>)
+                  ? (
+                    <tr><td colSpan={8}>
+                      <div className="ncp-empty">
+                        <p className="ncp-empty-text">
+                          {search || filtroEstado !== "" || filtroPrioridad !== ""
+                            ? "Sin resultados para este filtro."
+                            : "No hay no conformidades registradas."}
+                        </p>
+                      </div>
+                    </td></tr>
+                  )
                   : filtered.map(nc => (
                     <NCRow key={nc.id} nc={nc} selected={selected?.id === nc.id}
                       onClick={() => setSelected(selected?.id === nc.id ? null : nc)} />
@@ -504,14 +602,23 @@ export default function NoConformidadesPage() {
 
         {selected && (
           <div className="ncp-panel">
-            <DetallePanel nc={selected} onClose={() => setSelected(null)}
-              onAgregarAccion={handleAgregarAccion} onCerrar={handleCerrar} saving={saving} />
+            <DetallePanel
+              nc={selected}
+              onClose={() => setSelected(null)}
+              onAgregarAccion={handleAgregarAccion}
+              onCerrar={handleCerrar}
+              saving={saving}
+            />
           </div>
         )}
       </div>
 
       {showCrear && (
-        <ModalCrear onClose={() => setShowCrear(false)} onCrear={handleCrear} saving={saving} />
+        <ModalCrear
+          onClose={() => setShowCrear(false)}
+          onCrear={handleCrear}
+          saving={saving}
+        />
       )}
     </div>
   );
