@@ -7,18 +7,14 @@ export enum EstadoOC {
   Abierta               = 0,
   ParcialmenteRecibida  = 1,
   TotalmenteRecibida    = 2,
-  Cerrada               = 3,
-  Cancelada             = 4,
-  Vencida               = 5,
+  Cancelada             = 3,
 }
 
 export const EstadoOCLabels: Record<EstadoOC, string> = {
   [EstadoOC.Abierta]:              "Abierta",
   [EstadoOC.ParcialmenteRecibida]: "Parcialmente recibida",
   [EstadoOC.TotalmenteRecibida]:   "Totalmente recibida",
-  [EstadoOC.Cerrada]:              "Cerrada",
   [EstadoOC.Cancelada]:            "Cancelada",
-  [EstadoOC.Vencida]:              "Vencida",
 };
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
@@ -140,10 +136,10 @@ export const ordenesCompraService = {
     await apiClient.post(`/api/OrdenesCompra/${id}/aprobar`);
   },
 
-  async cancelar(id: string, motivo: string): Promise<void> {
+  async cancelar(id: string, Motivo: string): Promise<void> {
     await apiClient.patch(`/api/OrdenesCompra/${id}/estado`, {
-      nuevoEstado: 4,  // EstadoOC.Cancelada
-      motivo,
+      NuevoEstado: 3,  // EstadoOC.Cancelada
+      Motivo,
     });
   },
 

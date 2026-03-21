@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SistemaRecepcionMP.Infraestructure.Persistence;
 
@@ -11,9 +12,11 @@ using SistemaRecepcionMP.Infraestructure.Persistence;
 namespace SistemaRecepcionMP.Infraestructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260317200724_AddTipoCriterioToItemChecklist")]
+    partial class AddTipoCriterioToItemChecklist
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -194,35 +197,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasFilter("[Estado] = 1");
 
                     b.ToTable("ChecklistsBPM", (string)null);
-                });
-
-            modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.ComentarioNoConformidad", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AutorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("FechaRegistro")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("NoConformidadId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Texto")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AutorId");
-
-                    b.HasIndex("NoConformidadId");
-
-                    b.ToTable("ComentariosNoConformidad", (string)null);
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.ContactoProveedor", b =>
@@ -756,19 +730,14 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AsignadoA")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
                     b.Property<decimal>("CantidadAfectada")
                         .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<string>("CausaRaiz")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("decimal(12,3)");
 
                     b.Property<Guid>("CausalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CausalNoConformidadId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreadoEn")
@@ -782,51 +751,28 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("Estado")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("FechaCierre")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateOnly?>("FechaLimite")
-                        .HasColumnType("date");
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid>("LoteRecibidoId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Numero")
+                    b.Property<string>("Tipo")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ObservacionesCierre")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("Prioridad")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Titulo")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<Guid>("UsuarioCreadorId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CausalId");
 
+                    b.HasIndex("CausalNoConformidadId");
+
+                    b.HasIndex("CreadoPor");
+
                     b.HasIndex("LoteRecibidoId");
-
-                    b.HasIndex("Numero")
-                        .IsUnique();
-
-                    b.HasIndex("UsuarioCreadorId");
 
                     b.ToTable("NoConformidades", (string)null);
                 });
@@ -1213,25 +1159,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     b.Navigation("Categoria");
                 });
 
-            modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.ComentarioNoConformidad", b =>
-                {
-                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "Autor")
-                        .WithMany()
-                        .HasForeignKey("AutorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SistemaRecepcionMP.Domain.Entities.NoConformidad", "NoConformidad")
-                        .WithMany("Comentarios")
-                        .HasForeignKey("NoConformidadId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Autor");
-
-                    b.Navigation("NoConformidad");
-                });
-
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.ContactoProveedor", b =>
                 {
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.Proveedor", "Proveedor")
@@ -1479,21 +1406,25 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.NoConformidad", b =>
                 {
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.CausalNoConformidad", "Causal")
-                        .WithMany("NoConformidades")
+                        .WithMany()
                         .HasForeignKey("CausalId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SistemaRecepcionMP.Domain.Entities.CausalNoConformidad", null)
+                        .WithMany("NoConformidades")
+                        .HasForeignKey("CausalNoConformidadId");
+
+                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "UsuarioCreador")
+                        .WithMany()
+                        .HasForeignKey("CreadoPor")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.LoteRecibido", "LoteRecibido")
                         .WithMany("NoConformidades")
                         .HasForeignKey("LoteRecibidoId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "UsuarioCreador")
-                        .WithMany()
-                        .HasForeignKey("UsuarioCreadorId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Causal");
@@ -1681,8 +1612,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.NoConformidad", b =>
                 {
                     b.Navigation("AccionesCorrectivas");
-
-                    b.Navigation("Comentarios");
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.OrdenCompra", b =>

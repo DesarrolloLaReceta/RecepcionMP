@@ -15,12 +15,14 @@ namespace SistemaRecepcionMP.Application.Features.NoConformidades.Commands;
 public sealed class CrearNoConformidadCommand : IRequest<Guid>, IAuditableCommand
 {
     public Guid LoteRecibidoId { get; set; }
+    public string Titulo { get; set; } = string.Empty;
     public TipoNoConformidad Tipo { get; set; }
+    public PrioridadNoConformidad Prioridad { get; set; }
     public Guid CausalId { get; set; }
     public string Descripcion { get; set; } = string.Empty;
     public decimal CantidadAfectada { get; set; }
-
-    // IAuditableCommand
+    public string? AsignadoA { get; set; }
+    public DateOnly? FechaLimite { get; set; }
     public string EntidadAfectada => "NoConformidad";
     public string RegistroId => LoteRecibidoId.ToString();
 }
@@ -34,17 +36,18 @@ public sealed class CrearNoConformidadCommandValidator
     {
         RuleFor(x => x.LoteRecibidoId)
             .NotEmpty().WithMessage("El lote es obligatorio.");
-
+        RuleFor(x => x.Titulo)
+            .NotEmpty().WithMessage("El título es obligatorio.")
+            .MaximumLength(200);
         RuleFor(x => x.Tipo)
-            .IsInEnum().WithMessage("El tipo de no conformidad no es válido.");
-
+            .IsInEnum().WithMessage("El tipo no es válido.");
+        RuleFor(x => x.Prioridad)
+            .IsInEnum().WithMessage("La prioridad no es válida.");
         RuleFor(x => x.CausalId)
             .NotEmpty().WithMessage("La causal es obligatoria.");
-
         RuleFor(x => x.Descripcion)
             .NotEmpty().WithMessage("La descripción es obligatoria.")
-            .MaximumLength(500).WithMessage("La descripción no puede superar 500 caracteres.");
-
+            .MaximumLength(500);
         RuleFor(x => x.CantidadAfectada)
             .GreaterThan(0).WithMessage("La cantidad afectada debe ser mayor a 0.");
     }
@@ -70,41 +73,35 @@ public sealed class CrearNoConformidadCommandHandler
         CrearNoConformidadCommand request,
         CancellationToken cancellationToken)
     {
-        // 1. Verificar lote existe
         var lote = await _unitOfWork.Lotes.GetByIdAsync(request.LoteRecibidoId)
             ?? throw new LoteNotFoundException(request.LoteRecibidoId);
 
-        // 2. Verificar que lote no está liberado
         if (lote.Estado == EstadoLote.Liberado)
             throw new LoteYaLiberadoException(lote.CodigoLoteInterno);
 
-        // 3. Verificar causal existe y está activa
-        var causal = await _unitOfWork.NoConformidades.GetByIdAsync(request.CausalId)
-            ?? throw new AppValidationException("CausalId",
-                $"No se encontró la causal con ID '{request.CausalId}'.");
+        // Generar número consecutivo
+        var count = (await _unitOfWork.NoConformidades.GetAllAsync()).Count();
+        var numero = $"NC-{DateTime.UtcNow.Year}-{(count + 1):D4}";
 
-        // 4. Verificar cantidad no supera lo recibido
-        if (request.CantidadAfectada > lote.CantidadRecibida)
-            throw new AppValidationException("CantidadAfectada",
-                $"La cantidad afectada ({request.CantidadAfectada}) no puede superar " +
-                $"la cantidad recibida ({lote.CantidadRecibida}).");
-
-        var noConformidad = new NoConformidad
+        var nc = new NoConformidad
         {
-            LoteRecibidoId = lote.Id,
-            Tipo = request.Tipo,
-            CausalId = request.CausalId,
-            Descripcion = request.Descripcion.Trim(),
+            Numero           = numero,
+            Titulo           = request.Titulo.Trim(),
+            LoteRecibidoId   = request.LoteRecibidoId,
+            Tipo             = request.Tipo,
+            Prioridad        = request.Prioridad,
+            CausalId         = request.CausalId,
+            Descripcion      = request.Descripcion.Trim(),
             CantidadAfectada = request.CantidadAfectada,
-            Estado = EstadoNoConformidad.Abierta,
-            CreadoPor = _currentUser.UserId,
-            CreadoEn = DateTime.UtcNow
+            AsignadoA        = request.AsignadoA?.Trim(),
+            FechaLimite      = request.FechaLimite,
+            Estado           = EstadoNoConformidad.Abierta,
+            CreadoPor        = _currentUser.UserId,
+            CreadoEn         = DateTime.UtcNow,
         };
 
-        lote.NoConformidades.Add(noConformidad);
-        _unitOfWork.Lotes.Update(lote);
+        await _unitOfWork.NoConformidades.AddAsync(nc);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return noConformidad.Id;
+        return nc.Id;
     }
 }

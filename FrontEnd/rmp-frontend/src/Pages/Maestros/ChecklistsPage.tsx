@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import {
   checklistsService, categoriasService,
   type ChecklistResumen, type Checklist, type Categoria,
-  type CriterioChecklist,
+  type CriterioChecklist, TipoCriterio, TipoCriterioLabels,
 } from "../../Services/maestros.service";
 import { Button, Modal, ModalFooter } from "../../Components/UI/Index";
 import { TextField, SelectField } from "../../Components/Forms/Index";
@@ -13,13 +13,7 @@ import {
 import "./StylesMaestros/MaestrosLayout.css";
 import "./StylesMaestros/CheckListPage.css";
 
-const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
-
-const TIPO_CRITERIO_LABELS: Record<CriterioChecklist["tipoCriterio"], string> = {
-  SiNo:     "Sí / No",
-  Numerico: "Numérico",
-  Texto:    "Texto libre",
-};
+const isMock = import.meta.env.VITE_USE_MOCK === "true";
 
 // ─── CAT BADGE ────────────────────────────────────────────────────────────────
 
@@ -61,12 +55,12 @@ function ChecklistRow({
         <div
           className="cl-icon"
           style={{
-            background: cl.activo ? "rgba(245,158,11,0.08)" : "rgba(255,255,255,0.04)",
-            border: `1px solid ${cl.activo ? "rgba(245,158,11,0.15)" : "rgba(255,255,255,0.07)"}`,
+            background: cl.estado ? "rgba(245,158,11,0.08)" : "rgba(255,255,255,0.04)",
+            border: `1px solid ${cl.estado ? "rgba(245,158,11,0.15)" : "rgba(255,255,255,0.07)"}`,
           }}
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-            stroke={cl.activo ? "#F59E0B" : "#475569"} strokeWidth="1.8" strokeLinecap="round">
+            stroke={cl.estado ? "#F59E0B" : "#475569"} strokeWidth="1.8" strokeLinecap="round">
             <path d="M9 11l3 3L22 4" />
             <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
           </svg>
@@ -74,7 +68,7 @@ function ChecklistRow({
         <div className="cl-row-info">
           <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", marginBottom: "0.125rem" }}>
             <p className="cl-nombre">{cl.nombre}</p>
-            {!cl.activo && <span className="cl-inactive-badge">INACTIVO</span>}
+            {!cl.estado && <span className="cl-inactive-badge">BORRADOR</span>}
           </div>
           <div className="cl-meta">
             <CatBadge nombre={cl.categoriaNombre} />
@@ -84,7 +78,7 @@ function ChecklistRow({
             </span>
           </div>
           <p style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)", marginTop: "0.125rem" }}>
-            Actualizado {formatDate(cl.updatedAt)}
+            Creado {formatDate(cl.creadoEn)}
           </p>
         </div>
       </div>
@@ -132,27 +126,27 @@ function CriterioEditor({
         <select
           className="cl-tipo-select"
           value={criterio.tipoCriterio}
-          onChange={e => upd("tipoCriterio", e.target.value)}
+          onChange={e => upd("tipoCriterio", Number(e.target.value) as TipoCriterio)}
         >
-          {Object.entries(TIPO_CRITERIO_LABELS).map(([k, v]) => (
+          {Object.entries(TipoCriterioLabels).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
           ))}
         </select>
 
-        {/* Toggle obligatorio */}
+        {/* Toggle crítico */}
         <div className="cl-toggle-wrap">
-          <span className="cl-toggle-label">Obligatorio</span>
+          <span className="cl-toggle-label">Crítico</span>
           <button
             type="button"
             className="cl-toggle"
-            style={{ background: criterio.obligatorio ? "#F59E0B" : "rgba(255,255,255,0.08)" }}
-            onClick={() => upd("obligatorio", !criterio.obligatorio)}
-            aria-pressed={criterio.obligatorio}
-            aria-label="Marcar como obligatorio"
+            style={{ background: criterio.esCritico ? "#F59E0B" : "rgba(255,255,255,0.08)" }}
+            onClick={() => upd("esCritico", !criterio.esCritico)}
+            aria-pressed={criterio.esCritico}
+            aria-label="Marcar como crítico"
           >
             <span
               className="cl-toggle-knob"
-              style={{ left: criterio.obligatorio ? "1rem" : "0.125rem" }}
+              style={{ left: criterio.esCritico ? "1rem" : "0.125rem" }}
             />
           </button>
         </div>
@@ -169,12 +163,19 @@ function CriterioEditor({
       <div className="cl-criterio-body">
         <input
           className="cl-desc-input"
-          value={criterio.descripcion}
+          value={criterio.criterio}
+          onChange={e => upd("criterio", e.target.value)}
+          placeholder="Criterio de inspección…"
+        />
+        <input
+          className="cl-desc-input"
+          style={{ marginTop: "0.375rem", fontSize: "0.7rem" }}
+          value={criterio.descripcion ?? ""}
           onChange={e => upd("descripcion", e.target.value)}
-          placeholder="Descripción del criterio de inspección…"
+          placeholder="Descripción adicional (opcional)…"
         />
 
-        {criterio.tipoCriterio === "Numerico" && (
+        {criterio.tipoCriterio === TipoCriterio.Numerico && (
           <div className="cl-num-grid">
             {([
               { label: "Mín.", key: "valorMinimo" as keyof CriterioChecklist },
@@ -209,82 +210,133 @@ function CriterioEditor({
 // ─── PANEL EDITOR ─────────────────────────────────────────────────────────────
 
 function PanelEditor({
-  cl, onClose, onGuardado,
+  cl, categorias, onClose, onGuardado, onEliminar,
 }: {
-  cl:          Checklist;
-  onClose:     () => void;
-  onGuardado:  (updated: Checklist) => void;
+  cl:         Checklist;
+  categorias: Categoria[];
+  onClose:    () => void;
+  onGuardado: (updated: Checklist) => void;
+  onEliminar: (id : string) => void;
 }) {
-  const [criterios,   setCriterios]   = useState<CriterioChecklist[]>(cl.criterios);
-  const [dirty,       setDirty]       = useState(false);
-  const [saving,      setSaving]      = useState(false);
-  const [publishing,  setPublishing]  = useState(false);
-  const [savedOk,     setSavedOk]     = useState(false);
+  const [items,      setItems]      = useState<CriterioChecklist[]>(cl.items ?? []);
+  const [dirty,      setDirty]      = useState(false);
+  const [saving,     setSaving]     = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [savedOk,    setSavedOk]    = useState(false);
+
+  const [showEditar,   setShowEditar]   = useState(false);
+  const [showEliminar, setShowEliminar] = useState(false);
+  const [saving2,      setSaving2]      = useState(false);
+  const [formEdit,     setFormEdit]     = useState({
+    nombre:      cl.nombre,
+    categoriaId: cl.categoriaId,
+  });
 
   const update = (idx: number, updated: CriterioChecklist) => {
-    setCriterios(prev => prev.map((c, i) => i === idx ? updated : c));
+    setItems(prev => prev.map((c, i) => i === idx ? updated : c));
     setDirty(true); setSavedOk(false);
   };
 
-  const deleteCriterio = (idx: number) => {
-    setCriterios(prev =>
+  const deleteItem = (idx: number) => {
+    setItems(prev =>
       prev.filter((_, i) => i !== idx).map((c, i) => ({ ...c, orden: i + 1 }))
     );
     setDirty(true); setSavedOk(false);
   };
 
-  const moveCriterio = (idx: number, dir: "up" | "down") => {
-    const next = [...criterios];
+  const moveItem = (idx: number, dir: "up" | "down") => {
+    const next = [...items];
     const swap = dir === "up" ? idx - 1 : idx + 1;
     [next[idx], next[swap]] = [next[swap], next[idx]];
-    setCriterios(next.map((c, i) => ({ ...c, orden: i + 1 })));
+    setItems(next.map((c, i) => ({ ...c, orden: i + 1 })));
     setDirty(true); setSavedOk(false);
   };
 
-  const addCriterio = () => {
-    setCriterios(prev => [...prev, {
-      id: `cr-${Date.now()}`,
-      orden: prev.length + 1,
-      descripcion: "",
-      obligatorio: false,
-      tipoCriterio: "SiNo",
+  const addItem = () => {
+    setItems(prev => [...prev, {
+      id:           `cr-${Date.now()}`,
+      orden:        prev.length + 1,
+      criterio:     "",
+      descripcion:  undefined,
+      esCritico:    false,
+      tipoCriterio: TipoCriterio.SiNo,
     }]);
     setDirty(true); setSavedOk(false);
   };
 
   const guardar = async () => {
+    if (items.some(i => !i.criterio.trim())) {
+      console.log("Todos los criterios deben tener una descripción.", "warning");
+      return;
+    }
     setSaving(true);
     try {
-      if (!isMock) {
-        await checklistsService.actualizarCriterios(cl.id, criterios);
-      } else {
-        await new Promise(r => setTimeout(r, 500));
-      }
-      const updated: Checklist = { ...cl, criterios };
+      if (!isMock) await checklistsService.actualizarCriterios(cl.id, items);
+      else await new Promise(r => setTimeout(r, 500));
+      const updated: Checklist = { ...cl, items };
       onGuardado(updated);
       setDirty(false); setSavedOk(true);
       setTimeout(() => setSavedOk(false), 3000);
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   };
 
   const publicar = async () => {
+    if (items.length === 0) {
+      console.log("Agrega al menos un criterio antes de publicar.", "warning");
+      return;
+    }
     setPublishing(true);
     try {
       if (!isMock) {
-        if (dirty) await checklistsService.actualizarCriterios(cl.id, criterios);
+        if (dirty) await checklistsService.actualizarCriterios(cl.id, items);
         await checklistsService.publicar(cl.id);
       } else {
         await new Promise(r => setTimeout(r, 600));
       }
-      const updated: Checklist = { ...cl, criterios, version: cl.version + 1, activo: true };
+      const updated: Checklist = { ...cl, items, estado: true };
       onGuardado(updated);
       setDirty(false); setSavedOk(true);
       setTimeout(() => setSavedOk(false), 3000);
-    } finally {
-      setPublishing(false);
-    }
+    } finally { setPublishing(false); }
+  };
+
+  const handleActualizar = async () => {
+    setSaving2(true);
+    try {
+      await checklistsService.actualizarChecklist(cl.id, formEdit);
+      onGuardado({ ...cl, ...formEdit,
+        categoriaNombre: categorias.find(c => c.id === formEdit.categoriaId)?.nombre ?? cl.categoriaNombre
+      });
+      setShowEditar(false);
+    } finally { setSaving2(false); }
+  };
+
+  const handleDesactivar = async () => {
+    setSaving2(true);
+    try {
+      await checklistsService.desactivar(cl.id);
+      onGuardado({ ...cl, estado: false });
+    } finally { setSaving2(false); }
+  };
+
+  const handleReactivar = async () => {
+    if (items.length === 0) {
+        console.log("Agrega criterios antes de reactivar.", "warning");
+        return;
+      }
+    setSaving2(true);
+    try {
+      await checklistsService.activar(cl.id);
+      onGuardado({ ...cl, estado: true });
+    } finally { setSaving2(false); }
+  };
+
+  const handleEliminar = async () => {
+    setSaving2(true);
+    try {
+      await checklistsService.eliminar(cl.id);
+      onEliminar(cl.id);
+    } finally { setSaving2(false); }
   };
 
   return (
@@ -296,7 +348,7 @@ function PanelEditor({
           <div className="cl-panel-meta">
             <CatBadge nombre={cl.categoriaNombre} />
             <span className="cl-version">v{cl.version}</span>
-            {!cl.activo && <span className="cl-inactive-badge">BORRADOR</span>}
+            {!cl.estado && <span className="cl-inactive-badge">BORRADOR</span>}
           </div>
         </div>
         <button className="cl-panel-close" onClick={onClose} aria-label="Cerrar editor">
@@ -308,32 +360,47 @@ function PanelEditor({
 
       {/* Acciones */}
       <div className="cl-panel-actions">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={guardar}
-          loading={saving}
-          disabled={!dirty || publishing}
-        >
+        <Button variant="ghost" size="sm" onClick={guardar} loading={saving} disabled={!dirty || publishing}>
           {dirty ? "Guardar cambios" : "Sin cambios"}
         </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={publicar}
-          loading={publishing}
-          disabled={saving}
-        >
-          {dirty ? "Guardar y publicar" : `Publicar v${cl.version + 1}`}
+        <Button variant="primary" size="sm" onClick={publicar} loading={publishing} disabled={saving}>
+          {dirty ? "Guardar y publicar" : "Publicar"}
         </Button>
-        {savedOk && (
-          <span className="cl-save-ok">✓ Guardado</span>
-        )}
+        {savedOk && <span className="cl-save-ok">✓ Guardado</span>}
+        <div style={{ marginLeft: "auto", display: "flex", gap: "0.5rem" }}>
+          <button onClick={() => setShowEditar(true)}
+            style={{ fontSize: "0.7rem", padding: "0.25rem 0.625rem", borderRadius: "6px",
+                    background: "var(--surface-2)", border: "1px solid var(--border)",
+                    color: "var(--text-secondary)", cursor: "pointer" }}>
+            Editar
+          </button>
+          {cl.estado ? (
+            <button onClick={handleDesactivar} disabled={saving2}
+              style={{ fontSize: "0.7rem", padding: "0.25rem 0.625rem", borderRadius: "6px",
+                      background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)",
+                      color: "#FCD34D", cursor: "pointer" }}>
+              Desactivar
+            </button>
+          ) : (
+            <button onClick={handleReactivar} disabled={saving2}
+              style={{ fontSize: "0.7rem", padding: "0.25rem 0.625rem", borderRadius: "6px",
+                      background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)",
+                      color: "#86EFAC", cursor: "pointer" }}>
+              Reactivar
+            </button>
+          )}
+          <button onClick={() => setShowEliminar(true)}
+            style={{ fontSize: "0.7rem", padding: "0.25rem 0.625rem", borderRadius: "6px",
+                    background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
+                    color: "#FCA5A5", cursor: "pointer" }}>
+            Eliminar
+          </button>
+        </div>
       </div>
 
       {/* Lista de criterios */}
       <div className="cl-panel-scroll">
-        {criterios.length === 0 && (
+        {items.length === 0 && (
           <div className="cl-empty-criterios">
             <p style={{ fontSize: "var(--text-md)", color: "var(--text-tertiary)" }}>
               Sin criterios. Agrega el primero.
@@ -341,19 +408,23 @@ function PanelEditor({
           </div>
         )}
 
-        {criterios.map((cr, idx) => (
+        {items.map((cr, idx) => {
+          console.log("Renderizando criterio:", cr);
+        
+          return  (
           <CriterioEditor
             key={cr.id}
             criterio={cr}
             index={idx}
-            totalItems={criterios.length}
+            totalItems={items.length}
             onChange={updated => update(idx, updated)}
-            onDelete={() => deleteCriterio(idx)}
-            onMove={dir => moveCriterio(idx, dir)}
+            onDelete={() => deleteItem(idx)}
+            onMove={dir => moveItem(idx, dir)}
           />
-        ))}
+          );
+        })}
 
-        <button className="cl-add-btn" onClick={addCriterio} type="button">
+        <button className="cl-add-btn" onClick={addItem} type="button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14" />
@@ -362,10 +433,59 @@ function PanelEditor({
         </button>
 
         <p className="cl-norm-note">
-          Los criterios marcados como obligatorios bloquean la recepción si no se completan.
+          Los criterios críticos bloquean la recepción si no se cumplen.
           Al publicar se incrementa la versión y queda trazabilidad del cambio. Res. 2674/2013.
         </p>
       </div>
+
+      {/* Modal editar */}
+      {showEditar && (
+        <div className="ocd-modal-overlay" onClick={() => setShowEditar(false)}>
+          <div className="ocd-modal" onClick={e => e.stopPropagation()}>
+            <p className="ocd-modal-title">Editar checklist</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+              <TextField label="Nombre" required
+                value={formEdit.nombre}
+                onChange={e => setFormEdit(p => ({ ...p, nombre: e.target.value }))} />
+              <div>
+                <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", marginBottom: "0.25rem" }}>
+                  Categoría
+                </p>
+                <select value={formEdit.categoriaId}
+                  onChange={e => setFormEdit(p => ({ ...p, categoriaId: e.target.value }))}
+                  className="ms-select" style={{ width: "100%" }}>
+                  {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.25rem" }}>
+              <button onClick={() => setShowEditar(false)} className="ocd-modal-btn-sec">Cancelar</button>
+              <button onClick={handleActualizar} disabled={saving2 || !formEdit.nombre.trim()} className="ocd-modal-btn-pri">
+                {saving2 ? "Guardando…" : "Guardar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal eliminar */}
+      {showEliminar && (
+        <div className="ocd-modal-overlay" onClick={() => setShowEliminar(false)}>
+          <div className="ocd-modal" onClick={e => e.stopPropagation()}>
+            <p className="ocd-modal-title">Eliminar checklist</p>
+            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginTop: "0.5rem" }}>
+              Se eliminará <strong style={{ color: "var(--text-primary)" }}>{cl.nombre}</strong> y todos sus criterios.
+              Solo es posible si no tiene resultados de inspección registrados.
+            </p>
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.25rem" }}>
+              <button onClick={() => setShowEliminar(false)} className="ocd-modal-btn-sec">Cancelar</button>
+              <button onClick={handleEliminar} disabled={saving2} className="ocd-modal-btn-danger">
+                {saving2 ? "Eliminando…" : "Eliminar definitivamente"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -390,27 +510,40 @@ function ModalNuevo({
     try {
       const cat = categorias.find(c => c.id === catId);
       if (!isMock) {
-        await checklistsService.crear({
+        const { id } = await checklistsService.crear({
+          nombre,
+          categoriaId: catId,
+          items: [],
+        });
+        onCreado({
+          id,
           nombre,
           categoriaId: catId,
           categoriaNombre: cat?.nombre ?? "",
-          activo: false,
-          criterios: [],
+          version:        1,
+          estado:         false,
+          totalCriterios: 0,
+          obligatorios:   0,
+          creadoEn:       new Date().toISOString(),
         });
       } else {
         await new Promise(r => setTimeout(r, 600));
+        onCreado({
+          id:             `cl-${Date.now()}`,
+          nombre,
+          categoriaId:    catId,
+          categoriaNombre: cat?.nombre ?? "",
+          version:        1,
+          estado:         false,
+          totalCriterios: 0,
+          obligatorios:   0,
+          creadoEn:       new Date().toISOString(),
+        });
       }
-      onCreado({
-        id: `cl-${Date.now()}`,
-        nombre,
-        categoriaNombre: cat?.nombre ?? "",
-        version: 1,
-        activo: false,
-        totalCriterios: 0,
-        obligatorios: 0,
-        updatedAt: new Date().toISOString(),
-      });
-    } finally {
+    }  catch (error: any) {
+  console.log("Error crear checklist:", JSON.stringify(error.response?.data, null, 2));
+}
+    finally {
       setSaving(false);
     }
   };
@@ -491,6 +624,13 @@ export default function ChecklistsPage() {
     }
   }, []);
 
+  const categoriasConChecklist = new Set(
+    lista.filter(c => c.estado).map(c => c.categoriaNombre)
+  );
+  const categoriasSinChecklist = categorias.filter(
+    c => !categoriasConChecklist.has(c.nombre)
+  );
+
   useEffect(() => { cargar(); }, [cargar]);
 
   useEffect(() => {
@@ -514,7 +654,7 @@ export default function ChecklistsPage() {
   });
 
   const catOptions = [...new Set(lista.map(c => c.categoriaNombre))];
-  const activos    = lista.filter(c => c.activo).length;
+  const activos    = lista.filter(c => c.estado).length;
 
   return (
     <div className="ms-page">
@@ -541,10 +681,10 @@ export default function ChecklistsPage() {
       {/* KPIs */}
       <div className="ms-kpi-grid">
         {[
-          { label: "Total",      value: lista.length,              color: "#CBD5E1" },
-          { label: "Activos",    value: activos,                   color: "#86EFAC" },
-          { label: "Borradores", value: lista.length - activos,    color: "#FCD34D" },
-          { label: "Categorías", value: catOptions.length,         color: "#C4B5FD" },
+          { label: "Total",      value: lista.length,           color: "#CBD5E1" },
+          { label: "Activos",    value: activos,                color: "#86EFAC" },
+          { label: "Borradores", value: lista.length - activos, color: "#FCD34D" },
+          { label: "Categorías", value: catOptions.length,      color: "#C4B5FD" },
         ].map(k => (
           <div key={k.label} className="ms-kpi-card">
             <p className="ms-kpi-label">{k.label}</p>
@@ -552,6 +692,28 @@ export default function ChecklistsPage() {
           </div>
         ))}
       </div>
+
+      {/* Alerta categorías sin checklist activo */}
+      {!loading && categoriasSinChecklist.length > 0 && (
+        <div style={{
+          padding: "0.625rem 1rem",
+          borderRadius: "var(--radius-lg)",
+          background: "rgba(239,68,68,0.06)",
+          border: "1px solid rgba(239,68,68,0.15)",
+          display: "flex", alignItems: "center", gap: "0.75rem",
+          flexShrink: 0,
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="#FCA5A5" strokeWidth="2" strokeLinecap="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01" />
+          </svg>
+          <p style={{ fontSize: "var(--text-sm)", color: "#FCA5A5" }}>
+            Categorías sin checklist activo:{" "}
+            <strong>{categoriasSinChecklist.map(c => c.nombre).join(", ")}</strong>
+            {" "}— Las recepciones de estos ítems no podrán completar la inspección BPM.
+          </p>
+        </div>
+      )}
 
       {/* Filtros */}
       <div className="ms-filters">
@@ -574,7 +736,6 @@ export default function ChecklistsPage() {
 
       {/* Body */}
       <div className="ms-body">
-
         <div className="ms-list" style={{ width: selectedId ? "300px" : "100%" }}>
           <div className="ms-list-header">
             <p className="ms-list-count">
@@ -617,7 +778,13 @@ export default function ChecklistsPage() {
             ) : detalle ? (
               <PanelEditor
                 cl={detalle}
+                categorias={categorias}
                 onClose={() => setSelectedId(null)}
+                onEliminar={id => {
+                  setLista(prev => prev.filter(cl => cl.id !== id));
+                  setSelectedId(null);
+                  setDetalle(null);
+                }}
                 onGuardado={updated => {
                   setDetalle(updated);
                   setLista(prev => prev.map(cl =>
@@ -625,10 +792,9 @@ export default function ChecklistsPage() {
                       ? {
                           ...cl,
                           version:        updated.version,
-                          activo:         updated.activo,
-                          totalCriterios: updated.criterios.length,
-                          obligatorios:   updated.criterios.filter(c => c.obligatorio).length,
-                          updatedAt:      updated.updatedAt,
+                          estado:         updated.estado,
+                          totalCriterios: updated.items?.length ?? 0,
+                          obligatorios:   updated.items?.filter(c => c.esCritico).length ?? 0,
                         }
                       : cl
                   ));
@@ -637,7 +803,6 @@ export default function ChecklistsPage() {
             ) : null}
           </div>
         )}
-
       </div>
 
       {showModal && (

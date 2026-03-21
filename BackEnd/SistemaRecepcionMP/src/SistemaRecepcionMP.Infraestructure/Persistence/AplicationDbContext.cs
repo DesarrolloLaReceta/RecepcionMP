@@ -45,6 +45,7 @@ public sealed class ApplicationDbContext : DbContext
     // ── No Conformidades ──────────────────────────────────────────────────────
     public DbSet<NoConformidad> NoConformidades => Set<NoConformidad>();
     public DbSet<AccionCorrectiva> AccionesCorrectivas => Set<AccionCorrectiva>();
+    public DbSet<ComentarioNoConformidad> ComentariosNoConformidad => Set<ComentarioNoConformidad>();
 
     // ── Auditoría ─────────────────────────────────────────────────────────────
     public DbSet<BitacoraAuditoria> BitacoraAuditoria => Set<BitacoraAuditoria>();

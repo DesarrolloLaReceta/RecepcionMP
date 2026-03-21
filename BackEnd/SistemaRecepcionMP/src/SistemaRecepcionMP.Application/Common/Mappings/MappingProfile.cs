@@ -1,5 +1,6 @@
 using AutoMapper;
 using SistemaRecepcionMP.Domain.Entities;
+using SistemaRecepcionMP.Domain.Enums;
 
 namespace SistemaRecepcionMP.Application.Common.Mappings;
 
@@ -243,24 +244,21 @@ public sealed class MappingProfile : Profile
     // ─────────────────────────────────────────────────────────────────
     private void AplicarMapeosNoConformidad()
     {
-        CreateMap<CausalNoConformidad, CausalNoConformidadDto>();
-
         CreateMap<NoConformidad, NoConformidadResumenDto>()
-            .ForMember(dest => dest.CausalNombre,
-                opt => opt.MapFrom(src => src.Causal.Nombre))
-            .ForMember(dest => dest.CreadoPorNombre,
-                opt => opt.MapFrom(src => src.UsuarioCreador.Nombre));
+            .ForMember(d => d.CausalNombre,     o => o.MapFrom(s => s.Causal.Nombre))
+            .ForMember(d => d.NumeroLote,       o => o.MapFrom(s => s.LoteRecibido.CodigoLoteInterno))
+            .ForMember(d => d.ItemNombre,       o => o.MapFrom(s => s.LoteRecibido.Item.Nombre))
+            .ForMember(d => d.ProveedorNombre,  o => o.MapFrom(s => s.LoteRecibido.Recepcion.Proveedor.RazonSocial))
+            .ForMember(d => d.CreadoPorNombre,  o => o.MapFrom(s => s.UsuarioCreador.Nombre))
+            .ForMember(d => d.TotalAcciones,    o => o.MapFrom(s => s.AccionesCorrectivas.Count))
+            .ForMember(d => d.AccionesPendientes, o => o.MapFrom(s =>
+                s.AccionesCorrectivas.Count(a => a.Estado != EstadoAccionCorrectiva.Cerrada)));
 
         CreateMap<NoConformidad, NoConformidadDetalleDto>()
             .IncludeBase<NoConformidad, NoConformidadResumenDto>();
 
-        CreateMap<AccionCorrectiva, AccionCorrectivaDto>()
-            .ForMember(dest => dest.ResponsableNombre,
-                opt => opt.MapFrom(src => src.UsuarioResponsable.Nombre))
-            .ForMember(dest => dest.EstaVencida,
-                opt => opt.MapFrom(src =>
-                    src.Estado != SistemaRecepcionMP.Domain.Enums.EstadoAccionCorrectiva.Cerrada &&
-                    src.FechaCompromiso < DateOnly.FromDateTime(DateTime.UtcNow)));
+        CreateMap<ComentarioNoConformidad, ComentarioNCDto>()
+            .ForMember(d => d.AutorNombre, o => o.MapFrom(s => s.Autor.Nombre));
     }
 
     // ─────────────────────────────────────────────────────────────────

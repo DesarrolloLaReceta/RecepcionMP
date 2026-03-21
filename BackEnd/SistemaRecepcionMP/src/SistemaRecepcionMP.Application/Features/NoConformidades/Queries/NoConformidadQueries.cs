@@ -101,3 +101,72 @@ public sealed class GetNoConformidadesAbiertasQueryHandler
             todas.OrderByDescending(nc => nc.CreadoEn));
     }
 }
+
+// GET todos
+public sealed class GetNoConformidadesListQuery
+    : IRequest<IEnumerable<NoConformidadResumenDto>>
+{
+    public EstadoNoConformidad? Estado { get; set; }
+    public TipoNoConformidad? Tipo { get; set; }
+    public PrioridadNoConformidad? Prioridad { get; set; }
+}
+
+public sealed class GetNoConformidadesListQueryHandler
+    : IRequestHandler<GetNoConformidadesListQuery, IEnumerable<NoConformidadResumenDto>>
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+
+    public GetNoConformidadesListQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    {
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+    }
+
+    public async Task<IEnumerable<NoConformidadResumenDto>> Handle(
+        GetNoConformidadesListQuery request, CancellationToken cancellationToken)
+    {
+        var todas = await _unitOfWork.NoConformidades.GetAllConDetallesAsync();
+
+        if (request.Estado.HasValue)
+            todas = todas.Where(n => n.Estado == request.Estado.Value);
+        if (request.Tipo.HasValue)
+            todas = todas.Where(n => n.Tipo == request.Tipo.Value);
+        if (request.Prioridad.HasValue)
+            todas = todas.Where(n => n.Prioridad == request.Prioridad.Value);
+
+        return _mapper.Map<IEnumerable<NoConformidadResumenDto>>(
+            todas.OrderByDescending(n => n.CreadoEn));
+    }
+}
+
+// GET por id
+public sealed class GetNoConformidadByIdQuery
+    : IRequest<NoConformidadDetalleDto>
+{
+    public Guid Id { get; set; }
+    public GetNoConformidadByIdQuery(Guid id) => Id = id;
+}
+
+public sealed class GetNoConformidadByIdQueryHandler
+    : IRequestHandler<GetNoConformidadByIdQuery, NoConformidadDetalleDto>
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+
+    public GetNoConformidadByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    {
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+    }
+
+    public async Task<NoConformidadDetalleDto> Handle(
+    GetNoConformidadByIdQuery request, CancellationToken cancellationToken)
+    {
+        var nc = await _unitOfWork.NoConformidades.GetByIdConDetallesAsync(request.Id)
+            ?? throw new ValidationException("Id",
+                $"No se encontró la no conformidad con ID '{request.Id}'.");
+
+        return _mapper.Map<NoConformidadDetalleDto>(nc);
+    }
+}

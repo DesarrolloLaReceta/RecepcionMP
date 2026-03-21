@@ -300,9 +300,13 @@ public sealed class ChecklistBPMDto
 {
     public Guid Id { get; set; }
     public string Nombre { get; set; } = string.Empty;
+    public Guid CategoriaId { get; set; }
     public string CategoriaNombre { get; set; } = string.Empty;
     public int Version { get; set; }
     public bool Estado { get; set; }
+    public DateTime CreadoEn { get; set; }
+    public int TotalCriterios { get; set; }
+    public int Obligatorios { get; set; }
     public List<ItemChecklistDto> Items { get; set; } = new();
 }
 
@@ -313,6 +317,10 @@ public sealed class ItemChecklistDto
     public string? Descripcion { get; set; }
     public bool EsCritico { get; set; }
     public int Orden { get; set; }
+    public TipoCriterio TipoCriterio { get; set; }
+    public decimal? ValorMinimo { get; set; }
+    public decimal? ValorMaximo { get; set; }
+    public string? Unidad { get; set; }
 }
 
 public sealed class ResultadoChecklistDto
@@ -340,18 +348,41 @@ public sealed class CausalNoConformidadDto
 public class NoConformidadResumenDto
 {
     public Guid Id { get; set; }
+    public string Numero { get; set; } = string.Empty;
+    public string Titulo { get; set; } = string.Empty;
     public TipoNoConformidad Tipo { get; set; }
-    public string CausalNombre { get; set; } = string.Empty;
-    public string Descripcion { get; set; } = string.Empty;
-    public decimal CantidadAfectada { get; set; }
+    public PrioridadNoConformidad Prioridad { get; set; }
     public EstadoNoConformidad Estado { get; set; }
-    public string CreadoPorNombre { get; set; } = string.Empty;
+    public string CausalNombre { get; set; } = string.Empty;
+    public decimal CantidadAfectada { get; set; }
+    public string? AsignadoA { get; set; }
+    public DateOnly? FechaLimite { get; set; }
     public DateTime CreadoEn { get; set; }
+    public string CreadoPorNombre { get; set; } = string.Empty;
+    // Datos del lote
+    public string NumeroLote { get; set; } = string.Empty;
+    public string ItemNombre { get; set; } = string.Empty;
+    public string ProveedorNombre { get; set; } = string.Empty;
+    public int TotalAcciones { get; set; }
+    public int AccionesPendientes { get; set; }
 }
 
 public sealed class NoConformidadDetalleDto : NoConformidadResumenDto
 {
+    public string Descripcion { get; set; } = string.Empty;
+    public string? CausaRaiz { get; set; }
+    public string? ObservacionesCierre { get; set; }
+    public DateTime? FechaCierre { get; set; }
     public List<AccionCorrectivaDto> AccionesCorrectivas { get; set; } = new();
+    public List<ComentarioNCDto> Comentarios { get; set; } = new();
+}
+
+public sealed class ComentarioNCDto
+{
+    public Guid Id { get; set; }
+    public string Texto { get; set; } = string.Empty;
+    public string AutorNombre { get; set; } = string.Empty;
+    public DateTime FechaRegistro { get; set; }
 }
 
 public sealed class AccionCorrectivaDto

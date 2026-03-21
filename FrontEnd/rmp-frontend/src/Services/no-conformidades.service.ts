@@ -3,21 +3,23 @@ import { apiClient } from "./apiClient";
 // ─── ENUMS ────────────────────────────────────────────────────────────────────
 
 export enum EstadoNC {
-  Abierta      = 0,
-  EnAnalisis   = 1,
-  EnEjecucion  = 2,
-  Cerrada      = 3,
-  Anulada      = 4,
+  Abierta     = 0,
+  EnAnalisis  = 1,
+  EnProceso   = 2,
+  Cerrada     = 3,
+  Anulada     = 4,
 }
 
 export enum TipoNC {
-  Rechazo                 = 0,
-  MermaParcial            = 1,
-  TemperaturaFueraRango   = 2,
-  RotuladoNoConforme      = 3,
-  DocumentacionIncompleta = 4,
-  CalidadSensorial        = 5,
-  Otro                    = 6,
+  Merma                   = 0,
+  RechazoParcial          = 1,
+  RechazoTotal            = 2,
+  Cuarentena              = 3,
+  TemperaturaFueraRango   = 4,
+  RotuladoNoConforme      = 5,
+  DocumentacionIncompleta = 6,
+  CalidadSensorial        = 7,
+  Otro                    = 8,
 }
 
 export enum PrioridadNC {
@@ -30,16 +32,18 @@ export enum PrioridadNC {
 // ─── LABELS ───────────────────────────────────────────────────────────────────
 
 export const EstadoNCLabels: Record<EstadoNC, string> = {
-  [EstadoNC.Abierta]:     "Abierta",
-  [EstadoNC.EnAnalisis]:  "En análisis",
-  [EstadoNC.EnEjecucion]: "En ejecución",
-  [EstadoNC.Cerrada]:     "Cerrada",
-  [EstadoNC.Anulada]:     "Anulada",
+  [EstadoNC.Abierta]:    "Abierta",
+  [EstadoNC.EnAnalisis]: "En análisis",
+  [EstadoNC.EnProceso]:  "En proceso",
+  [EstadoNC.Cerrada]:    "Cerrada",
+  [EstadoNC.Anulada]:    "Anulada",
 };
 
 export const TipoNCLabels: Record<TipoNC, string> = {
-  [TipoNC.Rechazo]:                 "Rechazo de lote",
-  [TipoNC.MermaParcial]:            "Merma parcial",
+  [TipoNC.Merma]:                   "Merma",
+  [TipoNC.RechazoParcial]:          "Rechazo parcial",
+  [TipoNC.RechazoTotal]:            "Rechazo total",
+  [TipoNC.Cuarentena]:              "Cuarentena",
   [TipoNC.TemperaturaFueraRango]:   "Temperatura fuera de rango",
   [TipoNC.RotuladoNoConforme]:      "Rotulado no conforme",
   [TipoNC.DocumentacionIncompleta]: "Documentación incompleta",
@@ -70,60 +74,50 @@ export interface AccionCorrectiva {
 
 /** Entrada en el hilo de seguimiento de una NC. */
 export interface ComentarioNC {
-  id:             string;
-  texto:          string;
-  autor:          string;
-  fechaRegistro:  string;   // ISO 8601
+  id:            string;
+  texto:         string;
+  autorNombre:   string;
+  fechaRegistro: string;
 }
 
 export interface NoConformidad {
   id:               string;
   numero:           string;
+  titulo:           string;
   tipo:             TipoNC;
   prioridad:        PrioridadNC;
   estado:           EstadoNC;
-  titulo:           string;
   descripcion:      string;
+  causalNombre:     string;
   proveedorNombre?: string;
-  loteId?:          string;
   numeroLote?:      string;
   itemNombre?:      string;
-  recepcionId?:     string;
-  numeroRecepcion?: string;
   cantidadAfectada?: number;
-  unidadMedida?:    string;
-  fechaDeteccion:   string;
-  /** Fecha límite para resolver la NC — "YYYY-MM-DD" */
+  asignadoA?:       string;
   fechaLimite?:     string;
   fechaCierre?:     string;
-  /** Usuario que detectó / reportó la NC */
-  detectadoPor:     string;
-  asignadoA?:       string;
   causaRaiz?:       string;
-  accionesCorrectivas: AccionCorrectiva[];
-  /** Hilo de comentarios / seguimiento de la NC */
-  comentarios:      ComentarioNC[];
   observacionesCierre?: string;
-  notificarProveedor: boolean;
   creadoEn:         string;
-  actualizadoEn?:   string;
+  creadoPorNombre:  string;
+  totalAcciones:    number;
+  accionesPendientes: number;
+  accionesCorrectivas: AccionCorrectiva[];
+  comentarios:      ComentarioNC[];
 }
 
 // ─── COMMANDS ─────────────────────────────────────────────────────────────────
 
 export interface CrearNCCommand {
-  tipo:               TipoNC;
-  prioridad:          PrioridadNC;
-  titulo:             string;
-  descripcion:        string;
-  proveedorId?:       string;
-  loteId?:            string;
-  recepcionId?:       string;
-  cantidadAfectada?:  number;
-  unidadMedida?:      string;
-  fechaLimite?:       string;
-  asignadoA?:         string;
-  notificarProveedor: boolean;
+  loteRecibidoId:   string;
+  titulo:           string;
+  tipo:             TipoNC;
+  prioridad:        PrioridadNC;
+  causalId:         string;
+  descripcion:      string;
+  cantidadAfectada: number;
+  asignadoA?:       string;
+  fechaLimite?:     string;
 }
 
 /**
@@ -139,10 +133,15 @@ export interface CambiarEstadoCommand {
 }
 
 export interface AgregarAccionCommand {
-  ncId:            string;
-  descripcion:     string;
-  responsable:     string;
-  fechaCompromiso: string;
+  ncId:             string;
+  descripcionAccion: string;
+  responsableId:    string;
+  fechaCompromiso:  string;
+}
+
+export interface AgregarComentarioCommand {
+  ncId:  string;
+  texto: string;
 }
 
 export interface CerrarNCCommand {
@@ -174,28 +173,41 @@ export const noConformidadesService = {
     return data;
   },
 
-  /**
-   * Cambia el estado de una NC con causa raíz y comentario opcionales.
-   * Reemplaza al antiguo actualizarEstado(id, estado, causaRaiz?).
-   */
-  async cambiarEstado(cmd: CambiarEstadoCommand): Promise<void> {
-    await apiClient.put(`/api/NoConformidades/${cmd.ncId}/estado`, cmd);
+  async agregarAccion(cmd: AgregarAccionCommand): Promise<{ id: string }> {
+    const { data } = await apiClient.post(
+      `/api/NoConformidades/${cmd.ncId}/acciones-correctivas`,
+      {
+        descripcionAccion: cmd.descripcionAccion,
+        responsableId:     cmd.responsableId,
+        fechaCompromiso:   cmd.fechaCompromiso,
+      }
+    );
+    return data;
   },
 
-  async agregarAccion(cmd: AgregarAccionCommand): Promise<void> {
-    await apiClient.post(`/api/NoConformidades/${cmd.ncId}/acciones`, cmd);
+  async agregarComentario(cmd: AgregarComentarioCommand): Promise<{ id: string }> {
+    const { data } = await apiClient.post(
+      `/api/NoConformidades/${cmd.ncId}/comentarios`,
+      { texto: cmd.texto }
+    );
+    return data;
   },
 
   async cerrarAccion(ncId: string, accionId: string, evidencia?: string): Promise<void> {
-    await apiClient.post(`/api/NoConformidades/${ncId}/acciones/${accionId}/cerrar`, { evidencia });
+    await apiClient.post(
+      `/api/NoConformidades/${ncId}/acciones-correctivas/${accionId}/cerrar`,
+      { evidenciaUrl: evidencia }
+    );
   },
 
-  async cerrar(cmd: CerrarNCCommand): Promise<void> {
-    await apiClient.post(`/api/NoConformidades/${cmd.ncId}/cerrar`, { observaciones: cmd.observaciones });
+  async cerrar(cmd: { ncId: string; observaciones?: string }): Promise<void> {
+    await apiClient.post(`/api/NoConformidades/${cmd.ncId}/cerrar`, {
+      observaciones: cmd.observaciones,
+    });
   },
 
-  async agregarComentario(ncId: string, texto: string): Promise<ComentarioNC> {
-    const { data } = await apiClient.post(`/api/NoConformidades/${ncId}/comentarios`, { texto });
+  async getCausales(): Promise<{ id: string; nombre: string }[]> {
+    const { data } = await apiClient.get("/api/NoConformidades/causales");
     return data;
   },
 };

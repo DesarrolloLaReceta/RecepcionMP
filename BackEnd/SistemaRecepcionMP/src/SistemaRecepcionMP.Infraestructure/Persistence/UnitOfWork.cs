@@ -57,7 +57,6 @@ public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => await _context.SaveChangesAsync(cancellationToken);
 
-    // FIX CS0535: implementar IDisposable además de IAsyncDisposable
     public void Dispose()
         => _context.Dispose();
 
