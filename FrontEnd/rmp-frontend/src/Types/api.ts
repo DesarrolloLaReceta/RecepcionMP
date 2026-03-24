@@ -20,21 +20,21 @@ export const EstadoOrdenCompraLabels: Record<EstadoOrdenCompra, string> = {
 };
 
 export enum EstadoRecepcion {
-  Borrador = 0,
-  EnInspeccion = 1,
-  PendienteLiberacion = 2,
-  Liberada = 3,
-  Rechazada = 4,
-  EnCuarentena = 5
+  Iniciada = 0,
+  InspeccionVehiculo = 1,
+  RegistroLotes = 2,
+  PendienteCalidad = 3,
+  Liberada = 4,
+  Rechazada = 5, 
 }
 
 export const EstadoRecepcionLabels: Record<EstadoRecepcion, string> = {
-  [EstadoRecepcion.Borrador]: "Borrador",
-  [EstadoRecepcion.EnInspeccion]: "En inspección",
-  [EstadoRecepcion.PendienteLiberacion]: "Pendiente liberación",
-  [EstadoRecepcion.Liberada]: "Liberada",
-  [EstadoRecepcion.Rechazada]: "Rechazada",
-  [EstadoRecepcion.EnCuarentena]: "En cuarentena",
+  [EstadoRecepcion.Iniciada]:           "Iniciada",
+  [EstadoRecepcion.InspeccionVehiculo]: "Inspección vehículo",
+  [EstadoRecepcion.RegistroLotes]:      "Registro lotes",
+  [EstadoRecepcion.PendienteCalidad]:   "Pendiente calidad",
+  [EstadoRecepcion.Liberada]:           "Liberada",
+  [EstadoRecepcion.Rechazada]:          "Rechazada",
 };
 
 export enum EstadoRotulado {

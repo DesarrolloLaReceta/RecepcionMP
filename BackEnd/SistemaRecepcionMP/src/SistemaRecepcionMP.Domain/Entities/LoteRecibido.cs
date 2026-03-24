@@ -8,20 +8,18 @@ namespace SistemaRecepcionMP.Domain.Entities;
 
 public class LoteRecibido : BaseEntity
 {
-    public Guid RecepcionId { get; private set; }
-    public Guid DetalleOcId { get; private set; }
-    public Guid ItemId { get; private set; }
+    public Guid RecepcionItemId { get; private set; }
     public string? NumeroLoteProveedor { get; private set; }
     public string CodigoLoteInterno { get; private set; } = string.Empty;
     public DateOnly? FechaFabricacion { get; private set; }
-    public VidaUtil VidaUtil { get; private set; }
+    public VidaUtil? VidaUtil { get; private set; }
     public decimal CantidadRecibida { get; private set; }
     public decimal CantidadRechazada { get; private set; }
     public string UnidadMedida { get; private set; } = string.Empty;
     public decimal? TemperaturaMedida { get; private set; }
     public EstadoSensorial EstadoSensorial { get; private set; }
     public EstadoRotulado EstadoRotulado { get; private set; }
-    public EstadoLote Estado { get; private set; } = EstadoLote.Pendiente;
+    public EstadoLote Estado { get; private set; } = EstadoLote.PendienteCalidad;
     public UbicacionDestino? UbicacionDestino { get; private set; }
     public string? CodigoQr { get; private set; }
     public Guid RegistradoPor { get; private set; }
@@ -41,9 +39,7 @@ public class LoteRecibido : BaseEntity
 
     // Método de fábrica — construye el lote con todas sus propiedades iniciales
     public static LoteRecibido Crear(
-        Guid recepcionId,
-        Guid detalleOcId,
-        Guid itemId,
+        Guid recepcionItemId,
         string? numeroLoteProveedor,
         string codigoLoteInterno,
         DateOnly? fechaFabricacion,
@@ -58,9 +54,7 @@ public class LoteRecibido : BaseEntity
     {
         return new LoteRecibido
         {
-            RecepcionId = recepcionId,
-            DetalleOcId = detalleOcId,
-            ItemId = itemId,
+            RecepcionItemId = recepcionItemId,
             NumeroLoteProveedor = numeroLoteProveedor,
             CodigoLoteInterno = codigoLoteInterno,
             FechaFabricacion = fechaFabricacion,
@@ -71,7 +65,7 @@ public class LoteRecibido : BaseEntity
             TemperaturaMedida = temperaturaMedida,
             EstadoSensorial = estadoSensorial,
             EstadoRotulado = estadoRotulado,
-            Estado = EstadoLote.Pendiente,
+            Estado = EstadoLote.PendienteCalidad,
             UbicacionDestino = ubicacionDestino,
             RegistradoPor = registradoPor,
             FechaRegistro = DateTime.UtcNow

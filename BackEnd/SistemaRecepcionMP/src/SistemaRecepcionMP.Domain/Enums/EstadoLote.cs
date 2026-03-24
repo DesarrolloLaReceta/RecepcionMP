@@ -2,10 +2,9 @@ namespace SistemaRecepcionMP.Domain.Enums;
 
 public enum EstadoLote
 {
-    Pendiente,
-    Aceptado,
-    RechazadoParcial,
-    RechazadoTotal,
-    EnCuarentena,
-    Liberado
+    PendienteCalidad  = 0,
+    Liberado          = 1,
+    RechazadoParcial  = 2,
+    RechazadoTotal    = 3,
+    EnCuarentena      = 4,
 }

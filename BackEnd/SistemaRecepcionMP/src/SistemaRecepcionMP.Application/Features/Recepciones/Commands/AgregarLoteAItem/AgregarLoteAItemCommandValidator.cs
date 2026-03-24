@@ -1,11 +1,11 @@
 using FluentValidation;
 
-namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarLoteRecibido;
+namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.AgregarLoteAItem;
 
-public sealed class RegistrarLoteRecibidoCommandValidator
-    : AbstractValidator<RegistrarLoteRecibidoCommand>
+public sealed class AgregarLoteAItemCommandValidator
+    : AbstractValidator<AgregarLoteAItemCommand>
 {
-    public RegistrarLoteRecibidoCommandValidator()
+    public AgregarLoteAItemCommandValidator()
     {
         RuleFor(x => x.RecepcionId)
             .NotEmpty().WithMessage("La recepción es obligatoria.");

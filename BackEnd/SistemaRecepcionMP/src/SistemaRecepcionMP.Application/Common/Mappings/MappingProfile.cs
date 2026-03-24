@@ -111,15 +111,18 @@ public sealed class MappingProfile : Profile
     {
         CreateMap<OrdenCompra, OrdenCompraResumenDto>()
             .ForMember(dest => dest.ProveedorNombre,
-                opt => opt.MapFrom(src => src.Proveedor.RazonSocial))
+                opt => opt.MapFrom(src => src.Proveedor != null ? src.Proveedor.RazonSocial : string.Empty))
             .ForMember(dest => dest.ProveedorNit,
-                opt => opt.MapFrom(src => src.Proveedor.Nit))
+                opt => opt.MapFrom(src => src.Proveedor != null ? src.Proveedor.Nit : string.Empty))
             .ForMember(dest => dest.TotalItems,
                 opt => opt.MapFrom(src => src.Detalles.Count))
             .ForMember(dest => dest.ValorTotal,
                 opt => opt.MapFrom(src => src.Detalles.Sum(d => d.CantidadSolicitada * d.PrecioUnitario)))
             .ForMember(dest => dest.RequiereCadenaFrio,
-                opt => opt.MapFrom(src => src.Detalles.Any(d => d.Item.Categoria.RequiereCadenaFrio)))
+                opt => opt.MapFrom(src => src.Detalles.Any(d =>
+                    d.Item != null &&
+                    d.Item.Categoria != null &&
+                    d.Item.Categoria.RequiereCadenaFrio)))
             .ForMember(dest => dest.Detalles,
                 opt => opt.MapFrom(src => src.Detalles));
 
@@ -166,28 +169,56 @@ public sealed class MappingProfile : Profile
     private void AplicarMapeosRecepcion()
     {
         CreateMap<Recepcion, RecepcionResumenDto>()
+            .ForMember(dest => dest.OrdenCompraNumero,
+                opt => opt.MapFrom(src => src.OrdenCompra != null
+                    ? src.OrdenCompra.NumeroOC : string.Empty))
+            .ForMember(dest => dest.ProveedorId,
+                opt => opt.MapFrom(src => src.ProveedorId))
             .ForMember(dest => dest.ProveedorNombre,
-                opt => opt.MapFrom(src => src.Proveedor.RazonSocial))
+                opt => opt.MapFrom(src => src.Proveedor != null
+                    ? src.Proveedor.RazonSocial : string.Empty))
             .ForMember(dest => dest.TotalLotes,
-                opt => opt.MapFrom(src => src.Lotes.Count));
+                opt => opt.MapFrom(src => src.Lotes.Count))
+            .ForMember(dest => dest.LotesLiberados,
+                opt => opt.MapFrom(src => src.Lotes
+                    .Count(l => l.Estado == EstadoLote.Liberado)))
+            .ForMember(dest => dest.LotesRechazados,
+                opt => opt.MapFrom(src => src.Lotes
+                    .Count(l => l.Estado == EstadoLote.RechazadoTotal
+                            || l.Estado == EstadoLote.RechazadoParcial)));
 
         CreateMap<Recepcion, RecepcionDetalleDto>()
-            .IncludeBase<Recepcion, RecepcionResumenDto>();
+            .IncludeBase<Recepcion, RecepcionResumenDto>()
+            .ForMember(dest => dest.NumeroOC,
+                opt => opt.MapFrom(src => src.OrdenCompra != null
+                    ? src.OrdenCompra.NumeroOC : string.Empty));
 
         CreateMap<Factura, FacturaDto>();
 
         CreateMap<InspeccionVehiculo, InspeccionVehiculoDto>()
             .ForMember(dest => dest.RegistradoPorNombre,
-                opt => opt.MapFrom(src => src.UsuarioRegistrador.Nombre));
+                opt => opt.MapFrom(src => src.UsuarioRegistrador != null
+                    ? src.UsuarioRegistrador.Nombre : string.Empty));
 
         CreateMap<DocumentoRecepcion, DocumentoRecepcionDto>()
             .ForMember(dest => dest.CargadoPorNombre,
-                opt => opt.MapFrom(src => src.UsuarioCargador.Nombre));
+                opt => opt.MapFrom(src => src.UsuarioCargador != null
+                    ? src.UsuarioCargador.Nombre : string.Empty));
 
         CreateMap<TemperaturaRegistro, TemperaturaRegistroDto>()
             .ForMember(dest => dest.RegistradoPorNombre,
-                opt => opt.MapFrom(src =>
-                    src.UsuarioRegistrador != null ? src.UsuarioRegistrador.Nombre : "Sensor automático"));
+                opt => opt.MapFrom(src => src.UsuarioRegistrador != null
+                    ? src.UsuarioRegistrador.Nombre : "Sensor automático"));
+
+        CreateMap<LoteRecibido, LoteResumenDto>()
+            .ForMember(dest => dest.ItemNombre,
+                opt => opt.MapFrom(src => src.Item != null ? src.Item.Nombre : string.Empty))
+            .ForMember(dest => dest.ItemCodigo,
+                opt => opt.MapFrom(src => src.Item != null ? src.Item.CodigoInterno : string.Empty))
+            .ForMember(dest => dest.DiasVidaUtilRestantes,
+                opt => opt.MapFrom(src => src.VidaUtil.DiasRestantes))
+            .ForMember(dest => dest.EstaVencido,
+                opt => opt.MapFrom(src => src.VidaUtil.EstaVencido));
     }
 
     // ─────────────────────────────────────────────────────────────────

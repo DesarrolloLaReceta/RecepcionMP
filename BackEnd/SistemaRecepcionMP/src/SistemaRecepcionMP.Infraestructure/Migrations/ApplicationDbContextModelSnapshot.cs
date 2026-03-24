@@ -309,16 +309,20 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("CantidadRechazada")
+                        .ValueGeneratedOnAdd()
                         .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(12,3)")
+                        .HasDefaultValue(0m);
 
                     b.Property<decimal>("CantidadRecibida")
+                        .ValueGeneratedOnAdd()
                         .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(12,3)")
+                        .HasDefaultValue(0m);
 
                     b.Property<decimal>("CantidadSolicitada")
                         .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(12,3)");
 
                     b.Property<Guid>("ItemId")
                         .HasColumnType("uniqueidentifier");
@@ -328,11 +332,12 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
                     b.Property<decimal>("PrecioUnitario")
                         .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(16,2)");
 
                     b.Property<string>("UnidadMedida")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -340,7 +345,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
                     b.HasIndex("OrdenCompraId");
 
-                    b.ToTable("DetallesOrdenCompra");
+                    b.ToTable("DetallesOrdenCompra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.DocumentoRecepcion", b =>
@@ -854,24 +859,26 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
                     b.Property<string>("NumeroOC")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Observaciones")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid>("ProveedorId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("UsuarioCreadorId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("CreadoPor");
+
+                    b.HasIndex("NumeroOC")
+                        .IsUnique();
 
                     b.HasIndex("ProveedorId");
 
-                    b.HasIndex("UsuarioCreadorId");
-
-                    b.ToTable("OrdenesCompra");
+                    b.ToTable("OrdenesCompra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.Proveedor", b =>
@@ -1267,7 +1274,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.Item", "Item")
                         .WithMany("DetallesOrdenCompra")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.OrdenCompra", "OrdenCompra")
@@ -1505,16 +1512,16 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.OrdenCompra", b =>
                 {
+                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "UsuarioCreador")
+                        .WithMany()
+                        .HasForeignKey("CreadoPor")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.Proveedor", "Proveedor")
                         .WithMany("OrdenesCompra")
                         .HasForeignKey("ProveedorId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "UsuarioCreador")
-                        .WithMany()
-                        .HasForeignKey("UsuarioCreadorId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Proveedor");
