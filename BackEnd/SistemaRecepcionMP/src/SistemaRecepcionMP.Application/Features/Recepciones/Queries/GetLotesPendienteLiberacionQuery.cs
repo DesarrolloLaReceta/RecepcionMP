@@ -65,7 +65,7 @@ public sealed class GetLotesPendientesLiberacionQueryHandler
     GetLotesPendientesLiberacionQuery request,
     CancellationToken cancellationToken)
 {
-    var pendientes = (await _unitOfWork.Lotes.GetByEstadoAsync(EstadoLote.Pendiente))
+    var pendientes = (await _unitOfWork.Lotes.GetByEstadoAsync(EstadoLote.PendienteCalidad))
         .OrderBy(l => l.VidaUtil.FechaVencimiento)
         .ToList();
 

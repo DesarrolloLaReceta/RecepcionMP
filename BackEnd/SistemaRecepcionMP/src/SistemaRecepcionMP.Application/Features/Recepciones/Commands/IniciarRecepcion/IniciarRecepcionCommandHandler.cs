@@ -65,7 +65,7 @@ public sealed class IniciarRecepcionCommandHandler : IRequestHandler<IniciarRece
             PlacaVehiculo = request.PlacaVehiculo?.Trim().ToUpperInvariant(),
             NombreTransportista = request.NombreTransportista?.Trim(),
             ObservacionesGenerales = request.ObservacionesGenerales?.Trim(),
-            Estado = EstadoRecepcion.Borrador,
+            Estado = EstadoRecepcion.Iniciada,
             CreadoPor = _currentUser.UserId,
             CreadoEn = DateTime.UtcNow
         };

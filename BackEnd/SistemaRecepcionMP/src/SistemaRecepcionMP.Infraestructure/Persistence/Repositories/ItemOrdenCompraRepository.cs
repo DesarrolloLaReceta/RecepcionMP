@@ -65,8 +65,10 @@ public sealed class OrdenCompraRepository : GenericRepository<OrdenCompra>, IOrd
         => await DbSet
             .Include(o => o.Proveedor)
             .Include(o => o.Detalles)
-            .Where(o => o.Estado == Domain.Enums.EstadoOrdenCompra.Abierta ||
-                        o.Estado == Domain.Enums.EstadoOrdenCompra.ParcialmenteRecibida)
+                .ThenInclude(d => d.Item)
+                    .ThenInclude(i => i.Categoria)
+            .Where(o => o.Estado == EstadoOrdenCompra.Abierta ||
+                        o.Estado == EstadoOrdenCompra.ParcialmenteRecibida)
             .OrderByDescending(o => o.FechaEmision)
             .ToListAsync();
 
@@ -96,7 +98,7 @@ public sealed class OrdenCompraRepository : GenericRepository<OrdenCompra>, IOrd
             .Include(o => o.Proveedor)
             .Include(o => o.Detalles)
                 .ThenInclude(d => d.Item)
-                    .ThenInclude(i => i.Categoria)
+                    .ThenInclude(i => i.Categoria)   // ← agregar
             .AsQueryable();
 
         if (estado.HasValue)

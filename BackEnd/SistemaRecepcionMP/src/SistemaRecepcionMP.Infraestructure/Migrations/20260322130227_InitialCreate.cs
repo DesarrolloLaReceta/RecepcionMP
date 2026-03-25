@@ -49,12 +49,12 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RazonSocial = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Nit = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Telefono = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EmailContacto = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Direccion = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Estado = table.Column<bool>(type: "bit", nullable: false),
+                    RazonSocial = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Nit = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Telefono = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    EmailContacto = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    Direccion = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
+                    Estado = table.Column<int>(type: "int", nullable: false),
                     CreadoEn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ActualizadoEn = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -157,10 +157,10 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProveedorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Cargo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Telefono = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Cargo = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Telefono = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     EsPrincipal = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -181,10 +181,10 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProveedorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TipoDocumento = table.Column<int>(type: "int", nullable: false),
-                    NumeroDocumento = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NumeroDocumento = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     FechaExpedicion = table.Column<DateOnly>(type: "date", nullable: false),
                     FechaVencimiento = table.Column<DateOnly>(type: "date", nullable: false),
-                    AdjuntoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    AdjuntoUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -227,15 +227,14 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    NumeroOC = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NumeroOC = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     ProveedorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FechaEmision = table.Column<DateOnly>(type: "date", nullable: false),
                     FechaEntregaEsperada = table.Column<DateOnly>(type: "date", nullable: true),
                     Estado = table.Column<int>(type: "int", nullable: false),
-                    Observaciones = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Observaciones = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     CreadoPor = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreadoEn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UsuarioCreadorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CreadoEn = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -245,13 +244,13 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         column: x => x.ProveedorId,
                         principalTable: "Proveedores",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_OrdenesCompra_Usuarios_UsuarioCreadorId",
-                        column: x => x.UsuarioCreadorId,
+                        name: "FK_OrdenesCompra_Usuarios_CreadoPor",
+                        column: x => x.CreadoPor,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -263,7 +262,11 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     Criterio = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     Descripcion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     EsCritico = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    Orden = table.Column<int>(type: "int", nullable: false)
+                    Orden = table.Column<int>(type: "int", nullable: false),
+                    TipoCriterio = table.Column<int>(type: "int", nullable: false),
+                    ValorMinimo = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: true),
+                    ValorMaximo = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: true),
+                    Unidad = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -283,11 +286,11 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrdenCompraId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CantidadSolicitada = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
-                    UnidadMedida = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PrecioUnitario = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
-                    CantidadRecibida = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
-                    CantidadRechazada = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false)
+                    CantidadSolicitada = table.Column<decimal>(type: "decimal(12,3)", precision: 18, scale: 4, nullable: false),
+                    UnidadMedida = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    PrecioUnitario = table.Column<decimal>(type: "decimal(16,2)", precision: 18, scale: 4, nullable: false),
+                    CantidadRecibida = table.Column<decimal>(type: "decimal(12,3)", precision: 18, scale: 4, nullable: false, defaultValue: 0m),
+                    CantidadRechazada = table.Column<decimal>(type: "decimal(12,3)", precision: 18, scale: 4, nullable: false, defaultValue: 0m)
                 },
                 constraints: table =>
                 {
@@ -297,7 +300,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         column: x => x.ItemId,
                         principalTable: "Items",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_DetallesOrdenCompra_OrdenesCompra_OrdenCompraId",
                         column: x => x.OrdenCompraId,
@@ -578,15 +581,23 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Numero = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Titulo = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     LoteRecibidoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Tipo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Tipo = table.Column<int>(type: "int", nullable: false),
+                    Prioridad = table.Column<int>(type: "int", nullable: false),
                     CausalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Descripcion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    CantidadAfectada = table.Column<decimal>(type: "decimal(12,3)", precision: 18, scale: 4, nullable: false),
-                    Estado = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CantidadAfectada = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    Estado = table.Column<int>(type: "int", nullable: false),
+                    AsignadoA = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    CausaRaiz = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ObservacionesCierre = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    FechaLimite = table.Column<DateOnly>(type: "date", nullable: true),
+                    FechaCierre = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreadoPor = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreadoEn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CausalNoConformidadId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    UsuarioCreadorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -596,12 +607,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         column: x => x.CausalId,
                         principalTable: "CausalesNoConformidad",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_NoConformidades_CausalesNoConformidad_CausalNoConformidadId",
-                        column: x => x.CausalNoConformidadId,
-                        principalTable: "CausalesNoConformidad",
-                        principalColumn: "Id");
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_NoConformidades_LotesRecibidos_LoteRecibidoId",
                         column: x => x.LoteRecibidoId,
@@ -609,11 +615,11 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_NoConformidades_Usuarios_CreadoPor",
-                        column: x => x.CreadoPor,
+                        name: "FK_NoConformidades_Usuarios_UsuarioCreadorId",
+                        column: x => x.UsuarioCreadorId,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -733,6 +739,33 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ComentariosNoConformidad",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NoConformidadId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Texto = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    AutorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ComentariosNoConformidad", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ComentariosNoConformidad_NoConformidades_NoConformidadId",
+                        column: x => x.NoConformidadId,
+                        principalTable: "NoConformidades",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ComentariosNoConformidad_Usuarios_AutorId",
+                        column: x => x.AutorId,
+                        principalTable: "Usuarios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AccionesCorrectivas_NoConformidadId",
                 table: "AccionesCorrectivas",
@@ -764,6 +797,16 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 columns: new[] { "CategoriaId", "Estado" },
                 unique: true,
                 filter: "[Estado] = 1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ComentariosNoConformidad_AutorId",
+                table: "ComentariosNoConformidad",
+                column: "AutorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ComentariosNoConformidad_NoConformidadId",
+                table: "ComentariosNoConformidad",
+                column: "NoConformidadId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ContactosProveedor_ProveedorId",
@@ -892,29 +935,36 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 column: "CausalId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NoConformidades_CausalNoConformidadId",
-                table: "NoConformidades",
-                column: "CausalNoConformidadId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_NoConformidades_CreadoPor",
-                table: "NoConformidades",
-                column: "CreadoPor");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_NoConformidades_LoteRecibidoId",
                 table: "NoConformidades",
                 column: "LoteRecibidoId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_NoConformidades_Numero",
+                table: "NoConformidades",
+                column: "Numero",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NoConformidades_UsuarioCreadorId",
+                table: "NoConformidades",
+                column: "UsuarioCreadorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrdenesCompra_CreadoPor",
+                table: "OrdenesCompra",
+                column: "CreadoPor");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrdenesCompra_NumeroOC",
+                table: "OrdenesCompra",
+                column: "NumeroOC",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OrdenesCompra_ProveedorId",
                 table: "OrdenesCompra",
                 column: "ProveedorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrdenesCompra_UsuarioCreadorId",
-                table: "OrdenesCompra",
-                column: "UsuarioCreadorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Recepciones_CreadoPor",
@@ -997,6 +1047,9 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "BitacoraAuditoria");
+
+            migrationBuilder.DropTable(
+                name: "ComentariosNoConformidad");
 
             migrationBuilder.DropTable(
                 name: "ContactosProveedor");

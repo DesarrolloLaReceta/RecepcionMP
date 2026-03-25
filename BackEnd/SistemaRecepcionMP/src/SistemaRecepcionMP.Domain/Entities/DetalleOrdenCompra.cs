@@ -13,5 +13,4 @@ public class DetalleOrdenCompra : BaseEntity
     // Navegación
     public OrdenCompra OrdenCompra { get; set; } = null!;
     public Item Item { get; set; } = null!;
-    public ICollection<LoteRecibido> LotesRecibidos { get; set; } = new List<LoteRecibido>();
 }

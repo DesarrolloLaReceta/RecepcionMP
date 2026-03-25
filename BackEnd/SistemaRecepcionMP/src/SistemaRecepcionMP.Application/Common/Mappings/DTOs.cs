@@ -165,18 +165,23 @@ public class RecepcionResumenDto
 {
     public Guid Id { get; set; }
     public string NumeroRecepcion { get; set; } = string.Empty;
+    public string OrdenCompraNumero { get; set; } = string.Empty;
+    public Guid ProveedorId { get; set; }
     public string ProveedorNombre { get; set; } = string.Empty;
     public DateOnly FechaRecepcion { get; set; }
+    public TimeOnly HoraLlegadaVehiculo { get; set; }
+    public string? PlacaVehiculo { get; set; }
+    public string? NombreTransportista { get; set; }
     public EstadoRecepcion Estado { get; set; }
     public int TotalLotes { get; set; }
+    public int LotesLiberados { get; set; }
+    public int LotesRechazados { get; set; }
+    public string? ObservacionesGenerales { get; set; }
 }
 
 public sealed class RecepcionDetalleDto : RecepcionResumenDto
 {
     public string NumeroOC { get; set; } = string.Empty;
-    public string? PlacaVehiculo { get; set; }
-    public string? NombreTransportista { get; set; }
-    public string? ObservacionesGenerales { get; set; }
     public FacturaDto? Factura { get; set; }
     public InspeccionVehiculoDto? InspeccionVehiculo { get; set; }
     public List<LoteResumenDto> Lotes { get; set; } = new();

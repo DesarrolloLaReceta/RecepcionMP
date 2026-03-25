@@ -92,14 +92,17 @@ public sealed class GetKpiRecepcionesQueryHandler
             TotalRecepciones = listaRecepciones.Count,
             Liberadas = liberadas,
             Rechazadas = rechazadas,
-            EnCuarentena = listaRecepciones.Count(r => r.Estado == EstadoRecepcion.EnInspeccion),
+            EnCuarentena = 0,
             Pendientes = listaRecepciones.Count(r =>
-                r.Estado == EstadoRecepcion.Borrador ||
-                r.Estado == EstadoRecepcion.EnInspeccion),
+                r.Estado == EstadoRecepcion.Iniciada ||
+                r.Estado == EstadoRecepcion.InspeccionVehiculo ||
+                r.Estado == EstadoRecepcion.RegistroLotes),
             PorcentajeAprobacion = pctAprobacion,
             TotalLotes = lotesPeriodo.Count,
             LotesLiberados = lotesPeriodo.Count(l => l.Estado == EstadoLote.Liberado),
-            LotesRechazados = lotesPeriodo.Count(l => l.Estado == EstadoLote.RechazadoTotal),
+            LotesRechazados = lotesPeriodo.Count(l => 
+                l.Estado == EstadoLote.RechazadoTotal ||
+                l.Estado == EstadoLote.RechazadoParcial),
             LotesEnCuarentena = lotesPeriodo.Count(l => l.Estado == EstadoLote.EnCuarentena),
             NoConformidadesAbiertas = ncAbiertas.Count() + ncEnGestion.Count(),
             AccionesCorrectivasVencidas = accionesVencidas

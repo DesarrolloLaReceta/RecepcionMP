@@ -8,9 +8,10 @@ import type {
   EstadoRecepcion,
   EstadoSensorial,
   EstadoRotulado,
+  UbicacionDestino,
 } from "../Types/api";
 
-// ─── TIPOS DE RESPUESTA ───────────────────────────────────────────────────────
+// ─── TIPOS RESUMEN ────────────────────────────────────────────────────────────
 
 export interface RecepcionResumen {
   id: string;
@@ -29,15 +30,25 @@ export interface RecepcionResumen {
   observacionesGenerales?: string;
 }
 
-export interface RecepcionDetalle extends RecepcionResumen {
-  ordenCompraId: string;
-  inspeccionVehiculo?: InspeccionVehiculo;
-  lotes: LoteRecibido[];
-  documentos: DocumentoAdjunto[];
-  temperaturas: RegistroTemperatura[];
+// ─── TIPOS DETALLE ────────────────────────────────────────────────────────────
+
+export interface LoteResumen {
+  id: string;
+  codigoLoteInterno: string;
+  numeroLoteProveedor?: string;
+  itemCodigo: string;
+  itemNombre: string;
+  fechaVencimiento: string;
+  diasVidaUtilRestantes: number;
+  estaVencido: boolean;
+  cantidadRecibida: number;
+  cantidadRechazada: number;
+  estado: string;
+  ubicacionDestino?: UbicacionDestino;
 }
 
 export interface InspeccionVehiculo {
+  id: string;
   temperaturaInicial?: number;
   temperaturaDentroRango: boolean;
   integridadEmpaque: boolean;
@@ -45,56 +56,42 @@ export interface InspeccionVehiculo {
   presenciaOloresExtranos: boolean;
   plagasVisible: boolean;
   documentosTransporteOk: boolean;
+  resultado: number;
   observaciones?: string;
+  registradoPorNombre: string;
   fechaRegistro: string;
-}
-
-export interface LoteRecibido {
-  id: string;
-  itemId: string;
-  itemNombre: string;
-  itemCodigo: string;
-  detalleOcId: string;
-  numeroLoteProveedor?: string;
-  numeroLoteInterno: string;
-  fechaFabricacion?: string;
-  fechaVencimiento: string;
-  cantidadRecibida: number;
-  cantidadEsperada: number;
-  unidadMedida: string;
-  temperaturaMedida?: number;
-  estadoSensorial: EstadoSensorial;
-  estadoRotulado: EstadoRotulado;
-  ubicacionDestino: number;
-  estado: string;
-  documentos: DocumentoAdjunto[];
 }
 
 export interface DocumentoAdjunto {
   id: string;
   tipoDocumento: number;
   nombreArchivo: string;
-  urlDescarga: string;
+  adjuntoUrl: string;
   fechaCarga: string;
+  cargadoPorNombre: string;
+  esValido?: boolean;
 }
 
 export interface RegistroTemperatura {
   id: string;
-  temperatura: number;         
+  temperatura: number;
   unidadMedida: string;
-  fechaRegistro: string;        
-  origen: number;               
-  estaFueraDeRango: boolean;    
+  fechaHora: string;
+  origen: number;
+  estaFueraDeRango: boolean;
   dispositivoId?: string;
   observacion?: string;
-  // Campos opcionales que puede proyectar el DTO de respuesta
-  loteId?: string;
-  loteNumero?: string;          
-  itemNombre?: string;         
+  registradoPorNombre: string;
 }
 
-// ─── TIPOS OC — fuente canónica en ordenes-compra.service ───────────────────
-export type { OrdenCompraResumen, DetalleOC } from "./ordenes-compra.service";
+export interface RecepcionDetalle extends RecepcionResumen {
+  numeroOC: string;
+  creadoPorNombre?: string;
+  inspeccionVehiculo?: InspeccionVehiculo;
+  lotes: LoteResumen[];
+  documentos: DocumentoAdjunto[];
+  registrosTemperatura: RegistroTemperatura[];
+}
 
 // ─── FILTROS ──────────────────────────────────────────────────────────────────
 
@@ -105,11 +102,13 @@ export interface RecepcionesFilter {
   fechaHasta?: string;
 }
 
-// ─── SERVICIO RECEPCIONES ────────────────────────────────────────────────────
+// ─── SERVICIO ─────────────────────────────────────────────────────────────────
 
 export const recepcionesService = {
   async getAll(filter?: RecepcionesFilter): Promise<RecepcionResumen[]> {
-    const { data } = await apiClient.get("/api/Recepciones", { params: filter ?? {} });
+    const { data } = await apiClient.get("/api/Recepciones", {
+      params: filter ?? {},
+    });
     return data;
   },
 
@@ -159,5 +158,4 @@ export const recepcionesService = {
   },
 };
 
-// ─── SERVICIO OC — re-exportado desde ordenes-compra.service ────────────────
 export { ordenesCompraService } from "./ordenes-compra.service";

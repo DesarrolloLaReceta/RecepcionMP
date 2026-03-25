@@ -2,9 +2,9 @@ using SistemaRecepcionMP.Application.Common.Behaviours;
 using SistemaRecepcionMP.Domain.Enums;
 using MediatR;
 
-namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarLoteRecibido;
+namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.AgregarLoteAItem;
 
-public sealed class RegistrarLoteRecibidoCommand : IRequest<Guid>, IAuditableCommand
+public sealed class AgregarLoteAItemCommand : IRequest<Guid>, IAuditableCommand
 {
     public Guid RecepcionId { get; set; }
     public Guid DetalleOcId { get; set; }

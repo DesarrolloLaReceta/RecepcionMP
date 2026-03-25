@@ -69,6 +69,21 @@ public sealed class RecepcionRepository : GenericRepository<Recepcion>, IRecepci
             .Where(r => r.ProveedorId == proveedorId)
             .OrderByDescending(r => r.FechaRecepcion)
             .ToListAsync();
+        
+        public async Task AddInspeccionVehiculoAsync(InspeccionVehiculo inspeccion)
+            => await Context.Set<InspeccionVehiculo>().AddAsync(inspeccion);
+
+        public async Task<Recepcion?> GetWithItemsAndLotesAsync(Guid id)
+        {
+            return await _context.Recepciones
+                .AsNoTracking(false)
+                .Include(r => r.Proveedor)
+                .Include(r => r.Items)
+                    .ThenInclude(i => i.DetalleOrdenCompra)
+                .Include(r => r.Items)
+                    .ThenInclude(i => i.Lotes)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
 }
 
 public sealed class LoteRecibidoRepository : GenericRepository<LoteRecibido>, ILoteRecibidoRepository

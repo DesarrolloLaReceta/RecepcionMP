@@ -28,7 +28,7 @@ public sealed class RegistrarInspeccionVehiculoCommandHandler
         var recepcion = await _unitOfWork.Recepciones.GetByIdAsync(request.RecepcionId)
             ?? throw new RecepcionNotFoundException(request.RecepcionId);
 
-        if (recepcion.Estado != EstadoRecepcion.Borrador)
+        if (recepcion.Estado != EstadoRecepcion.Iniciada)
             throw new RecepcionEstadoInvalidoException(
                 recepcion.NumeroRecepcion,
                 recepcion.Estado,
@@ -60,13 +60,14 @@ public sealed class RegistrarInspeccionVehiculoCommandHandler
         };
 
         // Avanzar estado de la recepción
-        recepcion.InspeccionVehiculo = inspeccion;
+        inspeccion.RecepcionId = recepcion.Id;
+        await _unitOfWork.Recepciones.AddInspeccionVehiculoAsync(inspeccion);
+
         recepcion.Estado = resultado == ResultadoInspeccion.Aprobado
-            ? EstadoRecepcion.EnInspeccion
+            ? EstadoRecepcion.InspeccionVehiculo
             : EstadoRecepcion.Rechazada;
         recepcion.ActualizadoEn = DateTime.UtcNow;
 
-        _unitOfWork.Recepciones.Update(recepcion);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 

@@ -17,6 +17,7 @@ public class DevAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
             new Claim(ClaimTypes.Name, "dev-user"),
             new Claim(ClaimTypes.Email, "dev@empresa.com"),
             new Claim(ClaimTypes.Role, "Administrador"),
+            new Claim("local_user_id", "a0000000-0000-0000-0000-000000000001"),
         };
 
         var identity = new ClaimsIdentity(claims, "DevAuth");

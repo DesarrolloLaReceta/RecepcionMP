@@ -12,7 +12,7 @@ using SistemaRecepcionMP.Infraestructure.Persistence;
 namespace SistemaRecepcionMP.Infraestructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260222035818_InitialCreate")]
+    [Migration("20260322130227_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -199,6 +199,35 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     b.ToTable("ChecklistsBPM", (string)null);
                 });
 
+            modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.ComentarioNoConformidad", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AutorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("NoConformidadId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Texto")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AutorId");
+
+                    b.HasIndex("NoConformidadId");
+
+                    b.ToTable("ComentariosNoConformidad", (string)null);
+                });
+
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.ContactoProveedor", b =>
                 {
                     b.Property<Guid>("Id")
@@ -206,29 +235,33 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Cargo")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<bool>("EsPrincipal")
                         .HasColumnType("bit");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("ProveedorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Telefono")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProveedorId");
 
-                    b.ToTable("ContactosProveedor");
+                    b.ToTable("ContactosProveedor", (string)null);
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.Cuarentena", b =>
@@ -279,16 +312,20 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("CantidadRechazada")
+                        .ValueGeneratedOnAdd()
                         .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(12,3)")
+                        .HasDefaultValue(0m);
 
                     b.Property<decimal>("CantidadRecibida")
+                        .ValueGeneratedOnAdd()
                         .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(12,3)")
+                        .HasDefaultValue(0m);
 
                     b.Property<decimal>("CantidadSolicitada")
                         .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(12,3)");
 
                     b.Property<Guid>("ItemId")
                         .HasColumnType("uniqueidentifier");
@@ -298,11 +335,12 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
                     b.Property<decimal>("PrecioUnitario")
                         .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(16,2)");
 
                     b.Property<string>("UnidadMedida")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -310,7 +348,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
                     b.HasIndex("OrdenCompraId");
 
-                    b.ToTable("DetallesOrdenCompra");
+                    b.ToTable("DetallesOrdenCompra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.DocumentoRecepcion", b =>
@@ -375,7 +413,8 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AdjuntoUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateOnly>("FechaExpedicion")
                         .HasColumnType("date");
@@ -385,7 +424,8 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
                     b.Property<string>("NumeroDocumento")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("ProveedorId")
                         .HasColumnType("uniqueidentifier");
@@ -397,7 +437,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
                     b.HasIndex("ProveedorId");
 
-                    b.ToTable("DocumentosSanitariosProveedor");
+                    b.ToTable("DocumentosSanitariosProveedor", (string)null);
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.Factura", b =>
@@ -566,6 +606,20 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     b.Property<int>("Orden")
                         .HasColumnType("int");
 
+                    b.Property<int>("TipoCriterio")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Unidad")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("ValorMaximo")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal?>("ValorMinimo")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChecklistId", "Orden")
@@ -710,14 +764,19 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AsignadoA")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<decimal>("CantidadAfectada")
                         .HasPrecision(18, 4)
-                        .HasColumnType("decimal(12,3)");
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("CausaRaiz")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid>("CausalId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CausalNoConformidadId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreadoEn")
@@ -731,28 +790,51 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FechaCierre")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly?>("FechaLimite")
+                        .HasColumnType("date");
 
                     b.Property<Guid>("LoteRecibidoId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Tipo")
+                    b.Property<string>("Numero")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ObservacionesCierre")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Prioridad")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("UsuarioCreadorId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CausalId");
 
-                    b.HasIndex("CausalNoConformidadId");
-
-                    b.HasIndex("CreadoPor");
-
                     b.HasIndex("LoteRecibidoId");
+
+                    b.HasIndex("Numero")
+                        .IsUnique();
+
+                    b.HasIndex("UsuarioCreadorId");
 
                     b.ToTable("NoConformidades", (string)null);
                 });
@@ -780,24 +862,26 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
                     b.Property<string>("NumeroOC")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Observaciones")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid>("ProveedorId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("UsuarioCreadorId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("CreadoPor");
+
+                    b.HasIndex("NumeroOC")
+                        .IsUnique();
 
                     b.HasIndex("ProveedorId");
 
-                    b.HasIndex("UsuarioCreadorId");
-
-                    b.ToTable("OrdenesCompra");
+                    b.ToTable("OrdenesCompra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.Proveedor", b =>
@@ -813,28 +897,33 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Direccion")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("EmailContacto")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
-                    b.Property<bool>("Estado")
-                        .HasColumnType("bit");
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nit")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("RazonSocial")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Telefono")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Proveedores");
+                    b.ToTable("Proveedores", (string)null);
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.Recepcion", b =>
@@ -1134,6 +1223,25 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     b.Navigation("Categoria");
                 });
 
+            modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.ComentarioNoConformidad", b =>
+                {
+                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "Autor")
+                        .WithMany()
+                        .HasForeignKey("AutorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SistemaRecepcionMP.Domain.Entities.NoConformidad", "NoConformidad")
+                        .WithMany("Comentarios")
+                        .HasForeignKey("NoConformidadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Autor");
+
+                    b.Navigation("NoConformidad");
+                });
+
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.ContactoProveedor", b =>
                 {
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.Proveedor", "Proveedor")
@@ -1169,7 +1277,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.Item", "Item")
                         .WithMany("DetallesOrdenCompra")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.OrdenCompra", "OrdenCompra")
@@ -1381,25 +1489,21 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.NoConformidad", b =>
                 {
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.CausalNoConformidad", "Causal")
-                        .WithMany()
-                        .HasForeignKey("CausalId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SistemaRecepcionMP.Domain.Entities.CausalNoConformidad", null)
                         .WithMany("NoConformidades")
-                        .HasForeignKey("CausalNoConformidadId");
-
-                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "UsuarioCreador")
-                        .WithMany()
-                        .HasForeignKey("CreadoPor")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("CausalId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.LoteRecibido", "LoteRecibido")
                         .WithMany("NoConformidades")
                         .HasForeignKey("LoteRecibidoId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "UsuarioCreador")
+                        .WithMany()
+                        .HasForeignKey("UsuarioCreadorId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Causal");
@@ -1411,16 +1515,16 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.OrdenCompra", b =>
                 {
+                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "UsuarioCreador")
+                        .WithMany()
+                        .HasForeignKey("CreadoPor")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("SistemaRecepcionMP.Domain.Entities.Proveedor", "Proveedor")
                         .WithMany("OrdenesCompra")
                         .HasForeignKey("ProveedorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "UsuarioCreador")
-                        .WithMany()
-                        .HasForeignKey("UsuarioCreadorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Proveedor");
@@ -1587,6 +1691,8 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.NoConformidad", b =>
                 {
                     b.Navigation("AccionesCorrectivas");
+
+                    b.Navigation("Comentarios");
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.OrdenCompra", b =>
