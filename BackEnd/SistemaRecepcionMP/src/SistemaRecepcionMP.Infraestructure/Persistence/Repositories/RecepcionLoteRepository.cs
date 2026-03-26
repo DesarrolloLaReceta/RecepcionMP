@@ -15,14 +15,21 @@ public sealed class RecepcionRepository : GenericRepository<Recepcion>, IRecepci
             .Include(r => r.Proveedor)
             .Include(r => r.InspeccionVehiculo)
             .Include(r => r.Factura)
-            .Include(r => r.Lotes)
-                .ThenInclude(l => l.Item).ThenInclude(i => i!.Categoria)
-            .Include(r => r.Lotes)
-                .ThenInclude(l => l.Liberacion)
-            .Include(r => r.Lotes)
-                .ThenInclude(l => l.Cuarentena)
-            .Include(r => r.Lotes)
-                .ThenInclude(l => l.NoConformidades)
+            .Include(r => r.Items)
+                .ThenInclude(i => i.Item)
+                    .ThenInclude(p => p!.Categoria)
+
+            .Include(r => r.Items)
+                .ThenInclude(i => i.Lotes)
+                    .ThenInclude(l => l.Liberacion)
+
+            .Include(r => r.Items)
+                .ThenInclude(i => i.Lotes)
+                    .ThenInclude(l => l.Cuarentena)
+
+            .Include(r => r.Items)
+                .ThenInclude(i => i.Lotes)
+                    .ThenInclude(l => l.NoConformidades)
             .Include(r => r.Documentos)
             .Include(r => r.RegistrosTemperatura)
             .FirstOrDefaultAsync(r => r.Id == recepcionId);
@@ -46,18 +53,21 @@ public sealed class RecepcionRepository : GenericRepository<Recepcion>, IRecepci
     => await DbSet
         .Include(r => r.OrdenCompra)
         .Include(r => r.Proveedor)
-        .Include(r => r.UsuarioCreador)
+        .Include(r => r.CreadoPor)
         .Include(r => r.InspeccionVehiculo)
         .Include(r => r.Factura)
-        .Include(r => r.Lotes)
-            .ThenInclude(l => l.Item)
-                .ThenInclude(i => i!.Categoria)
-        .Include(r => r.Lotes)
-            .ThenInclude(l => l.Liberacion)
-        .Include(r => r.Lotes)
-            .ThenInclude(l => l.Cuarentena)
-        .Include(r => r.Lotes)
-            .ThenInclude(l => l.NoConformidades)
+        .Include(r => r.Items)
+            .ThenInclude(i => i.Item)
+                .ThenInclude(p => p!.Categoria)
+        .Include(r => r.Items)
+            .ThenInclude(i => i.Lotes)
+                .ThenInclude(l => l.Liberacion)
+        .Include(r => r.Items)
+            .ThenInclude(i => i.Lotes)
+                .ThenInclude(l => l.Cuarentena)
+        .Include(r => r.Items)
+            .ThenInclude(i => i.Lotes)
+                .ThenInclude(l => l.NoConformidades)
         .Include(r => r.Documentos)
         .Include(r => r.RegistrosTemperatura)
         .FirstOrDefaultAsync(r => r.NumeroRecepcion == numero);
@@ -75,9 +85,8 @@ public sealed class RecepcionRepository : GenericRepository<Recepcion>, IRecepci
 
         public async Task<Recepcion?> GetWithItemsAndLotesAsync(Guid id)
         {
-            return await _context.Recepciones
-                .AsNoTracking(false)
-                .Include(r => r.Proveedor)
+            return await DbSet
+                .Include(r => r.ProveedorId)
                 .Include(r => r.Items)
                     .ThenInclude(i => i.DetalleOrdenCompra)
                 .Include(r => r.Items)
@@ -87,11 +96,11 @@ public sealed class RecepcionRepository : GenericRepository<Recepcion>, IRecepci
 
         public async Task<bool> ExisteRecepcionActivaPorOrdenCompra(Guid ordenCompraId)
         {
-            return await _context.Recepciones
+            return await Context.Recepciones
                 .AnyAsync(r =>
                     r.OrdenCompraId == ordenCompraId &&
                     r.Estado != EstadoRecepcion.Finalizada &&
-                    r.Estado != EstadoRecepcion.Cancelada
+                    r.Estado != EstadoRecepcion.Rechazada
                 );
         }
 }
@@ -102,7 +111,9 @@ public sealed class LoteRecibidoRepository : GenericRepository<LoteRecibido>, IL
 
     public override async Task<LoteRecibido?> GetByIdAsync(Guid id)
         => await DbSet
-            .Include(l => l.Item).ThenInclude(i => i!.Categoria)
+            .Include(l => l.RecepcionItem)
+                .ThenInclude(i => i!.Item)
+                    .ThenInclude(p => p!.Categoria)
             .Include(l => l.Liberacion).ThenInclude(lib => lib!.UsuarioCalidad)
             .Include(l => l.Cuarentena)
             .Include(l => l.NoConformidades).ThenInclude(nc => nc.Causal)
@@ -116,18 +127,20 @@ public sealed class LoteRecibidoRepository : GenericRepository<LoteRecibido>, IL
         var fechaLimite = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(diasUmbral));
 
         return await DbSet
-            .Include(l => l.Item)
+            .Include(l => l.RecepcionItemId)
             .Include(l => l.Recepcion).ThenInclude(r => r!.Proveedor)
             .Where(l =>
-                l.VidaUtil.FechaVencimiento <= fechaLimite &&
+                l.VidaUtil!.FechaVencimiento <= fechaLimite &&
                 l.Estado != EstadoLote.RechazadoTotal)
-            .OrderBy(l => l.VidaUtil.FechaVencimiento)
+            .OrderBy(l => l.VidaUtil!.FechaVencimiento)
             .ToListAsync();
     }
 
     public async Task<LoteRecibido?> GetByCodigoInternoAsync(string codigoLoteInterno)
         => await DbSet
-            .Include(l => l.Item).ThenInclude(i => i!.Categoria)
+            .Include(l => l.RecepcionItem)
+                .ThenInclude(i => i!.Item)
+                    .ThenInclude(p => p!.Categoria)
             .Include(l => l.Liberacion).ThenInclude(lib => lib!.UsuarioCalidad)
             .Include(l => l.Cuarentena)
             .Include(l => l.NoConformidades).ThenInclude(nc => nc.Causal)
@@ -138,17 +151,25 @@ public sealed class LoteRecibidoRepository : GenericRepository<LoteRecibido>, IL
 
     public async Task<IEnumerable<LoteRecibido>> GetByEstadoAsync(EstadoLote estado)
     => await DbSet
-        .Include(l => l.Item).ThenInclude(i => i!.Categoria)
-        .Include(l => l.Item).ThenInclude(i => i!.RangoTemperatura) // ← agregar
-        .Include(l => l.Recepcion).ThenInclude(r => r!.Proveedor)
+        .Include(l => l.RecepcionItem)
+            .ThenInclude(ri => ri!.Item)
+                .ThenInclude(i => i!.Categoria)
+        .Include(l => l.RecepcionItem)
+            .ThenInclude(ri => ri!.Item)
+                .ThenInclude(i => i!.RangoTemperatura)
+        .Include(l => l.Recepcion)
+            .ThenInclude(r => r!.Proveedor)
         .Where(l => l.Estado == estado)
         .OrderByDescending(l => l.FechaRegistro)
         .ToListAsync();
     
     public async Task<IEnumerable<LoteRecibido>> GetByItemAsync(Guid itemId)
-        => await DbSet
-            .Include(l => l.Item).ThenInclude(i => i!.Categoria)
-            .Include(l => l.Recepcion).ThenInclude(r => r!.Proveedor)
-            .Where(l => l.ItemId == itemId)
-            .ToListAsync();
+    => await DbSet
+        .Include(l => l.RecepcionItem)
+            .ThenInclude(ri => ri!.Item)
+                .ThenInclude(i => i!.Categoria)
+        .Include(l => l.Recepcion)
+            .ThenInclude(r => r!.Proveedor)
+        .Where(l => l.RecepcionItem != null && l.RecepcionItem.ItemId == itemId)
+        .ToListAsync();
 }

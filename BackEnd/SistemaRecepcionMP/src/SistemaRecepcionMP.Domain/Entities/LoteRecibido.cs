@@ -10,10 +10,11 @@ public class LoteRecibido : BaseEntity
 {
 
     public Guid RecepcionItemId { get; private set; }
+    public RecepcionItem? RecepcionItem { get; private set; }
     public string? NumeroLoteProveedor { get; private set; }
     public string CodigoLoteInterno { get; private set; } = string.Empty;
     public DateOnly? FechaFabricacion { get; private set; }
-    public VidaUtil? VidaUtil { get; private set; }
+    public VidaUtil? VidaUtil { get; private set; } = null!;
     public decimal CantidadRecibida { get; private set; }
     public decimal CantidadRechazada { get; private set; }
     public decimal CantidadAceptada => CantidadRecibida - CantidadRechazada;
@@ -32,7 +33,6 @@ public class LoteRecibido : BaseEntity
     // Navegación
     public Recepcion Recepcion { get; init; } = null!;
     public DetalleOrdenCompra DetalleOrdenCompra { get; init; } = null!;
-    public Item Item { get; init; } = null!;
     public Usuario UsuarioRegistrador { get; init; } = null!;
     public LiberacionLote? Liberacion { get; private set; }
     public Cuarentena? Cuarentena { get; private set; }

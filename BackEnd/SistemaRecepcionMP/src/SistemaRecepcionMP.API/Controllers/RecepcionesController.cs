@@ -1,12 +1,13 @@
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.AdjuntarDocumento;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.IniciarRecepcion;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarInspeccionVehiculo;
-using SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarLoteRecibido;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands;
 using SistemaRecepcionMP.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using SistemaRecepcionMP.Application.Features.Recepciones.Queries;
 using SistemaRecepcionMP.API.Models;
+using SistemaRecepcionMP.Application.Features.Recepciones.Commands.AgregarItemRecepcion;
+using SistemaRecepcionMP.Application.Features.Recepciones.Commands.FinalizarRecepcion;
 
 namespace SistemaRecepcionMP.API.Controllers;
 
@@ -88,24 +89,15 @@ public sealed class RecepcionesController : BaseController
         return NoContent();
     }
 
-    /// <summary>
-    /// Paso 3 — Registra un lote de materia prima recibido.
-    /// Valida vida útil, rotulado y genera el código QR de trazabilidad.
-    /// Puede llamarse múltiples veces para registrar varios lotes de la misma recepción.
-    /// </summary>
-    [HttpPost("{id:guid}/lotes")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-    public async Task<IActionResult> RegistrarLote(
+    [HttpPost("{id:guid}/items")]
+    public async Task<IActionResult> AgregarItem(
         Guid id,
-        [FromBody] RegistrarLoteRecibidoCommand command,
+        [FromBody] AgregarItemRecepcionCommand command,
         CancellationToken ct = default)
     {
         command.RecepcionId = id;
-        var loteId = await Mediator.Send(command, ct);
-        return Created($"/api/lotes/{loteId}", new { id = loteId });
+        var itemId = await Mediator.Send(command, ct);
+        return Created(string.Empty, new { id = itemId });
     }
 
     /// <summary>
@@ -153,5 +145,17 @@ public sealed class RecepcionesController : BaseController
 
         var documentoId = await Mediator.Send(command, ct);
         return Created(string.Empty, new { id = documentoId });
+    }
+
+    [HttpPost("{id:guid}/finalizar")]
+    public async Task<IActionResult> Finalizar(
+        Guid id,
+        CancellationToken ct = default)
+    {
+        await Mediator.Send(new FinalizarRecepcionCommand
+        {
+            RecepcionId = id
+        }, ct);
+        return NoContent();
     }
 }

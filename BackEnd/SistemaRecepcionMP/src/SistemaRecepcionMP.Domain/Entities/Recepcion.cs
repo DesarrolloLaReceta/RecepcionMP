@@ -8,7 +8,12 @@ public class Recepcion : BaseEntity
 {
     public string NumeroRecepcion { get; private set; } = string.Empty;
     public Guid OrdenCompraId { get; private set; }
+    public OrdenCompra? OrdenCompra { get; private set; }
+
     public Guid ProveedorId { get; private set; }
+    public Proveedor? Proveedor { get; private set; }
+
+
     public Factura? Factura { get; private set; }
 
     public DateOnly FechaRecepcion { get; private set; }
@@ -22,7 +27,9 @@ public class Recepcion : BaseEntity
 
     public string? ObservacionesGenerales { get; private set; }
 
-    public Guid CreadoPor { get; private set; }
+    public Guid CreadoPorId { get; private set; }
+    public Usuario CreadoPor { get; private set; } = null!;
+
     public DateTime CreadoEn { get; private set; } = DateTime.UtcNow;
     public DateTime? ActualizadoEn { get; private set; }
     public DateTime? FechaFinalizacion { get; private set; }
@@ -41,7 +48,7 @@ public class Recepcion : BaseEntity
 
     public InspeccionVehiculo? InspeccionVehiculo { get; private set; }
 
-    public Recepcion(Guid ordenCompraId, Guid proveedorId, Guid creadoPor)
+    public Recepcion(Guid ordenCompraId, Guid proveedorId, Usuario creadoPor)
     {
         OrdenCompraId = ordenCompraId;
         ProveedorId = proveedorId;

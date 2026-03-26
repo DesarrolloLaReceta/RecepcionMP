@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using SistemaRecepcionMP.Domain.Exceptions;
 
 namespace SistemaRecepcionMP.Domain.Entities;
@@ -6,6 +7,8 @@ public class RecepcionItem : BaseEntity
 {
     public Guid RecepcionId { get; private set; }
     public Guid DetalleOrdenCompraId { get; private set; }
+    public Guid ItemId { get; private set; }
+    public Item? Item { get; private set; } = null!;
 
     public decimal CantidadEsperada { get; private set; }
     public decimal CantidadRecibida { get; private set; }
