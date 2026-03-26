@@ -2,13 +2,12 @@ using FluentValidation;
 
 namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.FinalizarRecepcion;
 
-public sealed class FinalizarRecepcionCommandValidator
+public class FinalizarRecepcionValidator 
     : AbstractValidator<FinalizarRecepcionCommand>
 {
-    public FinalizarRecepcionCommandValidator()
+    public FinalizarRecepcionValidator()
     {
         RuleFor(x => x.RecepcionId)
-            .NotEmpty()
-            .WithMessage("La recepción es obligatoria.");
+            .NotEmpty();
     }
 }

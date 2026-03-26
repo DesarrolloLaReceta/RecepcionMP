@@ -1,35 +1,32 @@
-
-
 using MediatR;
-using SistemaRecepcionMP.Domain.Exceptions.Recepciones;
-using SistemaRecepcionMP.Domain.Interfaces;
+using SistemaRecepcionMP.Domain.Exceptions;
+using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 
 namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.FinalizarRecepcion;
 
-public sealed class FinalizarRecepcionCommandHandler
+public class FinalizarRecepcionHandler 
     : IRequestHandler<FinalizarRecepcionCommand, Unit>
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IRecepcionRepository _repo;
 
-    public FinalizarRecepcionCommandHandler(IUnitOfWork unitOfWork)
+    public FinalizarRecepcionHandler(IRecepcionRepository repo)
     {
-        _unitOfWork = unitOfWork;
+        _repo = repo;
     }
 
     public async Task<Unit> Handle(
         FinalizarRecepcionCommand request,
         CancellationToken cancellationToken)
     {
-        // 1. Cargar agregado completo
-        var recepcion = await _unitOfWork.Recepciones
-            .GetWithItemsAndLotesAsync(request.RecepcionId)
-            ?? throw new RecepcionNotFoundException(request.RecepcionId);
+        var recepcion = await _repo
+            .GetWithItemsAndLotesAsync(request.RecepcionId);
 
-        // 2. Delegar al dominio (CLAVE)
+        if (recepcion is null)
+            throw new NotFoundException("Recepcion", request.RecepcionId);
+
         recepcion.Finalizar();
 
-        // 3. Guardar
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _repo.UpdateAsync(recepcion);
 
         return Unit.Value;
     }

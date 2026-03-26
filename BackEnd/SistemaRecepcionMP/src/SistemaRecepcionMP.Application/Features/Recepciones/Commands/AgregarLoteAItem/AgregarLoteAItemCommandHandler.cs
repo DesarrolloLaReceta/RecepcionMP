@@ -1,95 +1,47 @@
-using SistemaRecepcionMP.Application.Common.Interfaces;
-using SistemaRecepcionMP.Application.Common.Exceptions;
-using SistemaRecepcionMP.Domain.Entities;
-using SistemaRecepcionMP.Domain.Enums;
-using SistemaRecepcionMP.Domain.Exceptions.Lotes;
-using SistemaRecepcionMP.Domain.Exceptions.Recepciones;
-using SistemaRecepcionMP.Domain.Interfaces;
-using SistemaRecepcionMP.Domain.ValueObjects;
 using MediatR;
+using SistemaRecepcionMP.Domain.Entities;
 using SistemaRecepcionMP.Domain.Exceptions;
+using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 
 namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.AgregarLoteAItem;
 
-public sealed class AgregarLoteAItemCommandHandler
+public class AgregarLoteAItemHandler 
     : IRequestHandler<AgregarLoteAItemCommand, Guid>
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ICurrentUserService _currentUser;
-    private readonly IQrCodeService _qrCodeService;
+    private readonly IRecepcionRepository _recepcionRepository;
 
-    public AgregarLoteAItemCommandHandler(
-        IUnitOfWork unitOfWork,
-        ICurrentUserService currentUser,
-        IQrCodeService qrCodeService)
+    public AgregarLoteAItemHandler(IRecepcionRepository recepcionRepository)
     {
-        _unitOfWork = unitOfWork;
-        _currentUser = currentUser;
-        _qrCodeService = qrCodeService;
+        _recepcionRepository = recepcionRepository;
     }
 
     public async Task<Guid> Handle(
-        AgregarLoteAItemCommand request,
+        AgregarLoteAItemCommand request, 
         CancellationToken cancellationToken)
     {
-        // 1. Obtener recepción con Items + Lotes
-        var recepcion = await _unitOfWork.Recepciones
-            .GetWithItemsAndLotesAsync(request.RecepcionId)
-            ?? throw new RecepcionNotFoundException(request.RecepcionId);
+        var recepcion = await _recepcionRepository
+            .GetWithItemsAndLotesAsync(request.RecepcionId);
 
-        // 2. Validar estado
-        recepcion.ValidarPuedeRegistrarLotes();
+        if (recepcion is null)
+            throw new NotFoundException("Recepcion", request.RecepcionId);
 
-        // 3. Obtener RecepcionItem (PUNTO CLAVE)
-        var itemRecepcion = recepcion.Items
-            .FirstOrDefault(x => x.DetalleOrdenCompraId == request.DetalleOcId)
-            ?? throw new BusinessRuleException(
-                "El ítem no pertenece a la recepción.");
-
-        // 4. Obtener datos del item (catálogo)
-        var item = await _unitOfWork.Items.GetByIdAsync(request.ItemId)
-            ?? throw new ValidationException("ItemId",
-                $"No se encontró el ítem con ID '{request.ItemId}'.");
-
-        // 5. Crear VO VidaUtil
-        var vidaUtil = new VidaUtil(request.FechaVencimiento);
-
-        // 6. Crear lote (DOMINIO)
-        var lote = LoteRecibido.Crear(
-            recepcionItemId: itemRecepcion.Id,
-            detalleOcId: request.DetalleOcId,
-            itemId: request.ItemId,
-            numeroLoteProveedor: request.NumeroLoteProveedor?.Trim(),
-            fechaFabricacion: request.FechaFabricacion,
-            vidaUtil: vidaUtil,
-            cantidadRecibida: request.CantidadRecibida,
-            unidadMedida: request.UnidadMedida.Trim(),
-            temperaturaMedida: request.TemperaturaMedida,
-            estadoSensorial: request.EstadoSensorial,
-            estadoRotulado: request.EstadoRotulado,
-            ubicacionDestino: request.UbicacionDestino,
-            registradoPor: _currentUser.UserId
+        var lote = new LoteRecibido(
+            request.ItemId,
+            request.NumeroLoteProveedor,
+            request.FechaFabricacion,
+            request.FechaVencimiento,
+            request.CantidadRecibida,
+            request.CantidadRechazada,
+            request.UnidadMedida,
+            request.TemperaturaMedida,
+            request.EstadoSensorial,
+            request.EstadoRotulado,
+            request.UbicacionDestino
         );
 
-        // 7. Generar QR (infraestructura)
-        var urlQr = await _qrCodeService.GenerarParaLoteAsync(
-            lote.CodigoLoteInterno,
-            item.Nombre,
-            recepcion.Proveedor?.RazonSocial ?? string.Empty,
-            request.FechaVencimiento,
-            request.UbicacionDestino?.ToString() ?? "Sin asignar",
-            cancellationToken);
+        recepcion.AgregarLoteAItem(request.ItemId, lote);
 
-        lote.AsignarCodigoQr(urlQr);
-
-        // 8. Agregar lote al item (DOMINIO)
-        itemRecepcion.AgregarLote(lote);
-
-        // 9. Actualizar estado de recepción (DOMINIO)
-        recepcion.MarcarRegistroLotesEnProceso();
-
-        // 10. Guardar
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _recepcionRepository.UpdateAsync(recepcion);
 
         return lote.Id;
     }

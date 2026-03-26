@@ -51,9 +51,9 @@ public sealed class RecepcionConfiguration : IEntityTypeConfiguration<Recepcion>
             .HasForeignKey(r => r.ProveedorId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(r => r.UsuarioCreador)
+        builder.HasOne(r => r.CreadoPor)
             .WithMany()
-            .HasForeignKey(r => r.CreadoPor)
+            .HasForeignKey(r => r.CreadoPorId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(r => r.Factura)
@@ -65,11 +65,6 @@ public sealed class RecepcionConfiguration : IEntityTypeConfiguration<Recepcion>
             .WithOne(i => i.Recepcion)
             .HasForeignKey<InspeccionVehiculo>(i => i.RecepcionId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(r => r.Lotes)
-            .WithOne(l => l.Recepcion)
-            .HasForeignKey(l => l.RecepcionId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(r => r.Documentos)
             .WithOne(d => d.Recepcion)

@@ -1,5 +1,3 @@
-
-
 using MediatR;
 using SistemaRecepcionMP.Application.Common.Behaviours;
 
@@ -9,7 +7,6 @@ public sealed class FinalizarRecepcionCommand : IRequest<Unit>, IAuditableComman
 {
     public Guid RecepcionId { get; set; }
 
-    // Auditoría
     public string EntidadAfectada => "Recepcion";
     public string RegistroId => RecepcionId.ToString();
 }

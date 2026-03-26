@@ -4,84 +4,44 @@ using SistemaRecepcionMP.Domain.Enums;
 using SistemaRecepcionMP.Domain.Exceptions.Recepciones;
 using SistemaRecepcionMP.Domain.Interfaces;
 using MediatR;
+using SistemaRecepcionMP.Domain.Exceptions;
+using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 
 namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarInspeccionVehiculo;
 
-public sealed class RegistrarInspeccionVehiculoCommandHandler
-    : IRequestHandler<RegistrarInspeccionVehiculoCommand>
+public class RegistrarInspeccionVehiculoHandler 
+    : IRequestHandler<RegistrarInspeccionVehiculoCommand, Unit>
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ICurrentUserService _currentUser;
+    private readonly IRecepcionRepository _recepcionRepository;
 
-    public RegistrarInspeccionVehiculoCommandHandler(
-        IUnitOfWork unitOfWork,
-        ICurrentUserService currentUser)
+    public RegistrarInspeccionVehiculoHandler(IRecepcionRepository recepcionRepository)
     {
-        _unitOfWork = unitOfWork;
-        _currentUser = currentUser;
+        _recepcionRepository = recepcionRepository;
     }
 
-    public async Task Handle(
+    public async Task<Unit> Handle(
         RegistrarInspeccionVehiculoCommand request,
         CancellationToken cancellationToken)
     {
-        var recepcion = await _unitOfWork.Recepciones.GetByIdAsync(request.RecepcionId)
-            ?? throw new RecepcionNotFoundException(request.RecepcionId);
+        var recepcion = await _recepcionRepository
+            .GetByIdAsync(request.RecepcionId);
 
-        if (recepcion.Estado != EstadoRecepcion.Iniciada)
-            throw new RecepcionEstadoInvalidoException(
-                recepcion.NumeroRecepcion,
-                recepcion.Estado,
-                "registrar inspección de vehículo");
+        if (recepcion is null)
+            throw new NotFoundException("Recepcion", request.RecepcionId);
 
-        if (recepcion.InspeccionVehiculo is not null)
-            throw new RecepcionEstadoInvalidoException(
-                recepcion.NumeroRecepcion,
-                recepcion.Estado,
-                "registrar inspección — ya existe una inspección para esta recepción");
+        recepcion.RegistrarInspeccionVehiculo(
+            request.TemperaturaInicial,
+            request.TemperaturaDentroRango,
+            request.IntegridadEmpaque,
+            request.LimpiezaVehiculo,
+            request.PresenciaOloresExtranos,
+            request.PlagasVisible,
+            request.DocumentosTransporteOk,
+            request.Observaciones
+        );
 
-        // Determinar resultado automático según los criterios
-        var resultado = DeterminarResultado(request);
+        await _recepcionRepository.UpdateAsync(recepcion);
 
-        var inspeccion = new InspeccionVehiculo
-        {
-            RecepcionId = recepcion.Id,
-            TemperaturaInicial = request.TemperaturaInicial,
-            TemperaturaDentroRango = request.TemperaturaDentroRango,
-            IntegridadEmpaque = request.IntegridadEmpaque,
-            LimpiezaVehiculo = request.LimpiezaVehiculo,
-            PresenciaOloresExtranos = request.PresenciaOloresExtranos,
-            PlagasVisible = request.PlagasVisible,
-            DocumentosTransporteOk = request.DocumentosTransporteOk,
-            Resultado = resultado,
-            Observaciones = request.Observaciones?.Trim(),
-            RegistradoPor = _currentUser.UserId,
-            FechaRegistro = DateTime.UtcNow
-        };
-
-        // Avanzar estado de la recepción
-        inspeccion.RecepcionId = recepcion.Id;
-        await _unitOfWork.Recepciones.AddInspeccionVehiculoAsync(inspeccion);
-
-        recepcion.Estado = resultado == ResultadoInspeccion.Aprobado
-            ? EstadoRecepcion.InspeccionVehiculo
-            : EstadoRecepcion.Rechazada;
-        recepcion.ActualizadoEn = DateTime.UtcNow;
-
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-    }
-
-    private static ResultadoInspeccion DeterminarResultado(RegistrarInspeccionVehiculoCommand request)
-    {
-        // Criterios de rechazo automático según BPM
-        var hayFallaCritica =
-            request.PlagasVisible ||
-            !request.TemperaturaDentroRango ||
-            !request.IntegridadEmpaque ||
-            !request.LimpiezaVehiculo;
-
-        return hayFallaCritica
-            ? ResultadoInspeccion.Rechazado
-            : ResultadoInspeccion.Aprobado;
+        return Unit.Value;
     }
 }

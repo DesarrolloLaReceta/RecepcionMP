@@ -33,4 +33,10 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
 
     public virtual void Delete(T entity)
         => DbSet.Remove(entity);
+
+        public virtual async Task UpdateAsync(T entity)
+    {
+        DbSet.Update(entity);
+        await Context.SaveChangesAsync();
+    }
 }
