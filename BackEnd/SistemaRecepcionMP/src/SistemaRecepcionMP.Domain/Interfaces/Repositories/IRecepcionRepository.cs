@@ -11,4 +11,5 @@ public interface IRecepcionRepository : IRepository<Recepcion>
     Task<IEnumerable<Recepcion>> GetByProveedorAsync(Guid proveedorId);
     Task UpdateAsync(Recepcion recepcion);
     Task<Recepcion?> GetWithItemsAndLotesAsync(Guid id);
+    Task<bool> ExisteRecepcionActivaPorOrdenCompra(Guid ordenCompraId);
 }

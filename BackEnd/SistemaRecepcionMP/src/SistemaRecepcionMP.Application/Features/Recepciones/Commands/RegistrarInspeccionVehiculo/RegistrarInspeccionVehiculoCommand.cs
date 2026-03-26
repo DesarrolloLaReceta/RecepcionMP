@@ -4,7 +4,7 @@ using MediatR;
 
 namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarInspeccionVehiculo;
 
-public sealed class RegistrarInspeccionVehiculoCommand : IRequest, IAuditableCommand
+public sealed class RegistrarInspeccionVehiculoCommand : IRequest<Unit>, IAuditableCommand
 {
     public Guid RecepcionId { get; set; }
     public decimal? TemperaturaInicial { get; set; }

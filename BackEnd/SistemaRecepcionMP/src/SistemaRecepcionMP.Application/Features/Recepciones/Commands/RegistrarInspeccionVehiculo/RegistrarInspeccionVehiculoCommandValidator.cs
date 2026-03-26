@@ -2,27 +2,24 @@ using FluentValidation;
 
 namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarInspeccionVehiculo;
 
-public sealed class RegistrarInspeccionVehiculoCommandValidator
+public class RegistrarInspeccionVehiculoValidator 
     : AbstractValidator<RegistrarInspeccionVehiculoCommand>
 {
-    public RegistrarInspeccionVehiculoCommandValidator()
+    public RegistrarInspeccionVehiculoValidator()
     {
         RuleFor(x => x.RecepcionId)
-            .NotEmpty().WithMessage("La recepción es obligatoria.");
+            .NotEmpty();
 
         RuleFor(x => x.TemperaturaInicial)
-            .InclusiveBetween(-40m, 60m)
-            .WithMessage("La temperatura inicial debe estar entre -40°C y 60°C.")
+            .GreaterThanOrEqualTo(-50)
+            .LessThanOrEqualTo(100)
             .When(x => x.TemperaturaInicial.HasValue);
 
         RuleFor(x => x.Observaciones)
-            .MaximumLength(500).WithMessage("Las observaciones no pueden superar 500 caracteres.")
-            .When(x => x.Observaciones is not null);
+            .MaximumLength(500);
 
-        // Si hay plagas visibles o temperatura fuera de rango, observaciones son obligatorias
-        RuleFor(x => x.Observaciones)
-            .NotEmpty().WithMessage("Las observaciones son obligatorias cuando hay hallazgos críticos " +
-                                    "(plagas visibles o temperatura fuera de rango).")
-            .When(x => x.PlagasVisible || !x.TemperaturaDentroRango);
+        RuleFor(x => x)
+            .Must(x => x.TemperaturaDentroRango || x.TemperaturaInicial.HasValue)
+            .WithMessage("Debe indicar la temperatura si está fuera de rango.");
     }
 }

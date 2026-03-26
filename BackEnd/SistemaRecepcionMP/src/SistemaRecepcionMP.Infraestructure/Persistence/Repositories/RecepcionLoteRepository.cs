@@ -84,6 +84,16 @@ public sealed class RecepcionRepository : GenericRepository<Recepcion>, IRecepci
                     .ThenInclude(i => i.Lotes)
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
+
+        public async Task<bool> ExisteRecepcionActivaPorOrdenCompra(Guid ordenCompraId)
+        {
+            return await _context.Recepciones
+                .AnyAsync(r =>
+                    r.OrdenCompraId == ordenCompraId &&
+                    r.Estado != EstadoRecepcion.Finalizada &&
+                    r.Estado != EstadoRecepcion.Cancelada
+                );
+        }
 }
 
 public sealed class LoteRecibidoRepository : GenericRepository<LoteRecibido>, ILoteRecibidoRepository

@@ -1,3 +1,5 @@
+using SistemaRecepcionMP.Domain.Exceptions;
+
 namespace SistemaRecepcionMP.Domain.Entities;
 
 public class RecepcionItem : BaseEntity
@@ -8,6 +10,7 @@ public class RecepcionItem : BaseEntity
     public decimal CantidadEsperada { get; private set; }
     public decimal CantidadRecibida { get; private set; }
     public decimal CantidadRechazada { get; private set; }
+    public decimal CantidadAceptada => CantidadRecibida - CantidadRechazada;
 
     public string UnidadMedida { get; private set; } = string.Empty;
 
@@ -15,13 +18,57 @@ public class RecepcionItem : BaseEntity
     public Recepcion Recepcion { get; private set; } = null!;
     public DetalleOrdenCompra DetalleOrdenCompra { get; private set; } = null!;
 
-    public ICollection<LoteRecibido> Lotes { get; private set; } = new List<LoteRecibido>();
+    private readonly List<LoteRecibido> _lotes = new();
+
+    public IReadOnlyCollection<LoteRecibido> Lotes => _lotes;
+
+    public RecepcionItem(
+        Guid recepcionId,
+        Guid detalleOrdenCompraId,
+        decimal cantidadEsperada,
+        string unidadMedida)
+    {
+        if (cantidadEsperada <= 0)
+            throw new BusinessRuleException("La cantidad esperada debe ser mayor a 0");
+
+        if (string.IsNullOrWhiteSpace(unidadMedida))
+            throw new BusinessRuleException("La unidad de medida es obligatoria");
+
+        RecepcionId = recepcionId;
+        DetalleOrdenCompraId = detalleOrdenCompraId;
+        CantidadEsperada = cantidadEsperada;
+        UnidadMedida = unidadMedida;
+    }
 
     // MÉTODOS DE NEGOCIO
 
     public void AgregarLote(LoteRecibido lote)
     {
-        Lotes.Add(lote);
+        if (lote is null)
+            throw new ArgumentNullException(nameof(lote));
+
+        if (lote.CantidadRecibida <= 0)
+            throw new BusinessRuleException("El lote debe tener cantidad recibida mayor a 0");
+
+        if (lote.CantidadRechazada < 0)
+            throw new BusinessRuleException("La cantidad rechazada no puede ser negativa");
+
+        if (lote.CantidadRechazada > lote.CantidadRecibida)
+            throw new BusinessRuleException("No puedes rechazar más de lo recibido");
+
+        if (lote.UnidadMedida != UnidadMedida)
+            throw new BusinessRuleException("La unidad de medida del lote no coincide");
+
+        if (Lotes.Any(x => x.CodigoLoteInterno == lote.CodigoLoteInterno))
+            throw new BusinessRuleException("El lote ya fue agregado");
+
+        var totalConNuevo = Lotes.Sum(x => x.CantidadRecibida) + lote.CantidadRecibida;
+
+        if (totalConNuevo > CantidadEsperada)
+            throw new BusinessRuleException("No puedes recibir más de lo solicitado");
+
+        _lotes.Add(lote);
+
         RecalcularCantidades();
     }
 
@@ -31,6 +78,6 @@ public class RecepcionItem : BaseEntity
         CantidadRechazada = Lotes.Sum(x => x.CantidadRechazada);
 
         if (CantidadRecibida > CantidadEsperada)
-            throw new Exception("No puedes recibir más de lo solicitado");
+            throw new BusinessRuleException("Cantidad recibida excede la esperada");
     }
 }
