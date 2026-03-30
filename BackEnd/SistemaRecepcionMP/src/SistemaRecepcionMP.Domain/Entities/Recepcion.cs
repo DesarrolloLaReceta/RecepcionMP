@@ -48,6 +48,8 @@ public class Recepcion : BaseEntity
 
     public InspeccionVehiculo? InspeccionVehiculo { get; private set; }
 
+    public Recepcion() { }
+
     public Recepcion(Guid ordenCompraId, Guid proveedorId, Usuario creadoPor)
     {
         OrdenCompraId = ordenCompraId;
@@ -253,5 +255,13 @@ public class Recepcion : BaseEntity
         var item = Items.First(x => x.Id == itemId);
 
         item.AgregarLote(lote);
+    }
+
+    public void AgregarDocumento(DocumentoRecepcion documento)
+    {
+        if (documento == null)
+            throw new ArgumentNullException(nameof(documento));
+
+        _documentos.Add(documento);
     }
 }

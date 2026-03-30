@@ -156,7 +156,7 @@ public sealed class GetTrazabilidadLoteQueryHandler
         var lote = await _unitOfWork.Lotes.GetByIdAsync(request.LoteId)
             ?? throw new LoteNotFoundException(request.LoteId);
 
-        var recepcion = await _unitOfWork.Recepciones.GetWithLotesAsync(lote.RecepcionId)
+        var recepcion = await _unitOfWork.Recepciones.GetWithLotesAsync(lote.Recepcion.Id)
             ?? throw new Domain.Exceptions.BusinessRuleException(
                 $"No se encontró la recepción asociada al lote '{lote.CodigoLoteInterno}'.");
 
@@ -174,9 +174,9 @@ public sealed class GetTrazabilidadLoteQueryHandler
             CodigoQr = lote.CodigoQr ?? string.Empty,
             Estado = lote.Estado,
 
-            ItemCodigo = lote.Item?.CodigoInterno ?? string.Empty,
-            ItemNombre = lote.Item?.Nombre ?? string.Empty,
-            CategoriaNombre = lote.Item?.Categoria?.Nombre ?? string.Empty,
+            ItemCodigo = lote.RecepcionItem?.Item?.CodigoInterno ?? string.Empty,
+            ItemNombre = lote.RecepcionItem?.Item?.Nombre ?? string.Empty,
+            CategoriaNombre = lote.RecepcionItem?.Item?.Categoria?.Nombre ?? string.Empty,
 
             NumeroOC = recepcion.OrdenCompra?.NumeroOC ?? string.Empty,
             NumeroRecepcion = recepcion.NumeroRecepcion,
@@ -184,7 +184,7 @@ public sealed class GetTrazabilidadLoteQueryHandler
             ProveedorNit = recepcion.Proveedor?.Nit ?? string.Empty,
 
             FechaFabricacion = lote.FechaFabricacion,
-            FechaVencimiento = lote.VidaUtil.FechaVencimiento,
+            FechaVencimiento = lote.VidaUtil!.FechaVencimiento,
             DiasVidaUtilRestantes = lote.VidaUtil.DiasRestantes,
             FechaRecepcion = recepcion.FechaRecepcion,
 

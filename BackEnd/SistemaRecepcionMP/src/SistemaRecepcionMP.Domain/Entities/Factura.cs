@@ -16,6 +16,8 @@ public class Factura : BaseEntity
 
     public Recepcion Recepcion { get; private set; } = null!;
 
+    public Factura() { }
+
     public Factura(string numeroFactura, DateOnly fecha, decimal valor)
     {
         if (string.IsNullOrWhiteSpace(numeroFactura))

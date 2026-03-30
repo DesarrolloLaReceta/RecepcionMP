@@ -2,7 +2,6 @@ using SistemaRecepcionMP.Application.Common.Exceptions;
 using SistemaRecepcionMP.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using SendGrid.Helpers.Errors.Model;
 
 namespace SistemaRecepcionMP.API.Filters;
 

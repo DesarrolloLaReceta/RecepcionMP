@@ -123,7 +123,7 @@ public sealed class LiberarLoteCommandHandler : IRequestHandler<LiberarLoteComma
         // 7. Notificar si fue rechazado definitivamente
         if (request.Decision == DecisionLiberacion.RechazadoDefinitivo)
         {
-            var recepcion = await _unitOfWork.Recepciones.GetByIdAsync(lote.RecepcionId);
+            var recepcion = await _unitOfWork.Recepciones.GetByIdAsync(lote.Recepcion.Id);
             if (recepcion?.Proveedor?.EmailContacto is not null)
             {
                 await _emailService.EnviarConPlantillaAsync(

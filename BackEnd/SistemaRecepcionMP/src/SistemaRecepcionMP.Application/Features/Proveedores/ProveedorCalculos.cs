@@ -10,26 +10,30 @@ public static class ProveedorCalculos
 
     public static double TasaAceptacion(Proveedor p)
     {
+        // Obtener todos los lotes de las recepciones del proveedor
         var lotes = p.OrdenesCompra?
             .SelectMany(oc => oc.Recepciones ?? new List<Recepcion>())
-            .SelectMany(r => r.Lotes ?? new List<LoteRecibido>())
+            .SelectMany(r => r.Items.SelectMany(i => i.Lotes)) // ✅ Cambio clave
             .ToList() ?? new();
 
         if (lotes.Count == 0) return 0;
 
-        var aceptados = lotes.Count(l =>
-            l.Estado == EstadoLote.Liberado);
+        // Contar lotes liberados (aceptados)
+        var aceptados = lotes.Count(l => l.Estado == EstadoLote.Liberado); // ✅ Estado correcto
 
         return Math.Round((double)aceptados / lotes.Count * 100, 1);
     }
 
     public static List<string> Categorias(Proveedor p)
-    => p.OrdenesCompra?
-        .SelectMany(oc => oc.Detalles)
-        .Select(d => d.Item?.Categoria?.Nombre)
-        .Where(n => n is not null)
-        .Select(n => n!)
-        .Distinct()
-        .OrderBy(n => n)
-        .ToList() ?? new();
+    {
+        // Obtener categorías de los ítems de los lotes
+        return p.OrdenesCompra?
+            .SelectMany(oc => oc.Detalles)
+            .Select(d => d.Item?.Categoria?.Nombre)
+            .Where(n => n is not null)
+            .Select(n => n!)
+            .Distinct()
+            .OrderBy(n => n)
+            .ToList() ?? new();
+    }
 }

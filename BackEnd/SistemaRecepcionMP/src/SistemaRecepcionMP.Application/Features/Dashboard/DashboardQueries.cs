@@ -59,7 +59,7 @@ public sealed class GetKpiRecepcionesQueryHandler
         var listaRecepciones = recepciones.ToList();
 
         // KPIs de recepciones
-        var liberadas = listaRecepciones.Count(r => r.Estado == EstadoRecepcion.Liberada);
+        var liberadas = listaRecepciones.Count(r => r.Estado == EstadoRecepcion.Finalizada);
         var rechazadas = listaRecepciones.Count(r => r.Estado == EstadoRecepcion.Rechazada);
 
         // KPIs de lotes

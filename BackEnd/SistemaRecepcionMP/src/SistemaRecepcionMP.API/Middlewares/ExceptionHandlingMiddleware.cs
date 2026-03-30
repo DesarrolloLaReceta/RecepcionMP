@@ -3,7 +3,6 @@ using SistemaRecepcionMP.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Text.Json;
-using SendGrid.Helpers.Errors.Model;
 
 namespace SistemaRecepcionMP.API.Middlewares;
 

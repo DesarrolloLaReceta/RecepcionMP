@@ -3,6 +3,7 @@ using SistemaRecepcionMP.Domain.Entities;
 using SistemaRecepcionMP.Domain.Exceptions.Recepciones;
 using SistemaRecepcionMP.Domain.Interfaces;
 using MediatR;
+using SistemaRecepcionMP.Domain.Enums;
 
 namespace SistemaRecepcionMP.Application.Features.Recepciones.Commands.AdjuntarDocumento;
 
@@ -23,8 +24,8 @@ public sealed class AdjuntarDocumentoCommandHandler : IRequestHandler<AdjuntarDo
     }
 
     public async Task<Guid> Handle(
-        AdjuntarDocumentoCommand request,
-        CancellationToken cancellationToken)
+    AdjuntarDocumentoCommand request,
+    CancellationToken cancellationToken)
     {
         // Verificar que la recepción o el lote existen
         if (request.RecepcionId.HasValue)
@@ -32,8 +33,9 @@ public sealed class AdjuntarDocumentoCommandHandler : IRequestHandler<AdjuntarDo
             var recepcion = await _unitOfWork.Recepciones.GetByIdAsync(request.RecepcionId.Value)
                 ?? throw new RecepcionNotFoundException(request.RecepcionId.Value);
 
-            if (recepcion.Estado == Domain.Enums.EstadoRecepcion.Liberada ||
-                recepcion.Estado == Domain.Enums.EstadoRecepcion.Rechazada)
+            // ✅ Cambio: Liberada → Finalizada
+            if (recepcion.Estado == EstadoRecepcion.Finalizada ||
+                recepcion.Estado == EstadoRecepcion.Rechazada)
                 throw new RecepcionYaCerradaException(recepcion.NumeroRecepcion);
         }
 
@@ -71,13 +73,13 @@ public sealed class AdjuntarDocumentoCommandHandler : IRequestHandler<AdjuntarDo
         if (request.RecepcionId.HasValue)
         {
             var recepcion = await _unitOfWork.Recepciones.GetByIdAsync(request.RecepcionId.Value);
-            recepcion!.Documentos.Add(documento);
+            recepcion!.AgregarDocumento(documento);
             _unitOfWork.Recepciones.Update(recepcion);
         }
         else
         {
             var lote = await _unitOfWork.Lotes.GetByIdAsync(request.LoteRecibidoId!.Value);
-            lote!.Documentos.Add(documento);
+            lote!.Documentos.Add(documento);   // ✅ ICollection sí tiene Add
             _unitOfWork.Lotes.Update(lote);
         }
 

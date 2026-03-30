@@ -6,8 +6,6 @@ import type {
   RegistrarTemperaturaCommand,
   TipoDocumento,
   EstadoRecepcion,
-  EstadoSensorial,
-  EstadoRotulado,
   UbicacionDestino,
 } from "../Types/api";
 

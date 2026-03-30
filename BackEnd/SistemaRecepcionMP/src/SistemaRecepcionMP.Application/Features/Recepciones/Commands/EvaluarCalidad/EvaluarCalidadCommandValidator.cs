@@ -27,7 +27,7 @@ public class EvaluarCalidadValidator
 
         When(x => x.CantidadRechazada.HasValue, () =>
         {
-            RuleFor(x => x.CantidadRechazada.Value)
+            RuleFor(x => x.CantidadRechazada!.Value)
                 .GreaterThanOrEqualTo(0);
         });
     }

@@ -322,10 +322,12 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     PlacaVehiculo = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
                     NombreTransportista = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     Estado = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Resultado = table.Column<int>(type: "int", nullable: true),
                     ObservacionesGenerales = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    CreadoPor = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreadoPorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreadoEn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ActualizadoEn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FechaFinalizacion = table.Column<DateTime>(type: "datetime2", nullable: true),
                     OrdenCompraId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -349,8 +351,8 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Recepciones_Usuarios_CreadoPor",
-                        column: x => x.CreadoPor,
+                        name: "FK_Recepciones_Usuarios_CreadoPorId",
+                        column: x => x.CreadoPorId,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -364,10 +366,11 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     RecepcionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     NumeroFactura = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     FechaFactura = table.Column<DateOnly>(type: "date", nullable: false),
-                    ValorTotal = table.Column<decimal>(type: "decimal(16,2)", precision: 18, scale: 4, nullable: false),
-                    AdjuntoUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    NotaCreditoNumero = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    NotaCreditoValor = table.Column<decimal>(type: "decimal(16,2)", precision: 18, scale: 4, nullable: true)
+                    ValorTotal = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 4, nullable: false),
+                    AdjuntoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NotaCreditoNumero = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NotaCreditoValor = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: true),
+                    RecepcionId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -378,6 +381,11 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         principalTable: "Recepciones",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Facturas_Recepciones_RecepcionId1",
+                        column: x => x.RecepcionId1,
+                        principalTable: "Recepciones",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -416,54 +424,79 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LotesRecibidos",
+                name: "RecepcionItem",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RecepcionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DetalleOcId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DetalleOrdenCompraId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CantidadEsperada = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    CantidadRecibida = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    CantidadRechazada = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    UnidadMedida = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecepcionItem", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RecepcionItem_DetallesOrdenCompra_DetalleOrdenCompraId",
+                        column: x => x.DetalleOrdenCompraId,
+                        principalTable: "DetallesOrdenCompra",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RecepcionItem_Items_ItemId",
+                        column: x => x.ItemId,
+                        principalTable: "Items",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RecepcionItem_Recepciones_RecepcionId",
+                        column: x => x.RecepcionId,
+                        principalTable: "Recepciones",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LotesRecibidos",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RecepcionItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     NumeroLoteProveedor = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CodigoLoteInterno = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     FechaFabricacion = table.Column<DateOnly>(type: "date", nullable: true),
-                    FechaVencimiento = table.Column<DateOnly>(type: "date", nullable: false),
+                    FechaVencimiento = table.Column<DateOnly>(type: "date", nullable: true),
                     CantidadRecibida = table.Column<decimal>(type: "decimal(12,3)", precision: 18, scale: 4, nullable: false),
                     CantidadRechazada = table.Column<decimal>(type: "decimal(12,3)", precision: 18, scale: 4, nullable: false, defaultValue: 0m),
                     UnidadMedida = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     TemperaturaMedida = table.Column<decimal>(type: "decimal(5,2)", precision: 18, scale: 4, nullable: true),
                     EstadoSensorial = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     EstadoRotulado = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ObservacionesCalidad = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Estado = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     UbicacionDestino = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     CodigoQr = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     RegistradoPor = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DetalleOrdenCompraId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    LoteRecibido_FechaVencimiento = table.Column<DateOnly>(type: "date", nullable: false),
+                    DetalleOrdenCompraId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_LotesRecibidos", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LotesRecibidos_DetallesOrdenCompra_DetalleOcId",
-                        column: x => x.DetalleOcId,
-                        principalTable: "DetallesOrdenCompra",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_LotesRecibidos_DetallesOrdenCompra_DetalleOrdenCompraId",
                         column: x => x.DetalleOrdenCompraId,
                         principalTable: "DetallesOrdenCompra",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_LotesRecibidos_Items_ItemId",
-                        column: x => x.ItemId,
-                        principalTable: "Items",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LotesRecibidos_Recepciones_RecepcionId",
-                        column: x => x.RecepcionId,
-                        principalTable: "Recepciones",
+                        name: "FK_LotesRecibidos_RecepcionItem_RecepcionItemId",
+                        column: x => x.RecepcionItemId,
+                        principalTable: "RecepcionItem",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -866,6 +899,11 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Facturas_RecepcionId1",
+                table: "Facturas",
+                column: "RecepcionId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_InspeccionesVehiculo_RecepcionId",
                 table: "InspeccionesVehiculo",
                 column: "RecepcionId",
@@ -905,24 +943,14 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_LotesRecibidos_DetalleOcId",
-                table: "LotesRecibidos",
-                column: "DetalleOcId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_LotesRecibidos_DetalleOrdenCompraId",
                 table: "LotesRecibidos",
                 column: "DetalleOrdenCompraId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LotesRecibidos_ItemId",
+                name: "IX_LotesRecibidos_RecepcionItemId",
                 table: "LotesRecibidos",
-                column: "ItemId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LotesRecibidos_RecepcionId",
-                table: "LotesRecibidos",
-                column: "RecepcionId");
+                column: "RecepcionItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LotesRecibidos_RegistradoPor",
@@ -967,9 +995,9 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 column: "ProveedorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Recepciones_CreadoPor",
+                name: "IX_Recepciones_CreadoPorId",
                 table: "Recepciones",
-                column: "CreadoPor");
+                column: "CreadoPorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Recepciones_NumeroRecepcion",
@@ -991,6 +1019,21 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 name: "IX_Recepciones_ProveedorId",
                 table: "Recepciones",
                 column: "ProveedorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecepcionItem_DetalleOrdenCompraId",
+                table: "RecepcionItem",
+                column: "DetalleOrdenCompraId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecepcionItem_ItemId",
+                table: "RecepcionItem",
+                column: "ItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecepcionItem_RecepcionId",
+                table: "RecepcionItem",
+                column: "RecepcionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RegistrosTemperatura_LoteRecibidoId",
@@ -1095,6 +1138,9 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "ChecklistsBPM");
+
+            migrationBuilder.DropTable(
+                name: "RecepcionItem");
 
             migrationBuilder.DropTable(
                 name: "DetallesOrdenCompra");

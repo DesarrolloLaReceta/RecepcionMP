@@ -78,33 +78,22 @@ public sealed class RecepcionConfiguration : IEntityTypeConfiguration<Recepcion>
     }
 }
 
-public sealed class FacturaConfiguration : IEntityTypeConfiguration<Factura>
+public class FacturaConfiguration : IEntityTypeConfiguration<Factura>
 {
     public void Configure(EntityTypeBuilder<Factura> builder)
     {
         builder.ToTable("Facturas");
-
         builder.HasKey(f => f.Id);
 
-        builder.Property(f => f.NumeroFactura)
-            .IsRequired()
-            .HasMaxLength(50);
+        builder.Property(f => f.NumeroFactura).IsRequired().HasMaxLength(50);
+        builder.Property(f => f.FechaFactura).IsRequired();
+        builder.Property(f => f.ValorTotal).HasColumnType("decimal(18,2)");
 
-        builder.Property(f => f.FechaFactura)
-            .IsRequired();
-
-        builder.Property(f => f.ValorTotal)
-            .IsRequired()
-            .HasColumnType("decimal(16,2)");
-
-        builder.Property(f => f.AdjuntoUrl)
-            .HasMaxLength(500);
-
-        builder.Property(f => f.NotaCreditoNumero)
-            .HasMaxLength(50);
-
-        builder.Property(f => f.NotaCreditoValor)
-            .HasColumnType("decimal(16,2)");
+        // Relación con Recepcion
+        builder.HasOne(f => f.Recepcion)
+            .WithMany()
+            .HasForeignKey(f => f.RecepcionId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 

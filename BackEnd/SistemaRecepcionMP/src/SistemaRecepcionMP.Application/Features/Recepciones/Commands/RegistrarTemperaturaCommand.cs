@@ -77,7 +77,7 @@ public sealed class RegistrarTemperaturaCommandHandler : IRequestHandler<Registr
                 ?? throw new Domain.Exceptions.BusinessRuleException(
                     $"No se encontró el lote con ID '{request.LoteRecibidoId}'.");
 
-            var item = await _unitOfWork.Items.GetByIdAsync(lote.ItemId);
+            var item = await _unitOfWork.Items.GetByIdAsync(lote.RecepcionItem!.ItemId);
             if (item?.RangoTemperatura is not null)
                 estaFueraDeRango = item.RangoTemperatura.EstaFueraDeRango(request.Temperatura);
         }
