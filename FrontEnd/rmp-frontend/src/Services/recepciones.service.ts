@@ -2,35 +2,56 @@ import { apiClient } from "./apiClient";
 import type {
   IniciarRecepcionCommand,
   RegistrarInspeccionVehiculoCommand,
-  RegistrarLoteRecibidoCommand,
   RegistrarTemperaturaCommand,
   TipoDocumento,
   EstadoRecepcion,
-  UbicacionDestino,
-} from "../Types/api";
+  AgregarItemRecepcionCommand,
+} from "../Types";
 
-// ─── TIPOS RESUMEN ────────────────────────────────────────────────────────────
+// ─── DTOs DE RESPUESTA (basados en el backend) ─────────────────────────────────
 
 export interface RecepcionResumen {
   id: string;
   numeroRecepcion: string;
   ordenCompraNumero: string;
-  proveedorNombre: string;
   proveedorId: string;
-  fechaRecepcion: string;
-  horaLlegadaVehiculo: string;
+  proveedorNombre: string;
+  fechaRecepcion: string;          // "YYYY-MM-DD"
+  horaLlegadaVehiculo: string;     // "HH:MM:SS"
   placaVehiculo?: string;
   nombreTransportista?: string;
-  estado: EstadoRecepcion;
+  estado: EstadoRecepcion;          // 0|1|2|3|4|5
   totalLotes: number;
   lotesLiberados: number;
   lotesRechazados: number;
   observacionesGenerales?: string;
 }
 
-// ─── TIPOS DETALLE ────────────────────────────────────────────────────────────
+// Interfaces para los DTOs anidados (puedes refinarlos después)
+export interface FacturaDto {
+  // Propiedades según el backend
+  id: string;
+  numeroFactura: string;
+  fecha: string;
+  valor: number;
+}
 
-export interface LoteResumen {
+export interface InspeccionVehiculoDto {
+  id: string;
+  temperaturaInicial?: number;
+  temperaturaDentroRango: boolean;
+  integridadEmpaque: boolean;
+  limpiezaVehiculo: boolean;
+  presenciaOloresExtranos: boolean;
+  plagasVisible: boolean;
+  documentosTransporteOk: boolean;
+  resultado: number; // 0=Conforme, 1=NoConforme (puede ser enum)
+  observaciones?: string;
+  registradoPorNombre: string;
+  fechaRegistro: string;
+}
+
+export interface LoteResumenDto {
   id: string;
   codigoLoteInterno: string;
   numeroLoteProveedor?: string;
@@ -41,28 +62,13 @@ export interface LoteResumen {
   estaVencido: boolean;
   cantidadRecibida: number;
   cantidadRechazada: number;
-  estado: string;
-  ubicacionDestino?: UbicacionDestino;
+  estado: string; // Puede ser "Liberado", "RechazadoTotal", etc.
+  ubicacionDestino?: number; // 0=CD, 1=CP
 }
 
-export interface InspeccionVehiculo {
+export interface DocumentoRecepcionDto {
   id: string;
-  temperaturaInicial?: number;
-  temperaturaDentroRango: boolean;
-  integridadEmpaque: boolean;
-  limpiezaVehiculo: boolean;
-  presenciaOloresExtranos: boolean;
-  plagasVisible: boolean;
-  documentosTransporteOk: boolean;
-  resultado: number;
-  observaciones?: string;
-  registradoPorNombre: string;
-  fechaRegistro: string;
-}
-
-export interface DocumentoAdjunto {
-  id: string;
-  tipoDocumento: number;
+  tipoDocumento: TipoDocumento;
   nombreArchivo: string;
   adjuntoUrl: string;
   fechaCarga: string;
@@ -70,12 +76,12 @@ export interface DocumentoAdjunto {
   esValido?: boolean;
 }
 
-export interface RegistroTemperatura {
+export interface TemperaturaRegistroDto {
   id: string;
   temperatura: number;
   unidadMedida: string;
   fechaHora: string;
-  origen: number;
+  origen: number; // 0=Manual, 1=SensorBluetooth, 2=Importado
   estaFueraDeRango: boolean;
   dispositivoId?: string;
   observacion?: string;
@@ -84,11 +90,11 @@ export interface RegistroTemperatura {
 
 export interface RecepcionDetalle extends RecepcionResumen {
   numeroOC: string;
-  creadoPorNombre?: string;
-  inspeccionVehiculo?: InspeccionVehiculo;
-  lotes: LoteResumen[];
-  documentos: DocumentoAdjunto[];
-  registrosTemperatura: RegistroTemperatura[];
+  factura?: FacturaDto;
+  inspeccionVehiculo?: InspeccionVehiculoDto;
+  lotes: LoteResumenDto[];
+  documentos: DocumentoRecepcionDto[];
+  registrosTemperatura: TemperaturaRegistroDto[];
 }
 
 // ─── FILTROS ──────────────────────────────────────────────────────────────────
@@ -96,13 +102,14 @@ export interface RecepcionDetalle extends RecepcionResumen {
 export interface RecepcionesFilter {
   estado?: EstadoRecepcion;
   proveedorId?: string;
-  fechaDesde?: string;
+  fechaDesde?: string; // "YYYY-MM-DD"
   fechaHasta?: string;
 }
 
 // ─── SERVICIO ─────────────────────────────────────────────────────────────────
 
 export const recepcionesService = {
+  // Lista recepciones con filtros opcionales
   async getAll(filter?: RecepcionesFilter): Promise<RecepcionResumen[]> {
     const { data } = await apiClient.get("/api/Recepciones", {
       params: filter ?? {},
@@ -110,16 +117,19 @@ export const recepcionesService = {
     return data;
   },
 
+  // Obtiene detalle completo de una recepción
   async getById(id: string): Promise<RecepcionDetalle> {
     const { data } = await apiClient.get(`/api/Recepciones/${id}`);
     return data;
   },
 
+  // Paso 1: Iniciar recepción
   async iniciar(cmd: IniciarRecepcionCommand): Promise<{ id: string }> {
     const { data } = await apiClient.post("/api/Recepciones", cmd);
     return data;
   },
 
+  // Paso 2: Registrar inspección del vehículo
   async registrarInspeccionVehiculo(
     id: string,
     cmd: RegistrarInspeccionVehiculoCommand
@@ -127,33 +137,43 @@ export const recepcionesService = {
     await apiClient.post(`/api/Recepciones/${id}/inspeccion-vehiculo`, cmd);
   },
 
-  async registrarLote(
-    id: string,
-    cmd: RegistrarLoteRecibidoCommand
+  // Nuevo: Agregar un ítem a la recepción
+  async agregarItem(
+    recepcionId: string,
+    cmd: AgregarItemRecepcionCommand
   ): Promise<{ id: string }> {
-    const { data } = await apiClient.post(`/api/Recepciones/${id}/lotes`, cmd);
+    const { data } = await apiClient.post(`/api/Recepciones/${recepcionId}/items`, cmd);
     return data;
   },
 
+  // Registrar temperatura a nivel de recepción (antes de descargar)
   async registrarTemperatura(
-    id: string,
+    recepcionId: string,
     cmd: RegistrarTemperaturaCommand
-  ): Promise<void> {
-    await apiClient.post(`/api/Recepciones/${id}/temperaturas`, cmd);
+  ): Promise<{ id: string }> {
+    // Forzamos que el comando no tenga loteRecibidoId
+    const payload = { ...cmd, recepcionId, loteRecibidoId: undefined };
+    const { data } = await apiClient.post(`/api/Recepciones/${recepcionId}/temperaturas`, payload);
+    return data;
   },
 
+  // Subir documento a la recepción
   async subirDocumento(
-    id: string,
+    recepcionId: string,
     tipoDocumento: TipoDocumento,
     archivo: File
-  ): Promise<void> {
+  ): Promise<{ id: string }> {
     const form = new FormData();
     form.append("TipoDocumento", String(tipoDocumento));
     form.append("Archivo", archivo);
-    await apiClient.post(`/api/Recepciones/${id}/documentos`, form, {
+    const { data } = await apiClient.post(`/api/Recepciones/${recepcionId}/documentos`, form, {
       headers: { "Content-Type": "multipart/form-data" },
     });
+    return data;
+  },
+
+  // Finalizar recepción
+  async finalizarRecepcion(recepcionId: string): Promise<void> {
+    await apiClient.post(`/api/Recepciones/${recepcionId}/finalizar`);
   },
 };
-
-export { ordenesCompraService } from "./ordenes-compra.service";

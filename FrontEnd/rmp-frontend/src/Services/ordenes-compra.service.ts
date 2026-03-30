@@ -1,4 +1,4 @@
-import type { EstadoRecepcion } from "../Types/api";
+import type { EstadoRecepcion } from "../Types";
 import { apiClient } from "./apiClient";
 
 // ─── ENUMS ────────────────────────────────────────────────────────────────────
