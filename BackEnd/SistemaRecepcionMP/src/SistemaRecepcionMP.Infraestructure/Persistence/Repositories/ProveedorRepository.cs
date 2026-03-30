@@ -32,17 +32,18 @@ public sealed class ProveedorRepository : GenericRepository<Proveedor>, IProveed
     }
 
     public async Task<Proveedor?> GetWithDocumentosSanitariosAsync(Guid proveedorId)
-    => await DbSet
-        .Include(p => p.DocumentosSanitarios)
-        .Include(p => p.Contactos)
-        .Include(p => p.OrdenesCompra)
-            .ThenInclude(oc => oc.Recepciones)
-                .ThenInclude(r => r.Lotes)
-        .Include(p => p.OrdenesCompra)
-            .ThenInclude(oc => oc.Detalles)
-                .ThenInclude(d => d.Item)
-                    .ThenInclude(i => i.Categoria)
-        .FirstOrDefaultAsync(p => p.Id == proveedorId);
+        => await DbSet
+            .Include(p => p.DocumentosSanitarios)
+            .Include(p => p.Contactos)
+            .Include(p => p.OrdenesCompra)
+                .ThenInclude(oc => oc.Recepciones)
+                    .ThenInclude(r => r.Items)
+                        .ThenInclude(i => i.Lotes)
+            .Include(p => p.OrdenesCompra)
+                .ThenInclude(oc => oc.Detalles)
+                    .ThenInclude(d => d.Item)
+                        .ThenInclude(i => i.Categoria)
+            .FirstOrDefaultAsync(p => p.Id == proveedorId);
 
     public override async Task<IEnumerable<Proveedor>> GetAllAsync()
         => await DbSet

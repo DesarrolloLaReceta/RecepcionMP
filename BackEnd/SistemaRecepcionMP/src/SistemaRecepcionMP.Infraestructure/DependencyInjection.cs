@@ -10,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 using SistemaRecepcionMP.Infraestructure.Persistence;
 using Infrastructure.Identity;
 using Infrastructure.ExternalServices;
+using SistemaRecepcionMP.Infraestructure.Persistence.Repositories;
+using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 
 namespace SistemaRecepcionMP.Infraestructure;
 
@@ -51,7 +53,8 @@ public static class DependencyInjection
         // ── Servicios externos ────────────────────────────────────────────────
         services.AddScoped<IQrCodeService, QrCodeService>();
         services.AddScoped<IEmailService, EmailService>();
-
+        services.AddScoped<IRecepcionRepository, RecepcionRepository>();
+        
         return services;
     }
 }

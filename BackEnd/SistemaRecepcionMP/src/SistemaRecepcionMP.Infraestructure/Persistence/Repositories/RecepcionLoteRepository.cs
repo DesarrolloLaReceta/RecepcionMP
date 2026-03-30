@@ -127,7 +127,7 @@ public sealed class LoteRecibidoRepository : GenericRepository<LoteRecibido>, IL
         var fechaLimite = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(diasUmbral));
 
         return await DbSet
-            .Include(l => l.RecepcionItemId)
+            .Include(l => l.RecepcionItem)
             .Include(l => l.Recepcion).ThenInclude(r => r!.Proveedor)
             .Where(l =>
                 l.VidaUtil!.FechaVencimiento <= fechaLimite &&
@@ -150,26 +150,31 @@ public sealed class LoteRecibidoRepository : GenericRepository<LoteRecibido>, IL
             .FirstOrDefaultAsync(l => l.CodigoLoteInterno == codigoLoteInterno);
 
     public async Task<IEnumerable<LoteRecibido>> GetByEstadoAsync(EstadoLote estado)
-    => await DbSet
-        .Include(l => l.RecepcionItem)
-            .ThenInclude(ri => ri!.Item)
-                .ThenInclude(i => i!.Categoria)
-        .Include(l => l.RecepcionItem)
-            .ThenInclude(ri => ri!.Item)
-                .ThenInclude(i => i!.RangoTemperatura)
-        .Include(l => l.Recepcion)
-            .ThenInclude(r => r!.Proveedor)
-        .Where(l => l.Estado == estado)
-        .OrderByDescending(l => l.FechaRegistro)
-        .ToListAsync();
+    {
+        return await Context.LotesRecibidos
+            .Include(l => l.Recepcion)
+                .ThenInclude(r => r.Proveedor)
+            .Include(l => l.RecepcionItem)
+                .ThenInclude(ri => ri!.Item)
+                    .ThenInclude(i => i!.Categoria)
+            .Include(l => l.RecepcionItem)
+                .ThenInclude(ri => ri!.Item)
+                    .ThenInclude(i => i!.RangoTemperatura)
+            .Include(l => l.VidaUtil) // si es Value Object, no necesita Include
+            .Where(l => l.Estado == estado)
+            .OrderBy(l => l.VidaUtil!.FechaVencimiento)
+            .ToListAsync();
+    }
     
     public async Task<IEnumerable<LoteRecibido>> GetByItemAsync(Guid itemId)
-    => await DbSet
-        .Include(l => l.RecepcionItem)
-            .ThenInclude(ri => ri!.Item)
-                .ThenInclude(i => i!.Categoria)
-        .Include(l => l.Recepcion)
-            .ThenInclude(r => r!.Proveedor)
-        .Where(l => l.RecepcionItem != null && l.RecepcionItem.ItemId == itemId)
-        .ToListAsync();
+    {
+        return await DbSet
+            .Include(l => l.Recepcion)
+                .ThenInclude(r => r.Proveedor)
+            .Include(l => l.RecepcionItem)
+                .ThenInclude(ri => ri!.Item)
+            .Where(l => l.RecepcionItem!.ItemId == itemId)
+            .OrderBy(l => l.CodigoLoteInterno)
+            .ToListAsync();
+    }
 }

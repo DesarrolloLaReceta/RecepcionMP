@@ -66,7 +66,7 @@ public sealed class GetLotesPendientesLiberacionQueryHandler
     CancellationToken cancellationToken)
 {
     var pendientes = (await _unitOfWork.Lotes.GetByEstadoAsync(EstadoLote.PendienteCalidad))
-        .OrderBy(l => l.VidaUtil.FechaVencimiento)
+        .OrderBy(l => l.VidaUtil!.FechaVencimiento)
         .ToList();
 
     return pendientes.Select(lote => new LotePendienteDto
@@ -75,32 +75,31 @@ public sealed class GetLotesPendientesLiberacionQueryHandler
         NumeroLoteInterno = lote.CodigoLoteInterno,
         NumeroLoteProveedor = lote.NumeroLoteProveedor,
 
-        ItemId = lote.Item?.Id ?? Guid.Empty,
-        ItemNombre = lote.Item?.Nombre ?? string.Empty,
-        ItemCodigo = lote.Item?.CodigoInterno ?? string.Empty,
-        CategoriaNombre = lote.Item?.Categoria?.Nombre ?? string.Empty,
+        ItemId = lote.RecepcionItem?.Item?.Id ?? Guid.Empty,
+        ItemNombre = lote.RecepcionItem?.Item?.Nombre ?? string.Empty,
+        ItemCodigo = lote.RecepcionItem?.Item?.CodigoInterno ?? string.Empty,
+        CategoriaNombre = lote.RecepcionItem?.Item?.Categoria?.Nombre ?? string.Empty,
 
         // ✅ Recepcion ya viene incluida en GetByEstadoAsync
         ProveedorNombre = lote.Recepcion?.Proveedor?.RazonSocial ?? string.Empty,
-        RecepcionId = lote.RecepcionId,
+        RecepcionId = lote.Recepcion!.Id,
         NumeroRecepcion = lote.Recepcion?.NumeroRecepcion ?? string.Empty,
         FechaRecepcion = lote.Recepcion?.FechaRecepcion ?? DateOnly.MinValue,
 
         FechaFabricacion = lote.FechaFabricacion,
-        FechaVencimiento = lote.VidaUtil.FechaVencimiento,
+        FechaVencimiento = lote.VidaUtil!.FechaVencimiento,
         DiasParaVencer = lote.VidaUtil.DiasRestantes,
 
         CantidadRecibida = lote.CantidadRecibida,
         UnidadMedida = lote.UnidadMedida,
 
         // ⚠️ RangoTemperatura llegará null hasta agregar el Include
-        RequiereCadenaFrio = lote.Item?.RangoTemperatura is not null,
-        TemperaturaMedida = lote.TemperaturaMedida,
-        TemperaturaMinima = lote.Item?.RangoTemperatura?.Minima,
-        TemperaturaMaxima = lote.Item?.RangoTemperatura?.Maxima,
-        TemperaturaDentroRango = lote.Item?.RangoTemperatura is null ? null :
-            lote.TemperaturaMedida >= lote.Item.RangoTemperatura.Minima &&
-            lote.TemperaturaMedida <= lote.Item.RangoTemperatura.Maxima,
+        RequiereCadenaFrio = lote.RecepcionItem?.Item?.RangoTemperatura is not null,
+        TemperaturaMinima = lote.RecepcionItem?.Item?.RangoTemperatura?.Minima,
+        TemperaturaMaxima = lote.RecepcionItem?.Item?.RangoTemperatura?.Maxima,
+        TemperaturaDentroRango = lote.RecepcionItem?.Item?.RangoTemperatura is null ? null :
+            lote.TemperaturaMedida >= lote.RecepcionItem.Item.RangoTemperatura.Minima &&
+            lote.TemperaturaMedida <= lote.RecepcionItem.Item.RangoTemperatura.Maxima,
 
         EstadoSensorial = lote.EstadoSensorial,
         EstadoRotulado = lote.EstadoRotulado,

@@ -178,14 +178,14 @@ public sealed class MappingProfile : Profile
                 opt => opt.MapFrom(src => src.Proveedor != null
                     ? src.Proveedor.RazonSocial : string.Empty))
             .ForMember(dest => dest.TotalLotes,
-                opt => opt.MapFrom(src => src.Lotes.Count))
+                opt => opt.MapFrom(src => src.Items.SelectMany(i => i.Lotes).Count()))
             .ForMember(dest => dest.LotesLiberados,
-                opt => opt.MapFrom(src => src.Lotes
+                opt => opt.MapFrom(src => src.Items.SelectMany(i => i.Lotes)
                     .Count(l => l.Estado == EstadoLote.Liberado)))
             .ForMember(dest => dest.LotesRechazados,
-                opt => opt.MapFrom(src => src.Lotes
+                opt => opt.MapFrom(src => src.Items.SelectMany(i => i.Lotes)
                     .Count(l => l.Estado == EstadoLote.RechazadoTotal
-                            || l.Estado == EstadoLote.RechazadoParcial)));
+                            || l.Estado == EstadoLote.RechazadoParcial))); 
 
         CreateMap<Recepcion, RecepcionDetalleDto>()
             .IncludeBase<Recepcion, RecepcionResumenDto>()
@@ -193,8 +193,8 @@ public sealed class MappingProfile : Profile
                 opt => opt.MapFrom(src => src.OrdenCompra != null
                     ? src.OrdenCompra.NumeroOC : string.Empty));
 
-        CreateMap<Factura, FacturaDto>();
 
+        CreateMap<Factura, FacturaDto>();
         CreateMap<InspeccionVehiculo, InspeccionVehiculoDto>()
             .ForMember(dest => dest.RegistradoPorNombre,
                 opt => opt.MapFrom(src => src.UsuarioRegistrador != null
@@ -209,16 +209,6 @@ public sealed class MappingProfile : Profile
             .ForMember(dest => dest.RegistradoPorNombre,
                 opt => opt.MapFrom(src => src.UsuarioRegistrador != null
                     ? src.UsuarioRegistrador.Nombre : "Sensor automático"));
-
-        CreateMap<LoteRecibido, LoteResumenDto>()
-            .ForMember(dest => dest.ItemNombre,
-                opt => opt.MapFrom(src => src.Item != null ? src.Item.Nombre : string.Empty))
-            .ForMember(dest => dest.ItemCodigo,
-                opt => opt.MapFrom(src => src.Item != null ? src.Item.CodigoInterno : string.Empty))
-            .ForMember(dest => dest.DiasVidaUtilRestantes,
-                opt => opt.MapFrom(src => src.VidaUtil.DiasRestantes))
-            .ForMember(dest => dest.EstaVencido,
-                opt => opt.MapFrom(src => src.VidaUtil.EstaVencido));
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -228,13 +218,13 @@ public sealed class MappingProfile : Profile
     {
         CreateMap<LoteRecibido, LoteResumenDto>()
             .ForMember(dest => dest.ItemNombre,
-                opt => opt.MapFrom(src => src.Item.Nombre))
+                opt => opt.MapFrom(src => src.RecepcionItem!.Item!.Nombre))
             .ForMember(dest => dest.ItemCodigo,
-                opt => opt.MapFrom(src => src.Item.CodigoInterno))
+                opt => opt.MapFrom(src => src.RecepcionItem!.Item!.CodigoInterno))
             .ForMember(dest => dest.DiasVidaUtilRestantes,
-                opt => opt.MapFrom(src => src.VidaUtil.DiasRestantes))
+                opt => opt.MapFrom(src => src.VidaUtil!.DiasRestantes))
             .ForMember(dest => dest.EstaVencido,
-                opt => opt.MapFrom(src => src.VidaUtil.EstaVencido));
+                opt => opt.MapFrom(src => src.VidaUtil!.EstaVencido));
 
         CreateMap<LoteRecibido, LoteDetalleDto>()
             .IncludeBase<LoteRecibido, LoteResumenDto>();
@@ -278,8 +268,8 @@ public sealed class MappingProfile : Profile
         CreateMap<NoConformidad, NoConformidadResumenDto>()
             .ForMember(d => d.CausalNombre,     o => o.MapFrom(s => s.Causal.Nombre))
             .ForMember(d => d.NumeroLote,       o => o.MapFrom(s => s.LoteRecibido.CodigoLoteInterno))
-            .ForMember(d => d.ItemNombre,       o => o.MapFrom(s => s.LoteRecibido.Item.Nombre))
-            .ForMember(d => d.ProveedorNombre,  o => o.MapFrom(s => s.LoteRecibido.Recepcion.Proveedor.RazonSocial))
+            .ForMember(d => d.ItemNombre,       o => o.MapFrom(s => s.LoteRecibido.RecepcionItem!.Item!.Nombre))  // ← corregido
+            .ForMember(d => d.ProveedorNombre,  o => o.MapFrom(s => s.LoteRecibido.Recepcion.Proveedor!.RazonSocial))
             .ForMember(d => d.CreadoPorNombre,  o => o.MapFrom(s => s.UsuarioCreador.Nombre))
             .ForMember(d => d.TotalAcciones,    o => o.MapFrom(s => s.AccionesCorrectivas.Count))
             .ForMember(d => d.AccionesPendientes, o => o.MapFrom(s =>
@@ -301,11 +291,11 @@ public sealed class MappingProfile : Profile
             .ForMember(dest => dest.CodigoLote,
                 opt => opt.MapFrom(src => src.CodigoLoteInterno))
             .ForMember(dest => dest.ItemNombre,
-                opt => opt.MapFrom(src => src.Item.Nombre))
+                opt => opt.MapFrom(src => src.RecepcionItem!.Item!.Nombre))
             .ForMember(dest => dest.ProveedorNombre,
-                opt => opt.MapFrom(src => src.Recepcion.Proveedor.RazonSocial))
+                opt => opt.MapFrom(src => src.Recepcion.Proveedor!.RazonSocial))
             .ForMember(dest => dest.DiasRestantes,
-                opt => opt.MapFrom(src => src.VidaUtil.DiasRestantes));
+                opt => opt.MapFrom(src => src.VidaUtil!.DiasRestantes));
 
         CreateMap<DocumentoSanitarioProveedor, DocumentoPorVencerDto>()
             .ForMember(dest => dest.ProveedorNombre,

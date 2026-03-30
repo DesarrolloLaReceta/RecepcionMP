@@ -71,7 +71,9 @@ public sealed class NoConformidadRepository
     public async Task<IEnumerable<NoConformidad>> GetByEstadoAsync(EstadoNoConformidad estado)
         => await DbSet
             .Include(nc => nc.Causal)
-            .Include(nc => nc.LoteRecibido).ThenInclude(l => l!.Item)
+            .Include(nc => nc.LoteRecibido)
+            .ThenInclude(l => l.RecepcionItem)
+                .ThenInclude(ri => ri!.Item)
             .Include(nc => nc.AccionesCorrectivas)
             .Where(nc => nc.Estado == estado)
             .OrderByDescending(nc => nc.CreadoEn)
@@ -81,13 +83,17 @@ public sealed class NoConformidadRepository
         => await DbSet
             .Include(nc => nc.Causal)
             .Include(nc => nc.LoteRecibido)
+                .ThenInclude(l => l.RecepcionItem)
+                    .ThenInclude(ri => ri!.Item)
             .Include(nc => nc.AccionesCorrectivas).ThenInclude(a => a.ResponsableId)
             .FirstOrDefaultAsync(nc => nc.Id == id);
 
     public override async Task<IEnumerable<NoConformidad>> GetAllAsync()
         => await DbSet
             .Include(nc => nc.Causal)
-            .Include(nc => nc.LoteRecibido).ThenInclude(l => l!.Item)
+            .Include(nc => nc.LoteRecibido)
+                .ThenInclude(l => l.RecepcionItem)
+                    .ThenInclude(ri => ri!.Item)
             .Include(nc => nc.AccionesCorrectivas)
             .OrderByDescending(nc => nc.CreadoEn)
             .ToListAsync();
@@ -95,7 +101,9 @@ public sealed class NoConformidadRepository
     public async Task<IEnumerable<NoConformidad>> GetWithAccionesVencidasAsync()
         => await DbSet
             .Include(nc => nc.Causal)
-            .Include(nc => nc.LoteRecibido).ThenInclude(l => l!.Item)
+            .Include(nc => nc.LoteRecibido)
+                .ThenInclude(l => l.RecepcionItem)
+                    .ThenInclude(ri => ri!.Item)
             .Include(nc => nc.AccionesCorrectivas).ThenInclude(a => a.ResponsableId)
             .Where(nc => nc.AccionesCorrectivas.Any(a => a.FechaCompromiso < DateOnly.FromDateTime(DateTime.UtcNow)))
             .OrderByDescending(nc => nc.CreadoEn)
@@ -106,7 +114,9 @@ public sealed class NoConformidadRepository
                 .AsNoTracking()
                 .Include(n => n.Causal)
                 .Include(n => n.UsuarioCreador)
-                .Include(n => n.LoteRecibido).ThenInclude(l => l.Item)
+                .Include(n => n.LoteRecibido)
+                    .ThenInclude(l => l.RecepcionItem)
+                        .ThenInclude(ri => ri!.Item)
                 .Include(n => n.LoteRecibido).ThenInclude(l => l.Recepcion).ThenInclude(r => r.Proveedor)
                 .Include(n => n.AccionesCorrectivas)
                 .OrderByDescending(n => n.CreadoEn)
@@ -116,7 +126,9 @@ public sealed class NoConformidadRepository
             => await Context.Set<NoConformidad>()
                 .Include(n => n.Causal)
                 .Include(n => n.UsuarioCreador)
-                .Include(n => n.LoteRecibido).ThenInclude(l => l.Item)
+                .Include(n => n.LoteRecibido)
+                    .ThenInclude(l => l.RecepcionItem)
+                        .ThenInclude(ri => ri!.Item)
                 .Include(n => n.LoteRecibido).ThenInclude(l => l.Recepcion).ThenInclude(r => r.Proveedor)
                 .Include(n => n.AccionesCorrectivas)
                 .Include(n => n.Comentarios).ThenInclude(c => c.Autor)
@@ -147,7 +159,9 @@ public sealed class TemperaturaRegistroRepository
         Guid? recepcionId = null)
     {
         var query = DbSet
-            .Include(t => t.LoteRecibido).ThenInclude(l => l!.Item)
+            .Include(t => t.LoteRecibido)
+                .ThenInclude(l => l!.RecepcionItem)
+                    .ThenInclude(ri => ri!.Item)
             .Where(t => t.EstaFueraDeRango);
 
         if (recepcionId.HasValue)

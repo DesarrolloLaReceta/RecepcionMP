@@ -5,7 +5,8 @@ using SistemaRecepcionMP.Infraestructure.Persistence;
 using SistemaRecepcionMP.Application;
 using SistemaRecepcionMP.Infraestructure;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.FileProviders;
+using SistemaRecepcionMP.Domain.Interfaces.Repositories;
+using SistemaRecepcionMP.Infraestructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +16,17 @@ builder.Services
     .AddApplication()
     .AddInfraestructure(builder.Configuration, builder.Environment);
 
+// ─── Repositorios ───────────────────────────────────────────────────────────
 
-
+builder.Services.AddScoped<IRecepcionRepository, RecepcionRepository>();
+builder.Services.AddScoped<IOrdenCompraRepository, OrdenCompraRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<ILoteRecibidoRepository, LoteRecibidoRepository>();
+builder.Services.AddScoped<IItemRepository, ItemRepository>();
+builder.Services.AddScoped<ICheckListBPMRepository, CheckListBPMRepository>();
+builder.Services.AddScoped<INoConformidadRepository, NoConformidadRepository>();
+builder.Services.AddScoped<ITemperaturaRegistroRepository, TemperaturaRegistroRepository>();
+builder.Services.AddScoped<IBitacoraAuditoriaRepository, BitacoraAuditoriaRepository>();
 
 
 // ─── Autenticación ─────────────────────────────────────────────────────────

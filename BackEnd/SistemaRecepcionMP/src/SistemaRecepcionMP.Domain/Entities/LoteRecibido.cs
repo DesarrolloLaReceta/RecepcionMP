@@ -41,6 +41,8 @@ public class LoteRecibido : BaseEntity
     public ICollection<NoConformidad> NoConformidades { get; private set; } = new List<NoConformidad>();
     public ICollection<TemperaturaRegistro> RegistrosTemperatura { get; private set; } = new List<TemperaturaRegistro>();
 
+    public LoteRecibido() { }
+
     // Método de fábrica — construye el lote con todas sus propiedades iniciales
     public LoteRecibido(
     Guid itemId,
