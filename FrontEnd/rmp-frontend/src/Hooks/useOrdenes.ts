@@ -93,9 +93,8 @@ export function useOrdenes(options: UseOrdenesOptions = {}) {
       vencidas:            ordenes.filter(oc =>
         oc.fechaVencimiento &&
         new Date(oc.fechaVencimiento) < hoy &&
-        oc.estado !== EstadoOC.Cerrada &&
-        oc.estado !== EstadoOC.Cancelada &&
-        oc.estado !== EstadoOC.TotalmenteRecibida
+        oc.estado !== EstadoOC.TotalmenteRecibida &&
+        oc.estado !== EstadoOC.Cancelada
       ).length,
       conCadenaFrio:       ordenes.filter(oc => oc.requiereCadenaFrio).length,
       valorTotalPendiente: ordenes
@@ -115,9 +114,8 @@ export function useOrdenes(options: UseOrdenesOptions = {}) {
     state.ordenes.filter(oc =>
       oc.fechaVencimiento &&
       new Date(oc.fechaVencimiento) < hoy &&
-      oc.estado !== EstadoOC.Cerrada &&
-      oc.estado !== EstadoOC.Cancelada &&
-      oc.estado !== EstadoOC.TotalmenteRecibida
+      oc.estado !== EstadoOC.TotalmenteRecibida &&
+      oc.estado !== EstadoOC.Cancelada
     ), [state.ordenes]);
 
   // ── Helpers mutación ───────────────────────────────────────────────────────
@@ -213,7 +211,7 @@ export function useOrdenes(options: UseOrdenesOptions = {}) {
       setState(prev => ({
         ...prev,
         ordenes: prev.ordenes.map(oc =>
-          oc.id === id ? { ...oc, estado: EstadoOC.Cerrada } : oc
+          oc.id === id ? { ...oc, estado: EstadoOC.TotalmenteRecibida } : oc
         ),
       }));
       endSave();
@@ -321,7 +319,7 @@ export function useOrdenDetalle(id: string | undefined) {
     startSave();
     try {
       await ordenesCompraService.cerrar(id);
-      patchEstado(EstadoOC.Cerrada);
+      patchEstado(EstadoOC.TotalmenteRecibida);
       endSave();
     } catch {
       failSave("No se pudo cerrar la OC."); throw new Error("cerrar_failed");

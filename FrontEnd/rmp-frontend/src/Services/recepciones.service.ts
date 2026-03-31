@@ -106,6 +106,18 @@ export interface RecepcionesFilter {
   fechaHasta?: string;
 }
 
+export interface AgregarLoteAItemCommand {
+  numeroLoteProveedor?: string;
+  fechaFabricacion?: string; // YYYY-MM-DD
+  fechaVencimiento: string;
+  cantidadRecibida: number;
+  unidadMedida: string;
+  temperaturaMedida?: number;
+  estadoSensorial: number; // 0,1,2
+  estadoRotulado: number; // 0,1,2
+  ubicacionDestino: number; // 0,1
+}
+
 // ─── SERVICIO ─────────────────────────────────────────────────────────────────
 
 export const recepcionesService = {
@@ -175,5 +187,11 @@ export const recepcionesService = {
   // Finalizar recepción
   async finalizarRecepcion(recepcionId: string): Promise<void> {
     await apiClient.post(`/api/Recepciones/${recepcionId}/finalizar`);
+  },
+
+  // Agregar lote a un ítem de la recepción
+  async agregarLoteAItem(recepcionId: string, itemId: string, cmd: AgregarLoteAItemCommand): Promise<{ id: string }> {
+    const { data } = await apiClient.post(`/api/Recepciones/${recepcionId}/items/${itemId}/lotes`, cmd);
+    return data;
   },
 };

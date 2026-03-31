@@ -395,6 +395,7 @@ function ModalNuevoItem({
         id: realId,
         codigo: form.codigoInterno!,
         nombre: form.nombre!,
+        categoriaId: form.categoriaId!,
         categoriaNombre: cat?.nombre ?? "",
         unidadMedida: form.unidadMedida ?? "Kg",
         estado: true,

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLotes } from "../../Hooks/useLotes";
-import { type LotePendiente, type EstadoLote } from "../../Services/lotes.service";
+import { type LotePendienteDto } from "../../Services/lotes.service";
 import { ROUTES } from "../../Constants/routes";
 import { StatusBadge, Skeleton, EmptyState, Badge, Button } from "../../Components/UI/Index";
 import { formatDate, formatQuantity, vencimientoColor } from "../../Utils/formatters";
@@ -9,14 +9,15 @@ import "./StylesLotes/LotesPage.css";
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
-type FiltroEstado = EstadoLote | "Todos";
+type FiltroEstado = string; // Valores: "Todos", "PendienteCalidad", "Liberado", "RechazadoTotal", "RechazadoParcial", "EnCuarentena"
 
 const ESTADOS_FILTER: { value: FiltroEstado; label: string }[] = [
   { value: "Todos",            label: "Todos los estados"  },
   { value: "PendienteCalidad", label: "Pendiente calidad"  },
   { value: "Liberado",         label: "Liberados"          },
-  { value: "Rechazado",        label: "Rechazados"         },
-  { value: "Cuarentena",       label: "Cuarentena"         },
+  { value: "RechazadoTotal",   label: "Rechazados total"   },
+  { value: "RechazadoParcial", label: "Rechazados parcial" },
+  { value: "EnCuarentena",     label: "Cuarentena"         },
 ];
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -41,7 +42,7 @@ function KpiCard({ label, value, color }: { label: string; value: number; color:
 
 // ─── FILA DE LOTE ─────────────────────────────────────────────────────────────
 
-function LoteRow({ lote, onClick }: { lote: LotePendiente; onClick: () => void }) {
+function LoteRow({ lote, onClick }: { lote: LotePendienteDto; onClick: () => void }) {
   const urgencia = vencimientoColor(lote.diasParaVencer);
   const ok       = tempOk(lote.temperaturaMedida, lote.temperaturaMinima, lote.temperaturaMaxima);
 
@@ -199,7 +200,7 @@ export default function LotesPage() {
         {/* Estado */}
         <select
           value={filtroEstado}
-          onChange={e => setFiltroEstado(e.target.value as FiltroEstado)}
+          onChange={e => setFiltroEstado(e.target.value)}
           className="lt-select"
           aria-label="Filtrar por estado"
         >
