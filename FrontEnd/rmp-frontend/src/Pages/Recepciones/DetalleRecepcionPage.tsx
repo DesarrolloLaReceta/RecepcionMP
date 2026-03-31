@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { recepcionesService, type RecepcionDetalle, type LoteRecibido } from "../../Services/recepciones.service";
-import { EstadoRecepcion, TipoDocumento, TipoDocumentoLabels, OrigenTemperatura } from "../../Types/api";
+import { recepcionesService, type RecepcionDetalle, type LoteResumenDto } from "../../Services/recepciones.service";
 import { ROUTES } from "../../Constants/routes";
 import { formatDate, formatDateTime } from "../../Utils/formatters";
 import { MOCK_DETALLE } from "./MockData";
@@ -9,23 +8,44 @@ import "./StylesRecepciones/DetalleRecepcionPage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 
-// ── Config visual estados
-const ESTADO_CFG: Record<EstadoRecepcion, { label: string; color: string; bg: string; dot: string }> = {
-  [EstadoRecepcion.Iniciada]:           { label: "Iniciada",       color: "#93C5FD", bg: "rgba(59,130,246,0.1)",  dot: "#3B82F6" },
-  [EstadoRecepcion.InspeccionVehiculo]: { label: "Insp. vehículo", color: "#C4B5FD", bg: "rgba(168,85,247,0.1)", dot: "#A855F7" },
-  [EstadoRecepcion.RegistroLotes]:      { label: "Reg. lotes",     color: "#FCD34D", bg: "rgba(245,158,11,0.1)", dot: "#F59E0B" },
-  [EstadoRecepcion.PendienteCalidad]:   { label: "Pend. calidad",  color: "#FCA5A5", bg: "rgba(239,68,68,0.1)",  dot: "#EF4444" },
-  [EstadoRecepcion.Liberada]:           { label: "Liberada",       color: "#86EFAC", bg: "rgba(34,197,94,0.1)",  dot: "#22C55E" },
-  [EstadoRecepcion.Rechazada]:          { label: "Rechazada",      color: "#94A3B8", bg: "rgba(100,116,139,0.1)", dot: "#64748B" },
+// ===== CONSTANTES LOCALES =====
+
+const ESTADO_RECEPCION = {
+  Iniciada: 0,
+  InspeccionVehiculo: 1,
+  RegistroLotes: 2,
+  PendienteCalidad: 3,
+  Finalizada: 4,
+  Rechazada: 5,
+} as const;
+
+const ESTADO_CFG: Record<number, { label: string; color: string; bg: string; dot: string }> = {
+  [ESTADO_RECEPCION.Iniciada]:           { label: "Iniciada",       color: "#93C5FD", bg: "rgba(59,130,246,0.1)",  dot: "#3B82F6" },
+  [ESTADO_RECEPCION.InspeccionVehiculo]: { label: "Insp. vehículo", color: "#C4B5FD", bg: "rgba(168,85,247,0.1)", dot: "#A855F7" },
+  [ESTADO_RECEPCION.RegistroLotes]:      { label: "Reg. lotes",     color: "#FCD34D", bg: "rgba(245,158,11,0.1)", dot: "#F59E0B" },
+  [ESTADO_RECEPCION.PendienteCalidad]:   { label: "Pend. calidad",  color: "#FCA5A5", bg: "rgba(239,68,68,0.1)",  dot: "#EF4444" },
+  [ESTADO_RECEPCION.Finalizada]:         { label: "Finalizada",     color: "#86EFAC", bg: "rgba(34,197,94,0.1)",  dot: "#22C55E" },
+  [ESTADO_RECEPCION.Rechazada]:          { label: "Rechazada",      color: "#94A3B8", bg: "rgba(100,116,139,0.1)", dot: "#64748B" },
 };
 
 const ORIGEN_LABELS: Record<number, string> = {
-  [OrigenTemperatura.Manual]:    "Manual",
-  [OrigenTemperatura.Bluetooth]: "Bluetooth",
-  [OrigenTemperatura.Sensor]:    "Sensor IoT",
+  0: "Manual",
+  1: "Bluetooth",
+  2: "Sensor IoT",
 };
 
-// ── helpers
+const TIPO_DOCUMENTO_LABELS: Record<number, string> = {
+  0: "Factura",
+  1: "Orden de compra",
+  2: "Certificado de análisis (COA)",
+  3: "Registro INVIMA",
+  4: "Certificado de transporte",
+  5: "Bitácora de temperatura",
+  6: "Rotulado",
+  7: "Otro",
+};
+
+// ── helpers ───────────────────────────────────────────────────────────────────
 function diasParaVencer(fecha?: string): number | null {
   if (!fecha) return null;
   return Math.ceil((new Date(fecha).getTime() - Date.now()) / 86400000);
@@ -68,26 +88,23 @@ function CheckItem({ label, value, critical }: { label: string; value: boolean; 
   );
 }
 
-function TempBadge({ temp, min, max }: { temp: number; min?: number; max?: number }) {
-  const fuera = (min !== undefined && temp < min) || (max !== undefined && temp > max);
-  return (
-    <span className="dr-temp-badge" data-fuera={fuera}>
-      {temp}°C{fuera && <span className="dr-temp-warn">⚠</span>}
-    </span>
-  );
-}
-
-// ── Tarjeta de lote
+// ── Tarjeta de lote (solo campos disponibles en LoteResumenDto) ───────────────
 function LoteCard({ lote, expanded, onToggle }: {
-  lote: LoteRecibido; expanded: boolean; onToggle: () => void;
+  lote: LoteResumenDto; expanded: boolean; onToggle: () => void;
 }) {
+  const navigate = useNavigate();
   const dias      = diasParaVencer(lote.fechaVencimiento);
   const diasColor = dias === null ? "#64748B" : dias <= 7 ? "#FCA5A5" : dias <= 15 ? "#FCD34D" : "#86EFAC";
+
+  // Determinar texto de estado
+  let estadoTexto = "Pendiente";
+  if (lote.estado === "Liberado") estadoTexto = "Liberado";
+  else if (lote.estado.includes("Rechazado")) estadoTexto = "Rechazado";
 
   return (
     <div className="dr-lote-card">
       <div className="dr-lote-header" onClick={onToggle} role="button" aria-expanded={expanded}>
-        <p className="dr-lote-num">{lote.numeroLoteInterno}</p>
+        <p className="dr-lote-num">{lote.codigoLoteInterno}</p>
         <p className="dr-lote-item">{lote.itemNombre}</p>
         {dias !== null && (
           <span className="dr-lote-venc" style={{ color: diasColor }}>
@@ -102,14 +119,12 @@ function LoteCard({ lote, expanded, onToggle }: {
 
       {expanded && (
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-          {/* Detalle en dos columnas */}
           <div className="dr-lote-body">
             <div className="dr-lote-detail-col">
               {[
                 ["Lote proveedor",  lote.numeroLoteProveedor],
-                ["Fabricación",     formatDate(lote.fechaFabricacion)],
                 ["Vencimiento",     formatDate(lote.fechaVencimiento)],
-                ["Cantidad",        `${lote.cantidadRecibida} ${lote.unidadMedida}`],
+                ["Cantidad",        `${lote.cantidadRecibida}`],
               ].map(([k, v]) => (
                 <div key={k} className="dr-lote-kv">
                   <span className="dr-lote-k">{k}</span>
@@ -119,36 +134,28 @@ function LoteCard({ lote, expanded, onToggle }: {
             </div>
             <div className="dr-lote-detail-col">
               {[
-                ["Sensorial",   lote.estadoSensorial],
-                ["Rotulado",    lote.estadoRotulado],
                 ["Destino",     lote.ubicacionDestino === 0 ? "Almacén" : "Cuarentena"],
-                ["Temperatura", lote.temperaturaMedida !== undefined ? `${lote.temperaturaMedida}°C` : "N/A"],
+                ["Estado",      estadoTexto],
               ].map(([k, v]) => (
                 <div key={k} className="dr-lote-kv">
                   <span className="dr-lote-k">{k}</span>
-                  <span className="dr-lote-v">{v ?? "—"}</span>
+                  <span className="dr-lote-v">{v}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Documentos del lote */}
           <div className="dr-lote-docs">
-            <p className="dr-lote-docs-title">Documentos ({lote.documentos.length})</p>
-            {lote.documentos.length === 0
-              ? <p style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>Sin documentos adjuntos</p>
-              : lote.documentos.map(d => (
-                  <a key={d.id} href={d.urlDescarga} className="dr-doc-link" target="_blank" rel="noreferrer">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2">
-                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                    </svg>
-                    <span className="dr-doc-link-text">
-                      {TipoDocumentoLabels[d.tipoDocumento as TipoDocumento]}
-                    </span>
-                  </a>
-                ))
-            }
+            <button
+              onClick={() => navigate(`/lotes/${lote.id}/trazabilidad`)}
+              className="dr-doc-link"
+              style={{ marginTop: "0.5rem", display: "inline-flex", alignItems: "center", gap: "0.25rem", background: "none", border: "none", cursor: "pointer" }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M2 12h20M12 2v20" />
+              </svg>
+              Ver trazabilidad completa
+            </button>
           </div>
         </div>
       )}
@@ -211,7 +218,7 @@ export default function DetalleRecepcionPage() {
     { key: "lotes",        label: `Lotes (${recepcion.lotes.length})` },
     { key: "inspeccion",   label: "Inspección vehículo" },
     { key: "documentos",   label: `Documentos (${recepcion.documentos.length})` },
-    { key: "temperaturas", label: `Temperaturas (${recepcion.temperaturas.length})` },
+    { key: "temperaturas", label: `Temperaturas (${recepcion.registrosTemperatura.length})` },
   ] as const;
 
   return (
@@ -362,10 +369,10 @@ export default function DetalleRecepcionPage() {
                         </svg>
                       </div>
                       <div className="dr-doc-info">
-                        <p className="dr-doc-tipo">{TipoDocumentoLabels[doc.tipoDocumento as TipoDocumento]}</p>
+                        <p className="dr-doc-tipo">{TIPO_DOCUMENTO_LABELS[doc.tipoDocumento] ?? "Documento"}</p>
                         <p className="dr-doc-meta">{formatDate(doc.fechaCarga)}</p>
                       </div>
-                      <a href={doc.urlDescarga} className="dr-doc-dl-btn" target="_blank" rel="noreferrer">
+                      <a href={doc.adjuntoUrl} className="dr-doc-dl-btn" target="_blank" rel="noreferrer">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
                         </svg>
@@ -383,15 +390,13 @@ export default function DetalleRecepcionPage() {
       {/* ── TEMPERATURAS ── */}
       {activeTab === "temperaturas" && (
         <Section title="Registros de temperatura">
-          {recepcion.temperaturas.length === 0
+          {recepcion.registrosTemperatura.length === 0
             ? <div className="dr-tab-empty">Sin registros de temperatura para esta recepción.</div>
             : (
               <div style={{ padding: "0.875rem 1rem" }}>
                 <div className="dr-temp-list">
-                  {recepcion.temperaturas.map(t => (
+                  {recepcion.registrosTemperatura.map(t => (
                     <div key={t.id} className="dr-temp-card" data-fuera={t.estaFueraDeRango}>
-
-                      {/* Valor de temperatura */}
                       <span
                         className="dr-temp-card-val"
                         data-fuera={t.estaFueraDeRango}
@@ -404,17 +409,9 @@ export default function DetalleRecepcionPage() {
                           <span className="dr-temp-warn"> ⚠</span>
                         )}
                       </span>
-
-                      {/* Info contextual */}
                       <div className="dr-temp-card-info">
-                        {t.itemNombre
-                          ? <p className="dr-temp-item-name">{t.itemNombre}</p>
-                          : t.loteNumero
-                            ? <p className="dr-temp-item-name">Lote: {t.loteNumero}</p>
-                            : <p className="dr-temp-item-name" style={{ color: "var(--text-muted)" }}>Sin ítem asociado</p>
-                        }
                         <p className="dr-temp-meta">
-                          {ORIGEN_LABELS[t.origen] ?? "Manual"} · {formatDateTime(t.fechaRegistro)}
+                          {ORIGEN_LABELS[t.origen] ?? "Manual"} · {formatDateTime(t.fechaHora)}
                         </p>
                         {t.observacion && (
                           <p className="dr-temp-meta" style={{ marginTop: "0.125rem", color: "#94A3B8" }}>
@@ -422,8 +419,6 @@ export default function DetalleRecepcionPage() {
                           </p>
                         )}
                       </div>
-
-                      {/* Indicador fuera de rango */}
                       {t.estaFueraDeRango && (
                         <span className="dr-temp-rango" style={{ color: "#FCA5A5" }}>
                           Fuera de rango

@@ -1,5 +1,14 @@
 import type { RecepcionResumen, RecepcionDetalle } from "../../Services/recepciones.service";
-import { EstadoRecepcion, OrigenTemperatura } from "../../Types/api";
+
+// Constantes locales con los valores numéricos reales del backend
+const ESTADO_RECEPCION = {
+  Iniciada: 0,
+  InspeccionVehiculo: 1,
+  RegistroLotes: 2,
+  PendienteCalidad: 3,
+  Finalizada: 4,
+  Rechazada: 5,
+} as const;
 
 export const MOCK_RECEPCIONES: RecepcionResumen[] = [
   {
@@ -8,7 +17,7 @@ export const MOCK_RECEPCIONES: RecepcionResumen[] = [
     proveedorNombre: "AviCol S.A.", proveedorId: "prov-001",
     fechaRecepcion: "2026-02-24", horaLlegadaVehiculo: "07:30:00",
     placaVehiculo: "OPQ-451", nombreTransportista: "Luis García",
-    estado: EstadoRecepcion.PendienteCalidad,
+    estado: ESTADO_RECEPCION.PendienteCalidad,
     totalLotes: 3, lotesLiberados: 0, lotesRechazados: 0,
   },
   {
@@ -17,7 +26,7 @@ export const MOCK_RECEPCIONES: RecepcionResumen[] = [
     proveedorNombre: "Lácteos del Valle", proveedorId: "prov-002",
     fechaRecepcion: "2026-02-23", horaLlegadaVehiculo: "08:15:00",
     placaVehiculo: "JKL-782", nombreTransportista: "Carlos Rueda",
-    estado: EstadoRecepcion.Liberada,
+    estado: ESTADO_RECEPCION.Finalizada,
     totalLotes: 5, lotesLiberados: 5, lotesRechazados: 0,
   },
   {
@@ -26,7 +35,7 @@ export const MOCK_RECEPCIONES: RecepcionResumen[] = [
     proveedorNombre: "Riopaila Castilla", proveedorId: "prov-003",
     fechaRecepcion: "2026-02-23", horaLlegadaVehiculo: "10:00:00",
     placaVehiculo: "ABC-123",
-    estado: EstadoRecepcion.Rechazada,
+    estado: ESTADO_RECEPCION.Rechazada,
     totalLotes: 2, lotesLiberados: 1, lotesRechazados: 1,
   },
   {
@@ -35,7 +44,7 @@ export const MOCK_RECEPCIONES: RecepcionResumen[] = [
     proveedorNombre: "Frigorífico Guadalupe", proveedorId: "prov-004",
     fechaRecepcion: "2026-02-22", horaLlegadaVehiculo: "06:45:00",
     placaVehiculo: "DEF-999", nombreTransportista: "Mario Pérez",
-    estado: EstadoRecepcion.Liberada,
+    estado: ESTADO_RECEPCION.Finalizada,
     totalLotes: 4, lotesLiberados: 3, lotesRechazados: 1,
   },
   {
@@ -43,7 +52,7 @@ export const MOCK_RECEPCIONES: RecepcionResumen[] = [
     ordenCompraNumero: "OC-2026-0098",
     proveedorNombre: "Harinas del Meta S.A.", proveedorId: "prov-005",
     fechaRecepcion: "2026-02-21", horaLlegadaVehiculo: "09:30:00",
-    estado: EstadoRecepcion.RegistroLotes,
+    estado: ESTADO_RECEPCION.RegistroLotes,
     totalLotes: 2, lotesLiberados: 0, lotesRechazados: 0,
   },
   {
@@ -52,7 +61,7 @@ export const MOCK_RECEPCIONES: RecepcionResumen[] = [
     proveedorNombre: "Alimentos Deli Ltda.", proveedorId: "prov-006",
     fechaRecepcion: "2026-02-20", horaLlegadaVehiculo: "11:00:00",
     placaVehiculo: "GHI-555",
-    estado: EstadoRecepcion.InspeccionVehiculo,
+    estado: ESTADO_RECEPCION.InspeccionVehiculo,
     totalLotes: 0, lotesLiberados: 0, lotesRechazados: 0,
   },
 ];
@@ -68,7 +77,7 @@ export const MOCK_DETALLE: RecepcionDetalle = {
   horaLlegadaVehiculo: "07:30:00",
   placaVehiculo: "OPQ-451",
   nombreTransportista: "Luis García",
-  estado: EstadoRecepcion.PendienteCalidad,
+  estado: ESTADO_RECEPCION.PendienteCalidad,
   totalLotes: 3,
   lotesLiberados: 0,
   lotesRechazados: 0,
@@ -89,7 +98,6 @@ export const MOCK_DETALLE: RecepcionDetalle = {
     fechaRegistro: "2026-02-24T07:35:00Z",
   },
 
-  // ← Ahora usa LoteResumen (campos del backend DTO)
   lotes: [
     {
       id: "lote-001",

@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   lotesService,
-  type LotePendiente,
-  type TipoRechazo,
-  TipoRechazoLabels,
+  type LotePendienteDto,
 } from "../../Services/lotes.service";
-import { EstadoSensorialLabels, EstadoRotuladoLabels } from "../../Types/api";
+import { noConformidadesService } from "../../Services/no-conformidades.service";
 import { useAuth } from "../../Auth/AuthContext";
 import {
   Modal,
@@ -14,13 +12,25 @@ import {
   Spinner,
   EmptyState,
 } from "../../Components/UI/Index";
-import { TextAreaField } from "../../Components/Forms/Index";
+import { TextAreaField, SelectField, NumberField } from "../../Components/Forms/Index";
 import { MOCK_LOTES_PENDIENTES } from "./MockData";
 import "./LiberacionLotesPage.css";
 
-// ─── CONSTANTE isMock ────────────────────────────────────────────────────────
+// ─── CONSTANTES LOCALES ─────────────────────────────────────────────────────
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+
+const ESTADO_SENSORIAL_LABELS: Record<number, string> = {
+  0: "Óptimo",
+  1: "Aceptable",
+  2: "Deficiente",
+};
+
+const ESTADO_ROTULADO_LABELS: Record<number, string> = {
+  0: "Conforme",
+  1: "No conforme",
+  2: "Sin rótulo",
+};
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -84,14 +94,12 @@ function Toast({ msg, type }: { msg: string; type: "ok" | "error" }) {
   );
 }
 
-
-
 // ─── MODAL: LIBERAR ──────────────────────────────────────────────────────────
 
 function ModalLiberar({
   lote, open, onConfirm, onClose, loading,
 }: {
-  lote:      LotePendiente;
+  lote:      LotePendienteDto;
   open:      boolean;
   onConfirm: (obs: string) => void;
   onClose:   () => void;
@@ -99,7 +107,7 @@ function ModalLiberar({
 }) {
   const [obs, setObs] = useState("");
   const handleObsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-  setObs(e.target.value);
+    setObs(e.target.value);
   };
   const ts = tempOk(lote.temperaturaMedida, lote.temperaturaMinima, lote.temperaturaMaxima);
 
@@ -184,14 +192,12 @@ function ModalLiberar({
           </svg>
           <div>
             <p className="lib-modal-docs-warn-title">Documentos faltantes al liberar</p>
-            {lote.documentosFaltantes.map(d => (
+            {lote.documentosFaltantes.map((d: string) => (
               <p key={d} className="lib-modal-docs-warn-item">{d}</p>
             ))}
           </div>
         </div>
       )}
-
-      
 
       {/* Observaciones */}
       <TextAreaField
@@ -210,20 +216,42 @@ function ModalLiberar({
 function ModalRechazar({
   lote, open, onConfirm, onClose, loading,
 }: {
-  lote:      LotePendiente;
+  lote:      LotePendienteDto;
   open:      boolean;
-  onConfirm: (tipo: TipoRechazo, motivo: string, accion: string, nc: boolean) => void;
+  onConfirm: (causalId: string, descripcion: string, cantidadAfectada: number) => void;
   onClose:   () => void;
   loading:   boolean;
 }) {
-  const [tipo,   setTipo]   = useState<TipoRechazo>("Total");
-  const [motivo, setMotivo] = useState("");
-  const [accion, setAccion] = useState("");
-  const [nc,     setNc]     = useState(true);
-  const valid = motivo.trim().length >= 10;
-  const handleMotivoChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-  setMotivo(e.target.value);
-};
+  const [causales, setCausales] = useState<{ id: string; nombre: string }[]>([]);
+  const [causalId, setCausalId] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [cantidadAfectada, setCantidadAfectada] = useState<number>(lote.cantidadRecibida);
+
+  useEffect(() => {
+    if (!open) return;
+    const loadCausales = async () => {
+      try {
+        const data = isMock ? [] : await noConformidadesService.getCausales();
+        setCausales(data);
+        if (data.length) setCausalId(data[0].id);
+      } catch (error) {
+        console.error("Error cargando causales:", error);
+      }
+    };
+    loadCausales();
+  }, [open]);
+
+  const valid = causalId && descripcion.trim().length >= 10 && cantidadAfectada > 0 && cantidadAfectada <= lote.cantidadRecibida;
+
+  const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescripcion(e.target.value);
+  };
+  const handleCantidadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Number(e.target.value);
+    setCantidadAfectada(Math.min(val, lote.cantidadRecibida));
+  };
+
+  const causalOptions = causales.map(c => ({ value: c.id, label: c.nombre }));
 
   return (
     <Modal
@@ -236,7 +264,7 @@ function ModalRechazar({
       footer={
         <ModalFooter
           onCancel={onClose}
-          onConfirm={() => onConfirm(tipo, motivo, accion, nc)}
+          onConfirm={() => onConfirm(causalId, descripcion, cantidadAfectada)}
           cancelLabel="Cancelar"
           confirmLabel={loading ? "Rechazando…" : "Confirmar rechazo"}
           confirmVariant="danger"
@@ -268,72 +296,39 @@ function ModalRechazar({
         </div>
       </div>
 
-      {/* Tipo de rechazo */}
-      <label className="lib-modal-label">
-        Tipo de rechazo <span className="lib-modal-label-required">*</span>
-      </label>
-      <div className="lib-tipo-list">
-        {(["Total", "Parcial", "Cuarentena"] as TipoRechazo[]).map(t => (
-          <button
-            key={t}
-            className="lib-tipo-btn"
-            data-selected={tipo === t}
-            onClick={() => setTipo(t)}
-            type="button"
-          >
-            <div className="lib-tipo-radio">
-              {tipo === t && <div className="lib-tipo-radio-dot" />}
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <p className="lib-tipo-name">{t}</p>
-              <p className="lib-tipo-desc">
-                {TipoRechazoLabels[t].split("—")[1]?.trim()}
-              </p>
-            </div>
-          </button>
-        ))}
-      </div>
+      {/* Causal */}
+      {causalOptions.length > 0 && (
+        <SelectField
+          label="Causal de rechazo"
+          required
+          options={causalOptions}
+          value={causalId}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCausalId(e.target.value)}
+        />
+      )}
 
-      {/* Motivo */}
+      {/* Cantidad afectada */}
+      <NumberField
+        label="Cantidad afectada"
+        required
+        min={0}
+        max={lote.cantidadRecibida}
+        step={0.01}
+        value={String(cantidadAfectada)}
+        onChange={handleCantidadChange}
+        hint={`Máx. ${lote.cantidadRecibida} ${lote.unidadMedida}`}
+      />
+
+      {/* Motivo / Descripción */}
       <TextAreaField
-        label="Motivo"
+        label="Motivo del rechazo"
         required
         hint="mín. 10 caracteres"
-        value={motivo}
-        onChange={handleMotivoChange}
+        value={descripcion}
+        onChange={handleDescripcionChange}
         rows={3}
         placeholder="Descripción detallada del motivo de rechazo…"
       />
-
-      {/* Acción correctiva */}
-      <TextAreaField
-        label="Acción correctiva"
-        value={accion}
-        onChange={e => setAccion(e.target.value)}
-        rows={2}
-        placeholder="Devolución al proveedor, solicitud de reposición, análisis adicional…"
-      />
-
-      {/* Toggle NC */}
-      <div className="lib-nc-row">
-        <div>
-          <p className="lib-nc-label">Generar no conformidad</p>
-          <p className="lib-nc-hint">Crea un registro CAPA asociado al rechazo</p>
-        </div>
-        <button
-          className="lib-nc-track"
-          onClick={() => setNc(v => !v)}
-          type="button"
-          role="switch"
-          aria-checked={nc}
-          style={{ background: nc ? "var(--primary)" : "rgba(255,255,255,0.08)" }}
-        >
-          <span
-            className="lib-nc-thumb"
-            style={{ left: nc ? "22px" : "2px" }}
-          />
-        </button>
-      </div>
     </Modal>
   );
 }
@@ -343,20 +338,19 @@ function ModalRechazar({
 function LoteCard({
   lote, onLiberar, onRechazar,
 }: {
-  lote:       LotePendiente;
-  onLiberar:  (l: LotePendiente) => void;
-  onRechazar: (l: LotePendiente) => void;
+  lote:       LotePendienteDto;
+  onLiberar:  (l: LotePendienteDto) => void;
+  onRechazar: (l: LotePendienteDto) => void;
 }) {
   const urg  = urgencyColor(lote.diasParaVencer);
   const ts   = tempOk(lote.temperaturaMedida, lote.temperaturaMinima, lote.temperaturaMaxima);
-  const diff = lote.cantidadRecibida - lote.cantidadEsperada;
 
   const info: [string, string][] = [
     ["Recepción",  lote.numeroRecepcion],
     ["Vence",      `${fmtDate(lote.fechaVencimiento)} (${lote.diasParaVencer}d)`],
-    ["Cantidad",   `${lote.cantidadRecibida}/${lote.cantidadEsperada} ${lote.unidadMedida}${diff !== 0 ? ` (${diff > 0 ? "+" : ""}${diff})` : ""}`],
-    ["Sensorial",  EstadoSensorialLabels[lote.estadoSensorial as unknown as keyof typeof EstadoSensorialLabels] ?? "—"],
-    ["Rotulado",   EstadoRotuladoLabels[lote.estadoRotulado as unknown as keyof typeof EstadoRotuladoLabels] ?? "—"],
+    ["Cantidad",   `${lote.cantidadRecibida} ${lote.unidadMedida}`],
+    ["Sensorial",  ESTADO_SENSORIAL_LABELS[lote.estadoSensorial] ?? "—"],
+    ["Rotulado",   ESTADO_ROTULADO_LABELS[lote.estadoRotulado] ?? "—"],
     ["Temperatura", lote.temperaturaMedida != null
       ? `${lote.temperaturaMedida}°C ${ts === false ? "⚠" : "✓"}` : "N/A"],
   ];
@@ -416,7 +410,7 @@ function LoteCard({
           </svg>
           <div>
             <p className="lib-docs-alert-title">Documentos faltantes</p>
-            {lote.documentosFaltantes.map(d => (
+            {lote.documentosFaltantes.map((d: string) => (
               <p key={d} className="lib-docs-alert-item">{d}</p>
             ))}
           </div>
@@ -456,12 +450,12 @@ function LoteCard({
 
 // ─── PÁGINA PRINCIPAL ─────────────────────────────────────────────────────────
 
-type ModalState = { type: "liberar" | "rechazar"; lote: LotePendiente } | null;
+type ModalState = { type: "liberar" | "rechazar"; lote: LotePendienteDto } | null;
 
 export default function LiberacionLotesPage() {
   const { displayName } = useAuth();
 
-  const [lotes,         setLotes]         = useState<LotePendiente[]>([]);
+  const [lotes,         setLotes]         = useState<LotePendienteDto[]>([]);
   const [loading,       setLoading]       = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [modal,         setModal]         = useState<ModalState>(null);
@@ -487,7 +481,6 @@ export default function LiberacionLotesPage() {
 
   useEffect(() => { cargar(); }, [cargar]);
 
-  // KPIs derivados
   const kpis = {
     pendientes:    lotes.length,
     docsFaltantes: lotes.filter(l => l.tieneDocumentosFaltantes).length,
@@ -495,16 +488,12 @@ export default function LiberacionLotesPage() {
     urgentes:      lotes.filter(l => l.diasParaVencer <= 7).length,
   };
 
-  // Chips de categoría
   const categorias = ["Todas", ...Array.from(new Set(lotes.map(l => l.categoriaNombre)))];
-
-  // Filtrado + orden por urgencia
   const filtered = filtroCategoria === "Todas"
     ? lotes
     : lotes.filter(l => l.categoriaNombre === filtroCategoria);
   const sorted = [...filtered].sort((a, b) => a.diasParaVencer - b.diasParaVencer);
 
-  // ── Acciones ────────────────────────────────────────────────────────────
   const handleLiberar = async (obs: string) => {
     if (!modal || modal.type !== "liberar") return;
     setActionLoading(true);
@@ -521,26 +510,20 @@ export default function LiberacionLotesPage() {
     }
   };
 
-  const handleRechazar = async (
-    tipo: TipoRechazo, motivo: string, accion: string, nc: boolean,
-  ) => {
+  const handleRechazar = async (causalId: string, descripcion: string, cantidadAfectada: number) => {
     if (!modal || modal.type !== "rechazar") return;
     setActionLoading(true);
     try {
       if (!isMock) await lotesService.rechazar({
-        loteId:              modal.lote.id,
-        tipoRechazo:         tipo,
-        motivoRechazo:       motivo,
-        accionCorrectiva:    accion,
-        generaNoConformidad: nc,
+        loteId: modal.lote.id,
+        causalId,
+        descripcion,
+        cantidadAfectada,
       });
       else await new Promise(r => setTimeout(r, 900));
       setLotes(p => p.filter(l => l.id !== modal.lote.id));
       setModal(null);
-      showToast(
-        `Lote ${modal.lote.numeroLoteInterno} rechazado.${nc ? " NC generada." : ""}`,
-        "ok",
-      );
+      showToast(`Lote ${modal.lote.numeroLoteInterno} rechazado.`, "ok");
     } catch {
       showToast("Error al rechazar el lote. Intenta nuevamente.", "error");
     } finally {
@@ -552,7 +535,7 @@ export default function LiberacionLotesPage() {
     <>
       <div className="lib-page">
 
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="lib-header">
           <div>
             <p className="lib-header-meta">
@@ -571,7 +554,7 @@ export default function LiberacionLotesPage() {
           </Button>
         </div>
 
-        {/* ── KPIs ── */}
+        {/* KPIs */}
         <div className="lib-kpi-grid">
           <KpiCard label="Pendientes"        value={kpis.pendientes}    color="#F59E0B" sub="lotes por revisar"     />
           <KpiCard label="Docs. faltantes"   value={kpis.docsFaltantes} color="#FCD34D" sub="requieren atención"    />
@@ -584,7 +567,7 @@ export default function LiberacionLotesPage() {
           />
         </div>
 
-        {/* ── Chips de categoría ── */}
+        {/* Chips de categoría */}
         <div className="lib-chips">
           {categorias.map(cat => (
             <button
@@ -599,7 +582,7 @@ export default function LiberacionLotesPage() {
           ))}
         </div>
 
-        {/* ── Grid de lotes ── */}
+        {/* Grid de lotes */}
         <div>
           {loading ? (
             <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
@@ -632,7 +615,7 @@ export default function LiberacionLotesPage() {
 
       </div>
 
-      {/* ── Modales ── */}
+      {/* Modales */}
       {modal?.lote && (
         <>
           <ModalLiberar
@@ -652,7 +635,7 @@ export default function LiberacionLotesPage() {
         </>
       )}
 
-      {/* ── Toast ── */}
+      {/* Toast */}
       {toast && <Toast msg={toast.msg} type={toast.type} />}
     </>
   );

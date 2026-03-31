@@ -2,12 +2,6 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { recepcionesService } from "../../Services/recepciones.service";
 import { ordenesCompraService, type OrdenCompraResumen } from "../../Services/ordenes-compra.service";
-import {
-  EstadoSensorial, EstadoSensorialLabels,
-  EstadoRotulado, EstadoRotuladoLabels,
-  UbicacionDestino,
-  TipoDocumento, TipoDocumentoLabels,
-} from "../../Types/api";
 import { ROUTES } from "../../Constants/routes";
 import { Button } from "../../Components/UI/Index";
 import {
@@ -19,6 +13,70 @@ import "./StylesRecepciones/NuevaRecepcionPage.css";
 const isMock = import.meta.env.VITE_USE_MOCK === "true";
 const today   = new Date().toISOString().slice(0, 10);
 const nowTime = new Date().toTimeString().slice(0, 5);
+const DEV_USER_ID = "a0000000-0000-0000-0000-000000000001";
+
+
+// ===== CONSTANTES LOCALES PARA ENUMS (coinciden con backend) =====
+
+const ESTADO_SENSORIAL = {
+  Optimo: 0,
+  Aceptable: 1,
+  Deficiente: 2,
+} as const;
+type EstadoSensorial = typeof ESTADO_SENSORIAL[keyof typeof ESTADO_SENSORIAL];
+
+const ESTADO_SENSORIAL_LABELS: Record<EstadoSensorial, string> = {
+  [ESTADO_SENSORIAL.Optimo]: "Óptimo",
+  [ESTADO_SENSORIAL.Aceptable]: "Aceptable",
+  [ESTADO_SENSORIAL.Deficiente]: "Deficiente",
+};
+
+const ESTADO_ROTULADO = {
+  Conforme: 0,
+  NoConforme: 1,
+  SinRotulo: 2,
+} as const;
+type EstadoRotulado = typeof ESTADO_ROTULADO[keyof typeof ESTADO_ROTULADO];
+
+const ESTADO_ROTULADO_LABELS: Record<EstadoRotulado, string> = {
+  [ESTADO_ROTULADO.Conforme]: "Conforme",
+  [ESTADO_ROTULADO.NoConforme]: "No conforme",
+  [ESTADO_ROTULADO.SinRotulo]: "Sin rótulo",
+};
+
+const UBICACION_DESTINO = {
+  CD: 0,
+  CP: 1,
+} as const;
+type UbicacionDestino = typeof UBICACION_DESTINO[keyof typeof UBICACION_DESTINO];
+
+const UBICACION_LABELS: Record<UbicacionDestino, string> = {
+  [UBICACION_DESTINO.CD]: "Centro de Despacho",
+  [UBICACION_DESTINO.CP]: "Centro de Producción",
+};
+
+const TIPO_DOCUMENTO = {
+  Factura: 0,
+  OrdendeCompra: 1,
+  COA: 2,
+  RegistroINVIMA: 3,
+  CertTransporte: 4,
+  BitacoraTemperatura: 5,
+  Rotulado: 6,
+  Otros: 7,
+} as const;
+type TipoDocumento = typeof TIPO_DOCUMENTO[keyof typeof TIPO_DOCUMENTO];
+
+const TIPO_DOCUMENTO_LABELS: Record<TipoDocumento, string> = {
+  [TIPO_DOCUMENTO.Factura]: "Factura",
+  [TIPO_DOCUMENTO.OrdendeCompra]: "Orden de compra",
+  [TIPO_DOCUMENTO.COA]: "Certificado de análisis (COA)",
+  [TIPO_DOCUMENTO.RegistroINVIMA]: "Registro INVIMA",
+  [TIPO_DOCUMENTO.CertTransporte]: "Certificado de transporte",
+  [TIPO_DOCUMENTO.BitacoraTemperatura]: "Bitácora de temperatura",
+  [TIPO_DOCUMENTO.Rotulado]: "Rotulado",
+  [TIPO_DOCUMENTO.Otros]: "Otro",
+};
 
 // ── Tipos internos del wizard ─────────────────────────────────────────────────
 
@@ -81,16 +139,16 @@ function buildLotes(oc: OrdenCompraResumen): LoteForm[] {
     categoriaFrio:       d.requiereCadenaFrio,
     temperaturaMinima:   d.temperaturaMinima,
     temperaturaMaxima:   d.temperaturaMaxima,
-    unidadMedida:        d.unidadMedida,       // ← toma de la OC
+    unidadMedida:        d.unidadMedida,
     cantidadEsperada:    d.cantidadSolicitada,
     numeroLoteProveedor: "",
     fechaFabricacion:    "",
     fechaVencimiento:    "",
     cantidadRecibida:    String(d.cantidadSolicitada),
     temperaturaMedida:   "",
-    estadoSensorial:     EstadoSensorial.Aceptable,
-    estadoRotulado:      EstadoRotulado.Conforme,
-    ubicacionDestino: UbicacionDestino.CD,
+    estadoSensorial:     ESTADO_SENSORIAL.Aceptable,
+    estadoRotulado:      ESTADO_ROTULADO.Conforme,
+    ubicacionDestino:    UBICACION_DESTINO.CD,
   }));
 }
 
@@ -461,16 +519,16 @@ function Paso4Lotes({
     l => l.fechaVencimiento && Number(l.cantidadRecibida) > 0
   ).length;
 
-  const sensorialOpts = Object.entries(EstadoSensorialLabels).map(
+  const sensorialOpts = Object.entries(ESTADO_SENSORIAL_LABELS).map(
     ([k, v]) => ({ value: k, label: v })
   );
-  const rotuladoOpts = Object.entries(EstadoRotuladoLabels).map(
+  const rotuladoOpts = Object.entries(ESTADO_ROTULADO_LABELS).map(
     ([k, v]) => ({ value: k, label: v })
   );
-  const ubicacionOpts = [
-    { value: String(UbicacionDestino.CD), label: "Centro de Despacho" },
-    { value: String(UbicacionDestino.CP), label: "Centro de Producción" },
-  ];
+  const ubicacionOpts = Object.entries(UBICACION_LABELS).map(
+    ([k, v]) => ({ value: k, label: v })
+  );
+
 
   const tempFuera = lote.categoriaFrio &&
     lote.temperaturaMedida !== "" && (
@@ -627,9 +685,9 @@ function Paso5Documentos({
 }) {
   const necesitaFrio = state.lotes.some(l => l.categoriaFrio);
   const TIPOS_REQ = [
-    TipoDocumento.RegistroINVIMA,
-    TipoDocumento.COA,
-    ...(necesitaFrio ? [TipoDocumento.CertTransporte] : []),
+    TIPO_DOCUMENTO.RegistroINVIMA,
+    TIPO_DOCUMENTO.COA,
+    ...(necesitaFrio ? [TIPO_DOCUMENTO.CertTransporte] : []),
   ];
 
   const getDoc  = (tipo: TipoDocumento) =>
@@ -671,7 +729,7 @@ function Paso5Documentos({
                 </svg>
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p className="nr-doc-name">{TipoDocumentoLabels[tipo]}</p>
+                <p className="nr-doc-name">{TIPO_DOCUMENTO_LABELS[tipo]}</p>
                 {doc
                   ? <p className="nr-doc-file-name">✓ {doc.archivo?.name}</p>
                   : <p className="nr-doc-no-file">Sin archivo adjunto</p>
@@ -742,60 +800,63 @@ export default function NuevaRecepcionPage() {
         return;
       }
 
-      // 1. Iniciar recepción — "HH:mm" → "HH:mm:ss"
-      const { id } = await recepcionesService.iniciar({
-        ordenCompraId:          state.ocSeleccionada!.id,
-        fechaRecepcion:         state.fechaRecepcion,
-        horaLlegadaVehiculo:    state.horaLlegada.length === 5
-          ? `${state.horaLlegada}:00`
-          : state.horaLlegada,
-        placaVehiculo:          state.placaVehiculo || undefined,
-        nombreTransportista:    state.nombreTransportista || undefined,
+      const oc = state.ocSeleccionada!;
+
+      // 1. Iniciar recepción (sin fecha/hora)
+      const { id: recepcionId } = await recepcionesService.iniciar({
+        ordenCompraId: oc.id,
+        proveedorId: oc.proveedorId,
+        usuarioId: DEV_USER_ID,
         observacionesGenerales: state.observaciones || undefined,
       });
 
       // 2. Registrar inspección del vehículo
-      await recepcionesService.registrarInspeccionVehiculo(id, {
-        recepcionId:             id,
-        temperaturaInicial:      state.tempInicial
-          ? Number(state.tempInicial) : undefined,
-        temperaturaDentroRango:  state.temperaturaDentroRango,
-        integridadEmpaque:       state.integridadEmpaque,
-        limpiezaVehiculo:        state.limpiezaVehiculo,
+      await recepcionesService.registrarInspeccionVehiculo(recepcionId, {
+        temperaturaInicial: state.tempInicial ? Number(state.tempInicial) : undefined,
+        temperaturaDentroRango: state.temperaturaDentroRango,
+        integridadEmpaque: state.integridadEmpaque,
+        limpiezaVehiculo: state.limpiezaVehiculo,
         presenciaOloresExtranos: state.oloresExtranos,
-        plagasVisible:           state.plagasVisible,
-        documentosTransporteOk:  state.documentosTransporteOk,
-        observaciones:           state.obsInspeccion || undefined,
+        plagasVisible: state.plagasVisible,
+        documentosTransporteOk: state.documentosTransporteOk,
+        observaciones: state.obsInspeccion || undefined,
       });
 
-      // 3. Registrar lotes
+      // 3. Crear RecepcionItems para cada detalle de OC
+      const itemIds = new Map<string, string>(); // detalleOcId -> recepcionItemId
+      for (const detalle of oc.detalles) {
+        const { id: itemId } = await recepcionesService.agregarItem(recepcionId, {
+          detalleOrdenCompraId: detalle.id
+        });
+        itemIds.set(detalle.id, itemId);
+      }
+
+      // 4. Registrar lotes asociados a cada RecepcionItem
       for (const l of state.lotes) {
         if (!l.fechaVencimiento || Number(l.cantidadRecibida) <= 0) continue;
-        await recepcionesService.registrarLote(id, {
-          recepcionId:         id,
-          detalleOcId:         l.detalleOcId,
-          itemId:              l.itemId,
+        const recepcionItemId = itemIds.get(l.detalleOcId);
+        if (!recepcionItemId) continue;
+        await recepcionesService.agregarLoteAItem(recepcionId, recepcionItemId, {
           numeroLoteProveedor: l.numeroLoteProveedor || undefined,
-          fechaFabricacion:    l.fechaFabricacion   || undefined,
-          fechaVencimiento:    l.fechaVencimiento,
-          cantidadRecibida:    Number(l.cantidadRecibida),
-          unidadMedida:        l.unidadMedida,       // ← ya no falta
-          temperaturaMedida:   l.temperaturaMedida
-            ? Number(l.temperaturaMedida) : undefined,
-          estadoSensorial:     l.estadoSensorial,
-          estadoRotulado:      l.estadoRotulado,
-          ubicacionDestino:    l.ubicacionDestino,
+          fechaFabricacion: l.fechaFabricacion || undefined,
+          fechaVencimiento: l.fechaVencimiento,
+          cantidadRecibida: Number(l.cantidadRecibida),
+          unidadMedida: l.unidadMedida,
+          temperaturaMedida: l.temperaturaMedida ? Number(l.temperaturaMedida) : undefined,
+          estadoSensorial: l.estadoSensorial,
+          estadoRotulado: l.estadoRotulado,
+          ubicacionDestino: l.ubicacionDestino,
         });
       }
 
-      // 4. Subir documentos
+      // 5. Subir documentos
       for (const doc of state.documentos) {
         if (doc.archivo) {
-          await recepcionesService.subirDocumento(id, doc.tipo, doc.archivo);
+          await recepcionesService.subirDocumento(recepcionId, doc.tipo, doc.archivo);
         }
       }
 
-      navigate(ROUTES.DETALLE_RECEPCION(id));
+      navigate(ROUTES.DETALLE_RECEPCION(recepcionId));
 
     } catch (e: unknown) {
       console.error(e);

@@ -6,10 +6,8 @@ import {
   type ProveedorResumen,
   type Proveedor,
   type ItemResumen,
-  type Item,
   type Categoria,
   EstadoProveedor,
-  EstadoItem,
   type CrearProveedorCommand,
   type ActualizarProveedorCommand,
   type CrearItemCommand,
@@ -145,7 +143,7 @@ export function useProveedores() {
         ...prev,
         proveedores: prev.proveedores.map(p =>
           p.id === cmd.id
-            ? { ...p, razonSocial: cmd.razonSocial, nit: cmd.nit, ciudad: cmd.ciudad ?? p.ciudad }
+            ? { ...p, razonSocial: cmd.razonSocial ?? p.razonSocial }
             : p
         ),
       }));
@@ -161,11 +159,19 @@ export function useProveedores() {
    * Después del upload refresca el detalle (si aplica) pero no toda la lista.
    */
   const subirDocumento = useCallback(async (
-    proveedorId: string, tipo: string, archivo: File
+    proveedorId: string,
+    tipoDocumento: string,
+    numeroDocumento: string,
+    fechaExpedicion: string,
+    fechaVencimiento: string,
+    archivo: File
   ) => {
     startSave();
     try {
-      await proveedoresService.subirDocumento(proveedorId, tipo, archivo);
+      await proveedoresService.subirDocumento(
+        proveedorId, tipoDocumento, numeroDocumento,
+        fechaExpedicion, fechaVencimiento, archivo
+      );
       endSave();
     } catch {
       failSave("No se pudo subir el documento.");
@@ -266,7 +272,7 @@ export function useItems() {
 
   const kpis = useMemo(() => ({
     total:         state.items.length,
-    activos:       state.items.filter(i => i.estado === EstadoItem.Activo).length,
+    activos:       state.items.filter(i => i.estado === true).length,
     conCadenaFrio: state.items.filter(i => i.requiereCadenaFrio).length,
     sinCadenaFrio: state.items.filter(i => !i.requiereCadenaFrio).length,
   }), [state.items]);
@@ -299,7 +305,7 @@ export function useItems() {
 
   /** Actualiza campos de un ítem y lo refleja en la lista local. */
   const actualizar = useCallback(async (
-    id: string, cmd: Partial<CrearItemCommand> & { estado?: EstadoItem }
+    id: string, cmd: Partial<CrearItemCommand> & { estado?: boolean }
   ) => {
     startSave();
     try {
@@ -311,7 +317,9 @@ export function useItems() {
             ? {
                 ...i,
                 nombre:            cmd.nombre          ?? i.nombre,
-                estado:            cmd.estado          ?? i.estado,
+                categoriaId:       cmd.categoriaId      ?? i.categoriaId,
+                unidadMedida:      cmd.unidadMedida     ?? i.unidadMedida,
+                estado:            cmd.estado           ?? i.estado,
                 requiereCadenaFrio: cmd.requiereCadenaFrio ?? i.requiereCadenaFrio,
                 temperaturaMinima: cmd.temperaturaMinima ?? i.temperaturaMinima,
                 temperaturaMaxima: cmd.temperaturaMaxima ?? i.temperaturaMaxima,

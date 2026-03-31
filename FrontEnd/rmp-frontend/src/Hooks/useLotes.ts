@@ -1,16 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   lotesService,
-  type LotePendiente,
-  type LoteKpis,
-  type LiberarLoteCommand,
-  type RechazarLoteCommand,
+  type LotePendienteDto,
 } from "../Services/lotes.service";
+import type { LiberarLoteCommand, RechazarLoteCommand } from "../Types";
 
-// ─── TIPOS ────────────────────────────────────────────────────────────────────
+// ─── TIPOS LOCALES ────────────────────────────────────────────────────────────
+
+interface LoteKpis {
+  pendientes: number;
+  liberadosHoy: number;
+  rechazadosHoy: number;
+  enCuarentena: number;
+}
 
 interface LotesState {
-  lotes:       LotePendiente[];
+  lotes:       LotePendienteDto[];
   kpis:        LoteKpis;
   loading:     boolean;
   error:       string | null;
@@ -33,27 +38,6 @@ const KPIS_DEFAULT: LoteKpis = {
 
 // ─── HOOK ─────────────────────────────────────────────────────────────────────
 
-/**
- * Estado y acciones para el módulo de Liberación de Lotes.
- *
- * @example
- * const {
- *   lotes, kpis, loading, error,
- *   mutatingId, mutateError,
- *   liberar, rechazar, pasarACuarentena,
- *   refresh,
- * } = useLotes();
- *
- * // Liberar lote
- * await liberar({ loteId: "lot-001", observaciones: "Sin novedad" });
- *
- * // Rechazar
- * await rechazar({ loteId: "lot-002", motivoRechazo: "T° fuera de rango",
- *   tipoRechazo: "Total", generaNoConformidad: true });
- *
- * // Cuarentena
- * await pasarACuarentena("lot-003", "Análisis microbiológico pendiente");
- */
 export function useLotes(options: UseLotesOptions = {}) {
   const { autoLoad = true } = options;
 
@@ -73,12 +57,11 @@ export function useLotes(options: UseLotesOptions = {}) {
     try {
       const lotes = await lotesService.getPendientes();
 
-      // KPIs derivados del array (no hay endpoint separado en el servicio)
       const kpis: LoteKpis = {
         pendientes:    lotes.filter(l => l.estado === "PendienteCalidad").length,
         liberadosHoy:  lotes.filter(l => l.estado === "Liberado").length,
-        rechazadosHoy: lotes.filter(l => l.estado === "Rechazado").length,
-        enCuarentena:  lotes.filter(l => l.estado === "Cuarentena").length,
+        rechazadosHoy: lotes.filter(l => l.estado === "RechazadoTotal" || l.estado === "RechazadoParcial").length,
+        enCuarentena:  lotes.filter(l => l.estado === "EnCuarentena").length,
       };
 
       setState(prev => ({ ...prev, lotes, kpis, loading: false }));
@@ -97,11 +80,9 @@ export function useLotes(options: UseLotesOptions = {}) {
 
   // ── Helpers de mutación ────────────────────────────────────────────────────
 
-  /** Marca un lote como mutando y limpia errores previos. */
   const startMutation = (loteId: string) =>
     setState(prev => ({ ...prev, mutatingId: loteId, mutateError: null }));
 
-  /** Quita el lote de la lista localmente (actualización optimista). */
   const removeLoteLocal = (loteId: string) =>
     setState(prev => ({
       ...prev,
@@ -109,8 +90,7 @@ export function useLotes(options: UseLotesOptions = {}) {
       lotes: prev.lotes.filter(l => l.id !== loteId),
     }));
 
-  /** Actualiza el estado de un lote en la lista local. */
-  const updateLoteEstado = (loteId: string, nuevoEstado: LotePendiente["estado"]) =>
+  const updateLoteEstado = (loteId: string, nuevoEstado: LotePendienteDto["estado"]) =>
     setState(prev => ({
       ...prev,
       mutatingId: null,
@@ -124,58 +104,61 @@ export function useLotes(options: UseLotesOptions = {}) {
 
   // ── Acciones ───────────────────────────────────────────────────────────────
 
-  /**
-   * Libera un lote e ingresa al inventario productivo.
-   * El lote desaparece optimistamente de la lista al confirmar.
-   */
   const liberar = useCallback(async (cmd: LiberarLoteCommand) => {
-    startMutation(cmd.loteId);
+    const loteId = cmd.loteId;
+    if (!loteId) {
+      handleMutateError("No se especificó el ID del lote.");
+      throw new Error("missing_lote_id");
+    }
+    startMutation(loteId);
     try {
-      await lotesService.liberar(cmd);
-      removeLoteLocal(cmd.loteId);
+      await lotesService.liberar({ ...cmd, loteId });
+      removeLoteLocal(loteId);
     } catch {
       handleMutateError("No se pudo liberar el lote. Intenta de nuevo.");
       throw new Error("liberar_failed");
     }
   }, []);
 
-  /**
-   * Rechaza un lote total o parcialmente.
-   * Si `generaNoConformidad` es true, el backend crea la NC automáticamente.
-   */
   const rechazar = useCallback(async (cmd: RechazarLoteCommand) => {
-    startMutation(cmd.loteId);
+    const loteId = cmd.loteId;
+    if (!loteId) {
+      handleMutateError("No se especificó el ID del lote.");
+      throw new Error("missing_lote_id");
+    }
+    startMutation(loteId);
     try {
-      await lotesService.rechazar(cmd);
-      updateLoteEstado(cmd.loteId, "Rechazado");
+      await lotesService.rechazar({ ...cmd, loteId });
+      // El lote puede quedar como "RechazadoTotal" o "RechazadoParcial"
+      updateLoteEstado(loteId, "RechazadoTotal"); // o "RechazadoParcial" según corresponda
     } catch {
       handleMutateError("No se pudo rechazar el lote. Intenta de nuevo.");
       throw new Error("rechazar_failed");
     }
   }, []);
 
-  /**
-   * Mueve un lote a cuarentena para análisis adicional.
-   */
-  const pasarACuarentena = useCallback(async (loteId: string, motivo: string) => {
+  const ponerEnCuarentena = useCallback(async (loteId: string, motivo: string) => {
+    if (!loteId) {
+      handleMutateError("No se especificó el ID del lote.");
+      throw new Error("missing_lote_id");
+    }
     startMutation(loteId);
     try {
-      await lotesService.pasarACuarentena(loteId, motivo);
-      updateLoteEstado(loteId, "Cuarentena");
+      await lotesService.ponerEnCuarentena({ loteId, motivo });
+      updateLoteEstado(loteId, "EnCuarentena");
     } catch {
       handleMutateError("No se pudo mover el lote a cuarentena. Intenta de nuevo.");
       throw new Error("cuarentena_failed");
     }
   }, []);
 
-  /** Limpia el error de mutación manualmente (ej.: al cerrar un modal). */
   const clearMutateError = useCallback(() =>
     setState(prev => ({ ...prev, mutateError: null })), []);
 
   // ── Lotes filtrados por estado — atajos para la UI ─────────────────────────
 
   const lotesPendientes  = state.lotes.filter(l => l.estado === "PendienteCalidad");
-  const lotesEnCuarentena = state.lotes.filter(l => l.estado === "Cuarentena");
+  const lotesEnCuarentena = state.lotes.filter(l => l.estado === "EnCuarentena");
 
   return {
     // Estado
@@ -191,7 +174,7 @@ export function useLotes(options: UseLotesOptions = {}) {
     // Acciones
     liberar,
     rechazar,
-    pasarACuarentena,
+    ponerEnCuarentena,
     clearMutateError,
     refresh:          fetch,
   };

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecepciones } from "../../Hooks/useRecepciones";
-import { EstadoRecepcion, EstadoRecepcionLabels } from "../../Types/api";
+import type { EstadoRecepcion } from "../../Types";
 import { ROUTES } from "../../Constants/routes";
 import type { RecepcionResumen } from "../../Services/recepciones.service";
 import { Button } from "../../Components/UI/Index";
@@ -15,33 +15,42 @@ const isMock = import.meta.env.VITE_USE_MOCK === "true";
 
 
 // ── Config visual de estados — alineada con backend
-const ESTADO_CFG: Record<EstadoRecepcion, {
+const ESTADO_CFG: Record<number, {
   label: string; color: string; bg: string; dot: string;
 }> = {
-  [EstadoRecepcion.Iniciada]: {
+  0: { // Iniciada
     label: "Iniciada", color: "#93C5FD",
     bg: "rgba(59,130,246,0.08)", dot: "#3B82F6",
   },
-  [EstadoRecepcion.InspeccionVehiculo]: {
+  1: { // InspeccionVehiculo
     label: "Insp. vehículo", color: "#C4B5FD",
     bg: "rgba(168,85,247,0.08)", dot: "#A855F7",
   },
-  [EstadoRecepcion.RegistroLotes]: {
+  2: { // RegistroLotes
     label: "Registro lotes", color: "#FCD34D",
     bg: "rgba(245,158,11,0.08)", dot: "#F59E0B",
   },
-  [EstadoRecepcion.PendienteCalidad]: {
+  3: { // PendienteCalidad
     label: "Pend. calidad", color: "#FCA5A5",
     bg: "rgba(239,68,68,0.08)", dot: "#EF4444",
   },
-  [EstadoRecepcion.Liberada]: {
-    label: "Liberada", color: "#86EFAC",
+  4: { // Finalizada (antes Liberada)
+    label: "Finalizada", color: "#86EFAC",
     bg: "rgba(34,197,94,0.08)", dot: "#22C55E",
   },
-  [EstadoRecepcion.Rechazada]: {
+  5: { // Rechazada
     label: "Rechazada", color: "#94A3B8",
     bg: "rgba(100,116,139,0.1)", dot: "#64748B",
   },
+};
+
+const ESTADO_RECEPCION_LABELS: Record<number, string> = {
+  0: "Iniciada",
+  1: "Inspección vehículo",
+  2: "Registro lotes",
+  3: "Pendiente calidad",
+  4: "Finalizada",
+  5: "Rechazada",
 };
 
 // ── Badge estado
@@ -169,12 +178,11 @@ export default function RecepcionesPage() {
   // KPIs derivados
   const kpis = {
     total:      recepciones.length,
-    liberadas:  recepciones.filter(r => r.estado === EstadoRecepcion.Liberada).length,
+    liberadas:  recepciones.filter(r => r.estado === 4).length, // Finalizada
     pendientes: recepciones.filter(r =>
-      r.estado === EstadoRecepcion.PendienteCalidad ||
-      r.estado === EstadoRecepcion.RegistroLotes
+      r.estado === 3 || r.estado === 2   // PendienteCalidad o RegistroLotes
     ).length,
-    rechazadas: recepciones.filter(r => r.estado === EstadoRecepcion.Rechazada).length,
+    rechazadas: recepciones.filter(r => r.estado === 5).length,
   };
 
   return (
@@ -293,8 +301,8 @@ export default function RecepcionesPage() {
           aria-label="Filtrar por estado"
         >
           <option value="">Todos los estados</option>
-          {Object.entries(EstadoRecepcionLabels).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+          {Object.entries(ESTADO_RECEPCION_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
           ))}
         </select>
       </div>

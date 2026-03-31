@@ -2,20 +2,28 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   noConformidadesService,
-  type NoConformidad, type ComentarioNC,
-  EstadoNC, EstadoNCLabels,
-  PrioridadNC, PrioridadNCLabels,
-  TipoNC, TipoNCLabels,
-  type CambiarEstadoCommand,
+  type NoConformidad,
+  type ComentarioNC,
+  EstadoNC,
+  EstadoNCLabels,
+  PrioridadNC,
+  TipoNCLabels,
   type AgregarAccionCommand,
 } from "../../Services/no-conformidades.service";
 import { Button, Modal, ModalFooter } from "../../Components/UI/Index";
-import { TextAreaField, TextField, DateField } from "../../Components/Forms/Index";
+import { TextAreaField, DateField, SelectField } from "../../Components/Forms/Index";
 import { formatDate, formatDateTime } from "../../Utils/formatters";
 import { MOCK_NC } from "./MockData";
 import "./StylesNoC/DetalleNoConformidadPage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+
+// ─── CONSTANTES ───────────────────────────────────────────────────────────────
+const usuarios = [
+  { id: "user-1", nombre: "Usuario actual" },
+  { id: "user-2", nombre: "Calidad" },
+  { id: "user-3", nombre: "Compras" },
+];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -37,27 +45,25 @@ function calcDiasAbierta(fechaDeteccion: string, fechaCierre?: string): number {
 const ESTADO_CFG: Record<EstadoNC, { color: string; bg: string; dot: string; border: string }> = {
   [EstadoNC.Abierta]:     { color: "#FCA5A5", bg: "rgba(239,68,68,0.08)",   dot: "#EF4444", border: "rgba(239,68,68,0.2)"    },
   [EstadoNC.EnAnalisis]:  { color: "#C4B5FD", bg: "rgba(168,85,247,0.08)",  dot: "#A855F7", border: "rgba(168,85,247,0.2)"   },
-  [EstadoNC.EnEjecucion]: { color: "#FCD34D", bg: "rgba(245,158,11,0.08)",  dot: "#F59E0B", border: "rgba(245,158,11,0.2)"   },
+  [EstadoNC.EnProceso]:   { color: "#FCD34D", bg: "rgba(245,158,11,0.08)",  dot: "#F59E0B", border: "rgba(245,158,11,0.2)"   },
   [EstadoNC.Cerrada]:     { color: "#86EFAC", bg: "rgba(34,197,94,0.08)",   dot: "#22C55E", border: "rgba(34,197,94,0.2)"    },
   [EstadoNC.Anulada]:     { color: "#94A3B8", bg: "rgba(100,116,139,0.08)", dot: "#64748B", border: "rgba(100,116,139,0.15)" },
 };
+
 const PRIORIDAD_CFG: Record<PrioridadNC, { color: string; bg: string; label: string }> = {
   [PrioridadNC.Baja]:    { color: "#86EFAC", bg: "rgba(34,197,94,0.08)",  label: "Baja"    },
   [PrioridadNC.Media]:   { color: "#FCD34D", bg: "rgba(245,158,11,0.08)", label: "Media"   },
   [PrioridadNC.Alta]:    { color: "#FCA5A5", bg: "rgba(239,68,68,0.08)",  label: "Alta"    },
   [PrioridadNC.Critica]: { color: "#F87171", bg: "rgba(239,68,68,0.15)",  label: "CRÍTICA" },
 };
+
 const ACCION_CFG: Record<string, { color: string; bg: string; label: string }> = {
   Pendiente:  { color: "#FCD34D", bg: "rgba(245,158,11,0.08)", label: "Pendiente"  },
   EnCurso:    { color: "#93C5FD", bg: "rgba(59,130,246,0.08)", label: "En curso"   },
   Completada: { color: "#86EFAC", bg: "rgba(34,197,94,0.06)",  label: "Completada" },
 };
-const TRANSICIONES: Partial<Record<EstadoNC, EstadoNC[]>> = {
-  [EstadoNC.Abierta]:     [EstadoNC.EnAnalisis, EstadoNC.Anulada],
-  [EstadoNC.EnAnalisis]:  [EstadoNC.EnEjecucion, EstadoNC.Anulada],
-  [EstadoNC.EnEjecucion]: [EstadoNC.Cerrada, EstadoNC.EnAnalisis],
-};
-const ESTADO_ORDEN = [EstadoNC.Abierta, EstadoNC.EnAnalisis, EstadoNC.EnEjecucion, EstadoNC.Cerrada];
+
+const ESTADO_ORDEN = [EstadoNC.Abierta, EstadoNC.EnAnalisis, EstadoNC.EnProceso, EstadoNC.Cerrada];
 
 // ─── BADGE ───────────────────────────────────────────────────────────────────
 
@@ -145,51 +151,6 @@ function LineaTiempo({ estadoActual }: { estadoActual: EstadoNC }) {
   );
 }
 
-// ─── MODAL CAMBIO ESTADO ─────────────────────────────────────────────────────
-
-function ModalCambioEstado({ actual, destino, onClose, onConfirm, saving }: {
-  actual: EstadoNC; destino: EstadoNC;
-  onClose: () => void;
-  onConfirm: (cmd: Omit<CambiarEstadoCommand, "ncId">) => void;
-  saving: boolean;
-}) {
-  const [comentario, setComentario] = useState("");
-  const [causaRaiz,  setCausaRaiz]  = useState("");
-  const cfgDest       = ESTADO_CFG[destino];
-  const necesitaCausa = destino === EstadoNC.EnEjecucion;
-  const valid = necesitaCausa ? causaRaiz.trim().length > 5 : true;
-
-  return (
-    <Modal open onClose={onClose}
-      title={`Cambiar estado → ${EstadoNCLabels[destino]}`}
-      icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-      iconColor={cfgDest.dot}
-      size="sm"
-      footer={
-        <ModalFooter onCancel={onClose}
-          onConfirm={() => onConfirm({ nuevoEstado: destino, causaRaiz: causaRaiz || undefined, comentario: comentario || undefined })}
-          loading={saving} disabled={!valid}
-          confirmLabel={`→ ${EstadoNCLabels[destino]}`} />
-      }>
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        {necesitaCausa && (
-          <div className="nc-causa-needed">
-            Pasar a "En ejecución" requiere documentar la causa raíz identificada.
-          </div>
-        )}
-        {necesitaCausa && (
-          <TextAreaField label="Causa raíz" required rows={3}
-            placeholder="Describe la causa raíz identificada…"
-            value={causaRaiz} onChange={e => setCausaRaiz(e.target.value)} />
-        )}
-        <TextAreaField label="Comentario (opcional)" rows={2}
-          placeholder="Observaciones sobre el cambio de estado…"
-          value={comentario} onChange={e => setComentario(e.target.value)} />
-      </div>
-    </Modal>
-  );
-}
-
 // ─── MODAL NUEVA ACCIÓN ───────────────────────────────────────────────────────
 
 function ModalNuevaAccion({ onClose, onConfirm, saving }: {
@@ -202,6 +163,9 @@ function ModalNuevaAccion({ onClose, onConfirm, saving }: {
   const [fecha, setFecha] = useState("");
   const minDate = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
   const valid   = desc.trim() && resp.trim() && fecha;
+
+  const respOptions = usuarios.map(u => ({ value: u.id, label: u.nombre }));
+
   return (
     <Modal open onClose={onClose}
       title="Nueva acción correctiva"
@@ -209,7 +173,7 @@ function ModalNuevaAccion({ onClose, onConfirm, saving }: {
       size="sm"
       footer={
         <ModalFooter onCancel={onClose}
-          onConfirm={() => onConfirm({ descripcion: desc, responsable: resp, fechaCompromiso: fecha })}
+          onConfirm={() => onConfirm({ descripcionAccion: desc, responsableId: resp, fechaCompromiso: fecha })}
           loading={saving} disabled={!valid}
           confirmLabel="Agregar acción" />
       }>
@@ -218,8 +182,13 @@ function ModalNuevaAccion({ onClose, onConfirm, saving }: {
           placeholder="Qué se va a hacer, cómo y con qué recursos…"
           value={desc} onChange={e => setDesc(e.target.value)} />
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-          <TextField label="Responsable" required placeholder="Nombre y área"
-            value={resp} onChange={e => setResp(e.target.value)} />
+          <SelectField
+            label="Responsable"
+            required
+            options={respOptions}
+            value={resp}
+            onChange={e => setResp(e.target.value)}
+          />
           <DateField label="Fecha compromiso" required min={minDate}
             value={fecha} onChange={e => setFecha(e.target.value)} />
         </div>
@@ -230,7 +199,7 @@ function ModalNuevaAccion({ onClose, onConfirm, saving }: {
 
 // ─── TIPO MODAL ───────────────────────────────────────────────────────────────
 
-type ModalType = { tipo: "estado"; destino: EstadoNC } | { tipo: "accion" } | null;
+type ModalType = { tipo: "accion" } | null;
 
 // ─── PÁGINA PRINCIPAL ─────────────────────────────────────────────────────────
 
@@ -290,46 +259,30 @@ export default function DetalleNoConformidadPage() {
 
   const cfg          = ESTADO_CFG[nc.estado];
   const prioridadCfg = PRIORIDAD_CFG[nc.prioridad];
-  const transiciones = TRANSICIONES[nc.estado] ?? [];
   const cerrada      = nc.estado === EstadoNC.Cerrada || nc.estado === EstadoNC.Anulada;
-  const diasAbierta  = calcDiasAbierta(nc.fechaDeteccion, nc.fechaCierre);
+  const diasAbierta  = calcDiasAbierta(nc.creadoEn, nc.fechaCierre);
   const accionesCompletadas = nc.accionesCorrectivas.filter(a => a.estado === "Completada").length;
   const accionesPct = nc.accionesCorrectivas.length > 0
     ? Math.round((accionesCompletadas / nc.accionesCorrectivas.length) * 100) : 0;
 
   // handlers
-  const handleCambioEstado = async (cmd: Omit<CambiarEstadoCommand, "ncId">) => {
-    setSaving(true);
-    try {
-      if (!isMock) await noConformidadesService.cambiarEstado({ ncId: nc.id, ...cmd });
-      else await new Promise(r => setTimeout(r, 700));
-      setNc(prev => {
-        if (!prev) return null;
-        const nuevoComentario: ComentarioNC | null = cmd.comentario
-          ? { id: `com-${Date.now()}`, texto: cmd.comentario, autor: "Usuario actual", fechaRegistro: new Date().toISOString() }
-          : null;
-        return {
-          ...prev, estado: cmd.nuevoEstado,
-          causaRaiz: cmd.causaRaiz ?? prev.causaRaiz,
-          comentarios: nuevoComentario ? [...prev.comentarios, nuevoComentario] : prev.comentarios,
-        };
-      });
-      setModal(null);
-    } catch { setError("No se pudo cambiar el estado."); }
-    finally { setSaving(false); }
-  };
-
   const handleAgregarAccion = async (cmd: Omit<AgregarAccionCommand, "ncId">) => {
     setSaving(true);
     try {
       if (!isMock) await noConformidadesService.agregarAccion({ ncId: nc.id, ...cmd });
       else await new Promise(r => setTimeout(r, 600));
       setNc(prev => prev ? {
-        ...prev, accionesCorrectivas: [...prev.accionesCorrectivas, {
-          id: `ac-${Date.now()}`, descripcion: cmd.descripcion,
-          responsable: cmd.responsable, fechaCompromiso: cmd.fechaCompromiso,
-          estado: "Pendiente" as const,
-        }],
+        ...prev,
+        accionesCorrectivas: [
+          ...prev.accionesCorrectivas,
+          {
+            id: `ac-${Date.now()}`,
+            descripcion: cmd.descripcionAccion,
+            responsable: usuarios.find(u => u.id === cmd.responsableId)?.nombre ?? cmd.responsableId,
+            fechaCompromiso: cmd.fechaCompromiso,
+            estado: "Pendiente" as const,
+          },
+        ],
       } : null);
       setModal(null);
     } catch { setError("No se pudo agregar la acción."); }
@@ -340,13 +293,40 @@ export default function DetalleNoConformidadPage() {
     if (!comentario.trim()) return;
     setSavingComentario(true);
     try {
-      const nuevo: ComentarioNC = isMock
-        ? { id: `com-${Date.now()}`, texto: comentario, autor: "Usuario actual", fechaRegistro: new Date().toISOString() }
-        : await noConformidadesService.agregarComentario(nc.id, comentario);
-      setNc(prev => prev ? { ...prev, comentarios: [...prev.comentarios, nuevo] } : null);
+      let nuevoComentario: ComentarioNC;
+      if (isMock) {
+        nuevoComentario = {
+          id: `com-${Date.now()}`,
+          texto: comentario,
+          autorNombre: "Usuario actual",
+          fechaRegistro: new Date().toISOString(),
+        };
+      } else {
+        const { id: comentarioId } = await noConformidadesService.agregarComentario({
+          ncId: nc.id,
+          texto: comentario,
+        });
+        nuevoComentario = {
+          id: comentarioId,
+          texto: comentario,
+          autorNombre: "Usuario actual", // Podríamos obtener el nombre real si está disponible
+          fechaRegistro: new Date().toISOString(),
+        };
+      }
+      setNc(prev => prev ? { ...prev, comentarios: [...prev.comentarios, nuevoComentario] } : null);
       setComentario("");
     } catch { setError("No se pudo agregar el comentario."); }
     finally { setSavingComentario(false); }
+  };
+
+  const handleCerrar = async () => {
+    setSaving(true);
+    try {
+      if (!isMock) await noConformidadesService.cerrar({ ncId: nc.id, observaciones: "Cierre manual" });
+      else await new Promise(r => setTimeout(r, 700));
+      setNc(prev => prev ? { ...prev, estado: EstadoNC.Cerrada, fechaCierre: new Date().toISOString() } : null);
+    } catch { setError("No se pudo cerrar la NC."); }
+    finally { setSaving(false); }
   };
 
   return (
@@ -378,7 +358,7 @@ export default function DetalleNoConformidadPage() {
 
         <h1 className="nc-titulo-hero">{nc.titulo}</h1>
         <p className="nc-meta-hero">
-          {TipoNCLabels[nc.tipo]} · Detectada {diasDesde(nc.fechaDeteccion)}
+          {TipoNCLabels[nc.tipo]} · Detectada {diasDesde(nc.creadoEn)}
           {nc.proveedorNombre && ` · ${nc.proveedorNombre}`}
         </p>
 
@@ -399,24 +379,21 @@ export default function DetalleNoConformidadPage() {
           </div>
         )}
 
-        {/* Botones de transición */}
-        {!cerrada && transiciones.length > 0 && (
-          <div className="nc-transiciones" style={{ marginTop: "1rem" }}>
-            {transiciones.map(sig => {
-              const c = ESTADO_CFG[sig];
-              return (
-                <button key={sig} className="nc-trans-btn"
-                  style={{ background: c.bg, color: c.color, border: `1px solid ${c.border}` }}
-                  onClick={() => setModal({ tipo: "estado", destino: sig })}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                  {EstadoNCLabels[sig]}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        {/* Botones de acción simplificados */}
+        <div className="nc-transiciones" style={{ marginTop: "1rem" }}>
+          {!cerrada && (
+            <button
+              className="nc-trans-btn"
+              style={{ background: "#22C55E20", color: "#86EFAC", border: "1px solid #22C55E40" }}
+              onClick={handleCerrar}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+              Cerrar NC
+            </button>
+          )}
+        </div>
 
         <p style={{ fontSize: "var(--text-xs)", fontFamily: "var(--font-mono)", color: "var(--text-tertiary)", marginTop: "0.875rem" }}>
           Res. 2674/2013 — INVIMA
@@ -438,9 +415,9 @@ export default function DetalleNoConformidadPage() {
                 <DataCell label="Prioridad">
                   <span style={{ color: prioridadCfg.color }}>{prioridadCfg.label}</span>
                 </DataCell>
-                <DataCell label="Detectado por">{nc.detectadoPor}</DataCell>
+                <DataCell label="Detectado por">{nc.creadoPorNombre}</DataCell>
                 <DataCell label="Asignado a">{nc.asignadoA ?? "—"}</DataCell>
-                <DataCell label="Detección">{formatDate(nc.fechaDeteccion)}</DataCell>
+                <DataCell label="Detección">{formatDate(nc.creadoEn)}</DataCell>
                 <DataCell label="Límite">
                   <span style={{ color: isVencida(nc.fechaLimite) && !cerrada ? "#FCA5A5" : "#94A3B8" }}>
                     {formatDate(nc.fechaLimite)}
@@ -459,28 +436,17 @@ export default function DetalleNoConformidadPage() {
             {nc.causaRaiz
               ? <p style={{ fontSize: "var(--text-sm)", color: "#94A3B8", lineHeight: 1.6 }}>{nc.causaRaiz}</p>
               : <p style={{ fontSize: "var(--text-sm)", color: "var(--text-tertiary)", fontStyle: "italic" }}>
-                  Pendiente de análisis — se requiere al pasar a "En ejecución".
+                  Pendiente de análisis — se requiere al pasar a "En proceso".
                 </p>
             }
           </Section>
 
           {/* Referencias */}
-          {(nc.numeroRecepcion || nc.numeroLote || nc.itemNombre) && (
+          {(nc.numeroLote || nc.itemNombre) && (
             <Section title="Referencias">
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {nc.numeroRecepcion && (
-                  <a href={`/recepciones/${nc.recepcionId}`} className="nc-ref-link">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round">
-                      <path d="M5 3h14a2 2 0 012 2v3H3V5a2 2 0 012-2zM3 8h18v13a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
-                    </svg>
-                    <div>
-                      <p className="nc-ref-sub">Recepción</p>
-                      <p className="nc-ref-num">{nc.numeroRecepcion}</p>
-                    </div>
-                  </a>
-                )}
                 {nc.numeroLote && (
-                  <a href={`/lotes/${nc.loteId}`} className="nc-ref-link">
+                  <div className="nc-ref-link" style={{ cursor: "default" }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round">
                       <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" />
                     </svg>
@@ -488,7 +454,7 @@ export default function DetalleNoConformidadPage() {
                       <p className="nc-ref-sub">Lote · {nc.itemNombre}</p>
                       <p className="nc-ref-num">{nc.numeroLote}</p>
                     </div>
-                  </a>
+                  </div>
                 )}
               </div>
             </Section>
@@ -557,7 +523,7 @@ export default function DetalleNoConformidadPage() {
                     : <div className="nc-comment-list">
                         {nc.comentarios.map(c => (
                           <div key={c.id} className="nc-comment">
-                            <p className="nc-comment-autor">{c.autor}</p>
+                            <p className="nc-comment-autor">{c.autorNombre}</p>
                             <p className="nc-comment-texto">{c.texto}</p>
                             <p className="nc-comment-fecha">{formatDateTime(c.fechaRegistro)}</p>
                           </div>
@@ -592,15 +558,6 @@ export default function DetalleNoConformidadPage() {
       </div>
 
       {/* ── MODALES ──────────────────────────────────────────────────────────── */}
-      {modal?.tipo === "estado" && (
-        <ModalCambioEstado
-          actual={nc.estado}
-          destino={(modal as { tipo: "estado"; destino: EstadoNC }).destino}
-          onClose={() => setModal(null)}
-          onConfirm={handleCambioEstado}
-          saving={saving}
-        />
-      )}
       {modal?.tipo === "accion" && (
         <ModalNuevaAccion
           onClose={() => setModal(null)}

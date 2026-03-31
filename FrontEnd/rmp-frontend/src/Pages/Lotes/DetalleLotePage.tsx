@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { lotesService, type LotePendiente } from "../../Services/lotes.service";
-import { EstadoSensorialLabels, EstadoRotuladoLabels } from "../../Types/api";
+import { lotesService, type LotePendienteDto } from "../../Services/lotes.service";
 import { ROUTES } from "../../Constants/routes";
 import {
   StatusBadge, Button, Card, CardHeader, CardSection,
@@ -14,6 +13,19 @@ import { MOCK_LOTES_PENDIENTES } from "../Liberacion/MockData";
 import "./StylesPages/DetalleLotePage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+
+// ===== CONSTANTES LOCALES =====
+const ESTADO_SENSORIAL_LABELS: Record<number, string> = {
+  0: "Óptimo",
+  1: "Aceptable",
+  2: "Deficiente",
+};
+
+const ESTADO_ROTULADO_LABELS: Record<number, string> = {
+  0: "Conforme",
+  1: "No conforme",
+  2: "Sin rótulo",
+};
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -48,7 +60,7 @@ export default function DetalleLotePage() {
   const { id }   = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [lote,    setLote]    = useState<LotePendiente | null>(null);
+  const [lote,    setLote]    = useState<LotePendienteDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
 
@@ -61,7 +73,6 @@ export default function DetalleLotePage() {
       try {
         if (isMock) {
           await new Promise(r => setTimeout(r, 350));
-          // Buscar en el mock de lotes por id; si no está, usar el primero
           const found = MOCK_LOTES_PENDIENTES.find(l => l.id === id)
                      ?? MOCK_LOTES_PENDIENTES[0];
           setLote(found ?? null);
@@ -130,7 +141,7 @@ export default function DetalleLotePage() {
     ? "warning"
     : lote.estado === "Liberado"
     ? "success"
-    : lote.estado === "Rechazado"
+    : lote.estado.includes("Rechazado")
     ? "danger"
     : "default";
 
@@ -201,8 +212,7 @@ export default function DetalleLotePage() {
 
                 <Field label="Cantidad recibida"
                   value={formatQuantity(lote.cantidadRecibida, lote.unidadMedida)} mono />
-                <Field label="Cantidad esperada"
-                  value={formatQuantity(lote.cantidadEsperada, lote.unidadMedida)} mono />
+                {/* Cantidad esperada no está disponible en LotePendienteDto, se omite */}
               </div>
             </CardSection>
           </Card>
@@ -303,11 +313,11 @@ export default function DetalleLotePage() {
 
                 {/* Sensorial */}
                 <Field label="Estado sensorial"
-                  value={EstadoSensorialLabels[lote.estadoSensorial as unknown as keyof typeof EstadoSensorialLabels] ?? "—"} />
+                  value={ESTADO_SENSORIAL_LABELS[lote.estadoSensorial] ?? "—"} />
 
                 {/* Rotulado */}
                 <Field label="Rotulado"
-                  value={EstadoRotuladoLabels[lote.estadoRotulado as unknown as keyof typeof EstadoRotuladoLabels] ?? "—"} />
+                  value={ESTADO_ROTULADO_LABELS[lote.estadoRotulado] ?? "—"} />
 
                 {/* Cadena de frío */}
                 <Field label="Cadena de frío"
@@ -331,7 +341,7 @@ export default function DetalleLotePage() {
                   </svg>
                   <div>
                     <p className="dl-docs-alert-title">Documentos faltantes</p>
-                    {lote.documentosFaltantes.map(d => (
+                    {lote.documentosFaltantes.map((d: string) => (
                       <p key={d} className="dl-docs-alert-item">{d}</p>
                     ))}
                   </div>

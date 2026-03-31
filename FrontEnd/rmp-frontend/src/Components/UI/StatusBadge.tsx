@@ -1,13 +1,106 @@
 import { Badge, type BadgeSize, type BadgeColor } from "./Badge";
 
-// ─── IMPORTACIONES DE ENUMS ───────────────────────────────────────────────────
-// StatusBadge es el punto único donde se define el mapping visual de cada
-// estado del sistema. Importa directamente de los servicios canónicos.
+// ─── CONSTANTES LOCALES (basadas en el backend real) ─────────────────────────
 
-import { EstadoRecepcion } from "../../Types/api";
-import { EstadoOC }        from "../../Services/ordenes-compra.service";
-import { EstadoNC, PrioridadNC } from "../../Services/no-conformidades.service";
-import { EstadoItem, EstadoProveedor }  from "../../Services/maestros.service";
+// Recepción: 0=Iniciada, 1=InspeccionVehiculo, 2=RegistroLotes, 3=PendienteCalidad, 4=Finalizada, 5=Rechazada
+const ESTADO_RECEPCION = {
+  Iniciada: 0,
+  InspeccionVehiculo: 1,
+  RegistroLotes: 2,
+  PendienteCalidad: 3,
+  Finalizada: 4,
+  Rechazada: 5,
+} as const;
+
+// OC: 0=Abierta, 1=ParcialmenteRecibida, 2=TotalmenteRecibida, 3=Cancelada
+const ESTADO_OC = {
+  Abierta: 0,
+  ParcialmenteRecibida: 1,
+  TotalmenteRecibida: 2,
+  Cancelada: 3,
+} as const;
+
+// NC: 0=Abierta, 1=EnAnalisis, 2=EnProceso, 3=Cerrada, 4=Anulada
+const ESTADO_NC = {
+  Abierta: 0,
+  EnAnalisis: 1,
+  EnProceso: 2,
+  Cerrada: 3,
+  Anulada: 4,
+} as const;
+
+// Prioridad NC: 0=Baja, 1=Media, 2=Alta, 3=Critica
+const PRIORIDAD_NC = {
+  Baja: 0,
+  Media: 1,
+  Alta: 2,
+  Critica: 3,
+} as const;
+
+// Proveedor: 0=Activo, 1=Inactivo, 2=Suspendido
+const ESTADO_PROVEEDOR = {
+  Activo: 0,
+  Inactivo: 1,
+  Suspendido: 2,
+} as const;
+
+// Item: 0=Activo, 1=Inactivo (en realidad es booleano, pero lo tratamos como número para consistencia)
+const ESTADO_ITEM = {
+  Activo: 0,
+  Inactivo: 1,
+} as const;
+
+// ─── CONFIGURACIONES VISUALES ─────────────────────────────────────────────────
+
+const RECEPCION_CFG: Record<number, StatusConfig> = {
+  [ESTADO_RECEPCION.Iniciada]:           { color: "amber",  label: "Iniciada",            dot: true },
+  [ESTADO_RECEPCION.InspeccionVehiculo]: { color: "amber",  label: "Insp. vehículo",      dot: true },
+  [ESTADO_RECEPCION.RegistroLotes]:      { color: "amber",  label: "Registro lotes",      dot: true },
+  [ESTADO_RECEPCION.PendienteCalidad]:   { color: "yellow", label: "Pendiente calidad",   dot: true },
+  [ESTADO_RECEPCION.Finalizada]:         { color: "green",  label: "Finalizada",          dot: true },
+  [ESTADO_RECEPCION.Rechazada]:          { color: "red",    label: "Rechazada",           dot: true },
+};
+
+const OC_CFG: Record<number, StatusConfig> = {
+  [ESTADO_OC.Abierta]:              { color: "green",  label: "Abierta",               dot: true },
+  [ESTADO_OC.ParcialmenteRecibida]: { color: "amber",  label: "Parcialmente recibida", dot: true },
+  [ESTADO_OC.TotalmenteRecibida]:   { color: "blue",   label: "Totalmente recibida",   dot: true },
+  [ESTADO_OC.Cancelada]:            { color: "slate",  label: "Cancelada" },
+};
+
+const NC_CFG: Record<number, StatusConfig> = {
+  [ESTADO_NC.Abierta]:     { color: "red",    label: "Abierta",       dot: true },
+  [ESTADO_NC.EnAnalisis]:  { color: "purple", label: "En análisis",   dot: true },
+  [ESTADO_NC.EnProceso]:   { color: "amber",  label: "En proceso",    dot: true },
+  [ESTADO_NC.Cerrada]:     { color: "green",  label: "Cerrada",       dot: true },
+  [ESTADO_NC.Anulada]:     { color: "slate",  label: "Anulada" },
+};
+
+const PRIORIDAD_NC_CFG: Record<number, StatusConfig> = {
+  [PRIORIDAD_NC.Baja]:    { color: "green",  label: "Baja"    },
+  [PRIORIDAD_NC.Media]:   { color: "yellow", label: "Media"   },
+  [PRIORIDAD_NC.Alta]:    { color: "red",    label: "Alta"    },
+  [PRIORIDAD_NC.Critica]: { color: "red",    label: "Crítica" },
+};
+
+const LOTE_CFG: Record<string, StatusConfig> = {
+  PendienteCalidad:   { color: "yellow", label: "Pdte. calidad", dot: true },
+  Liberado:           { color: "green",  label: "Liberado",      dot: true },
+  RechazadoTotal:     { color: "red",    label: "Rechazado total", dot: true },
+  RechazadoParcial:   { color: "red",    label: "Rechazado parcial", dot: true },
+  EnCuarentena:       { color: "purple", label: "Cuarentena",    dot: true },
+};
+
+const PROVEEDOR_CFG: Record<number, StatusConfig> = {
+  [ESTADO_PROVEEDOR.Activo]:     { color: "green",  label: "Activo",     dot: true },
+  [ESTADO_PROVEEDOR.Inactivo]:   { color: "slate",  label: "Inactivo" },
+  [ESTADO_PROVEEDOR.Suspendido]: { color: "red",    label: "Suspendido", dot: true },
+};
+
+const ITEM_CFG: Record<number, StatusConfig> = {
+  [ESTADO_ITEM.Activo]:   { color: "green",  label: "Activo",   dot: true },
+  [ESTADO_ITEM.Inactivo]: { color: "slate",  label: "Inactivo", dot: false },
+};
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
@@ -29,97 +122,23 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-// ─── TIPOS INTERNOS ───────────────────────────────────────────────────────────
-
 interface StatusConfig {
   color: BadgeColor;
   label: string;
   dot?: boolean;
 }
 
-// ─── CONFIGURACIONES VISUALES ─────────────────────────────────────────────────
-
-// ── Recepciones ─────────────────────────────────────────────────────────────
-// EstadoRecepcion (api.ts): Iniciada=0 | InspeccionVehiculo=1 | RegistroLotes=2
-//                           PendienteCalidad=3 | Liberada=4 | Rechazada=5
-const RECEPCION_CFG: Record<EstadoRecepcion, StatusConfig> = {
-  [EstadoRecepcion.Iniciada]:           { color: "amber",  label: "Iniciada",            dot: true },
-  [EstadoRecepcion.InspeccionVehiculo]: { color: "amber",  label: "Insp. vehículo",      dot: true },
-  [EstadoRecepcion.RegistroLotes]:      { color: "amber",  label: "Registro lotes",      dot: true },
-  [EstadoRecepcion.PendienteCalidad]:   { color: "yellow", label: "Pendiente calidad",   dot: true },
-  [EstadoRecepcion.Liberada]:           { color: "green",  label: "Liberada",            dot: true },
-  [EstadoRecepcion.Rechazada]:          { color: "red",    label: "Rechazada",           dot: true },
-};
-
-// ── Órdenes de Compra ────────────────────────────────────────────────────────
-// EstadoOC: Abierta=0 | ParcialmenteRecibida=1 | TotalmenteRecibida=2
-//           Cerrada=3 | Cancelada=4 | Vencida=5
-const OC_CFG: Record<EstadoOC, StatusConfig> = {
-  [EstadoOC.Abierta]:              { color: "green",  label: "Abierta",               dot: true },
-  [EstadoOC.ParcialmenteRecibida]: { color: "amber",  label: "Parcialmente recibida", dot: true },
-  [EstadoOC.TotalmenteRecibida]:   { color: "blue",   label: "Totalmente recibida",   dot: true },
-  [EstadoOC.Cerrada]:              { color: "slate",  label: "Cerrada" },
-  [EstadoOC.Cancelada]:            { color: "slate",  label: "Cancelada" },
-  [EstadoOC.Vencida]:              { color: "red",    label: "Vencida",               dot: true },
-};
-
-// ── No Conformidades ─────────────────────────────────────────────────────────
-// EstadoNC: Abierta=0 | EnAnalisis=1 | EnEjecucion=2 | Cerrada=3 | Anulada=4
-const NC_CFG: Record<EstadoNC, StatusConfig> = {
-  [EstadoNC.Abierta]:     { color: "red",    label: "Abierta",       dot: true },
-  [EstadoNC.EnAnalisis]:  { color: "purple", label: "En análisis",   dot: true },
-  [EstadoNC.EnEjecucion]: { color: "amber",  label: "En ejecución",  dot: true },
-  [EstadoNC.Cerrada]:     { color: "green",  label: "Cerrada",       dot: true },
-  [EstadoNC.Anulada]:     { color: "slate",  label: "Anulada" },
-};
-
-// ── Prioridad NC ─────────────────────────────────────────────────────────────
-// PrioridadNC: Baja=0 | Media=1 | Alta=2 | Critica=3
-const PRIORIDAD_NC_CFG: Record<PrioridadNC, StatusConfig> = {
-  [PrioridadNC.Baja]:    { color: "green",  label: "Baja"    },
-  [PrioridadNC.Media]:   { color: "yellow", label: "Media"   },
-  [PrioridadNC.Alta]:    { color: "red",    label: "Alta"    },
-  [PrioridadNC.Critica]: { color: "red",    label: "Crítica" },
-};
-
-// ── Lote (estados textuales de la capa de liberación) ────────────────────────
-const LOTE_CFG: Record<string, StatusConfig> = {
-  Pendiente:          { color: "yellow", label: "Pendiente",   dot: true },
-  PendienteCalidad:   { color: "yellow", label: "Pdte. calidad", dot: true },
-  Liberado:           { color: "green",  label: "Liberado",    dot: true },
-  Rechazado:          { color: "red",    label: "Rechazado",   dot: true },
-  Cuarentena:         { color: "purple", label: "Cuarentena",  dot: true },
-};
-
-// ── Proveedor ────────────────────────────────────────────────────────────────
-// EstadoProveedor: Activo=0 | Inactivo=1 | Suspendido=2
-const PROVEEDOR_CFG: Record<EstadoProveedor, StatusConfig> = {
-  [EstadoProveedor.Activo]:     { color: "green",  label: "Activo",     dot: true },
-  [EstadoProveedor.Inactivo]:   { color: "slate",  label: "Inactivo" },
-  [EstadoProveedor.Suspendido]: { color: "red",    label: "Suspendido", dot: true },
-};
-
-//
-const ITEM_CFG: Record<string, StatusConfig> = {
-  [EstadoItem.Activo]:   { color: "green",  label: "Activo",   dot: true },
-  [EstadoItem.Inactivo]: { color: "slate",  label: "Inactivo", dot: false },
-  
-};
-
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
-/**
- * Obtiene la configuración visual para un dominio y valor específicos
- */
 function getStatusConfig(domain: StatusDomain, value: StatusValue): StatusConfig | undefined {
   switch (domain) {
-    case "recepcion":   return RECEPCION_CFG[value as EstadoRecepcion];
-    case "oc":          return OC_CFG[value as EstadoOC];
-    case "nc":          return NC_CFG[value as EstadoNC];
-    case "prioridadNC": return PRIORIDAD_NC_CFG[value as PrioridadNC];
+    case "recepcion":   return RECEPCION_CFG[value as number];
+    case "oc":          return OC_CFG[value as number];
+    case "nc":          return NC_CFG[value as number];
+    case "prioridadNC": return PRIORIDAD_NC_CFG[value as number];
     case "lote":        return LOTE_CFG[String(value)];
-    case "proveedor":   return PROVEEDOR_CFG[value as EstadoProveedor];
-    case "item":        return ITEM_CFG[String(value)];
+    case "proveedor":   return PROVEEDOR_CFG[value as number];
+    case "item":        return ITEM_CFG[value as number];
     default:            return undefined;
   }
 }
@@ -131,12 +150,12 @@ function getStatusConfig(domain: StatusDomain, value: StatusValue): StatusConfig
  * Utiliza el componente Badge base con los tokens del tema.
  *
  * @example
- * <StatusBadge domain="recepcion"   value={EstadoRecepcion.Liberada} />
- * <StatusBadge domain="oc"          value={EstadoOC.Abierta} size="xs" />
- * <StatusBadge domain="nc"          value={EstadoNC.EnEjecucion} />
- * <StatusBadge domain="prioridadNC" value={PrioridadNC.Critica} />
- * <StatusBadge domain="lote"        value="Cuarentena" />
- * <StatusBadge domain="proveedor"   value={EstadoProveedor.Suspendido} />
+ * <StatusBadge domain="recepcion"   value={0} /> // Iniciada
+ * <StatusBadge domain="oc"          value={0} /> // Abierta
+ * <StatusBadge domain="nc"          value={2} /> // En proceso
+ * <StatusBadge domain="prioridadNC" value={3} /> // Crítica
+ * <StatusBadge domain="lote"        value="Liberado" />
+ * <StatusBadge domain="proveedor"   value={0} /> // Activo
  */
 export function StatusBadge({ 
   domain, 
@@ -147,7 +166,6 @@ export function StatusBadge({
   
   const config = getStatusConfig(domain, value);
 
-  // Si no hay configuración, mostramos el valor raw con color slate
   if (!config) {
     return (
       <Badge color="slate" size={size} className={className}>
@@ -156,7 +174,6 @@ export function StatusBadge({
     );
   }
 
-  // Mostramos el badge con la configuración semántica
   return (
     <Badge 
       color={config.color} 
