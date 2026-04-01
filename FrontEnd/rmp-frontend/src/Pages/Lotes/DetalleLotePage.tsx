@@ -10,7 +10,7 @@ import {
   formatTemp, formatTempRange, vencimientoColor,
 } from "../../Utils/formatters";
 import { MOCK_LOTES_PENDIENTES } from "../Liberacion/MockData";
-import "./StylesPages/DetalleLotePage.css";
+import "./StylesLotes/DetalleLotePage.css";
 
 const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 

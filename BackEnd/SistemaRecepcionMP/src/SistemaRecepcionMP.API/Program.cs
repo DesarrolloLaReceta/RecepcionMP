@@ -110,5 +110,6 @@ app.UseAuthorization();
 
 // 8. Controllers
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 await app.RunAsync();
