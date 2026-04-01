@@ -8,9 +8,7 @@ const isMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 
 async function bootstrap() {
   if (isMock) {
-    // ── Modo desarrollo: sin MSAL ────────────────────────────────────────
     const { MockAuthProvider } = await import("./Auth/mockAuth");
-
     ReactDOM.createRoot(document.getElementById("root")!).render(
       <React.StrictMode>
         <MockAuthProvider>
@@ -21,15 +19,13 @@ async function bootstrap() {
       </React.StrictMode>
     );
   } else {
-    // ── Modo producción: Entra ID ────────────────────────────────────────
     const { MsalProvider } = await import("@azure/msal-react");
-    const { msalInstance } = await import("./Services/apiClient");
-
+    const { initMsal, msalInstance } = await import("./Services/msalInterceptor");
+    initMsal();
+    if (!msalInstance) throw new Error("MSAL instance not initialized");
     await msalInstance.initialize();
     await msalInstance.handleRedirectPromise();
-
     const { AuthProvider } = await import("./Auth/AuthContext");
-
     ReactDOM.createRoot(document.getElementById("root")!).render(
       <React.StrictMode>
         <MsalProvider instance={msalInstance}>
