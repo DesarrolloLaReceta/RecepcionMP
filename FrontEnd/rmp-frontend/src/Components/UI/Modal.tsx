@@ -119,7 +119,7 @@ export function Modal({
   children, footer, className = "", loading,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const isDrawer = variant === "drawer";
+  //const isDrawer = variant === "drawer";
   const iconColorValue = iconColor || "var(--primary)";
 
   // Cerrar con Escape

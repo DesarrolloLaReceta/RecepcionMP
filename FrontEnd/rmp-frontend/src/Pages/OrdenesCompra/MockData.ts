@@ -156,9 +156,8 @@ export const MOCK_OC_TODAS: OrdenCompraResumen[] = [
 
 export const MOCK_OC_DETALLE: OrdenCompra = {
   ...MOCK_OC_ABIERTAS[0],
-  notas: "Entrega en muelle 2. Llamar a portería antes de ingresar. Requiere bitácora de temperatura del vehículo.",
-  creadoPor: "Pedro Gómez (Compras)",
-  aprobadoPor: "Ana Torres (Gerente Compras)",
-  fechaAprobacion: "2026-02-20T14:30:00",
+  observaciones: "Entrega en muelle 2. Llamar a portería antes de ingresar. Requiere bitácora de temperatura del vehículo.",
+  creadoPorNombre: "Pedro Gómez (Compras)",
+  creadoEn: "2026-02-20T14:30:00",
   recepciones: [],
 };

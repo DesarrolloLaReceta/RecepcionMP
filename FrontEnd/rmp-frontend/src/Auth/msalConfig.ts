@@ -1,4 +1,4 @@
-import { type Configuration, type PopupRequest, LogLevel } from "@azure/msal-browser";
+import { type Configuration } from "@azure/msal-browser";
 
 // ─── CONFIGURACIÓN ENTRA ID ──────────────────────────────────────────────────
 // Reemplaza estos valores con los de tu App Registration en Azure Portal
