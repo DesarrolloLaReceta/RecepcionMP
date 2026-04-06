@@ -124,9 +124,10 @@ function initWizard(): WizardState {
     fechaRecepcion: today, horaLlegada: nowTime,
     placaVehiculo: "", nombreTransportista: "", observaciones: "",
     tempInicial: "",
-    temperaturaDentroRango: true, integridadEmpaque: true,
-    limpiezaVehiculo: true, oloresExtranos: false, plagasVisible: false,
-    documentosTransporteOk: true, obsInspeccion: "",
+    temperaturaDentroRango: false, integridadEmpaque: false,
+    limpiezaVehiculo: false, oloresExtranos: true, plagasVisible: true,
+    documentosTransporteOk: false,
+    obsInspeccion: "",
     lotes: [], documentos: [],
   };
 }
@@ -412,6 +413,9 @@ function Paso3Inspeccion({
 }) {
   const tieneCongelados = state.lotes.some(l => l.categoriaFrio);
 
+  // Validación: si requiere cadena de frío, la temperatura inicial no puede estar vacía
+  const isValid = !tieneCongelados || (state.tempInicial.trim() !== "");
+
   const CHECKS: {
     key: keyof WizardState; label: string; sub: string; critical?: boolean;
   }[] = [
@@ -434,9 +438,7 @@ function Paso3Inspeccion({
     <div className="nr-form-grid-1">
       <div>
         <h2 className="nr-step-title">Inspección del vehículo</h2>
-        <p className="nr-step-sub">
-          Checklist BPM — Res. 2674/2013.
-        </p>
+        <p className="nr-step-sub">Checklist BPM — Res. 2674/2013.</p>
       </div>
 
       {tieneCongelados && (
@@ -470,7 +472,7 @@ function Paso3Inspeccion({
               const val = key === "oloresExtranos" || key === "plagasVisible" ? !v : v;
               setState(p => ({ ...p, [key]: val }));
             }}
-            label={critical ? `⚡ ${label}` : label}
+            label={critical ? `${label}` : label}
             subLabel={sub}
           />
         ))}
@@ -486,7 +488,9 @@ function Paso3Inspeccion({
       <div className="nr-step-nav">
         <button className="nr-back-step-btn" onClick={onBack}>← Atrás</button>
         <Button
-          variant="primary" size="sm" onClick={onNext}
+          variant="primary" size="sm"
+          onClick={onNext}
+          disabled={!isValid}
           iconRight="M9 18l6-6-6-6"
         >
           Continuar
@@ -514,10 +518,30 @@ function Paso4Lotes({
       return { ...p, lotes };
     });
 
-  const lote   = state.lotes[activeLote];
-  const validos = state.lotes.filter(
-    l => l.fechaVencimiento && Number(l.cantidadRecibida) > 0
-  ).length;
+  const lote = state.lotes[activeLote];
+
+  // Función que determina si un lote está completamente diligenciado
+  const isLoteCompleto = (lote: LoteForm): boolean => {
+    // Campos siempre obligatorios
+    if (!lote.fechaVencimiento) return false;
+    const cantidad = Number(lote.cantidadRecibida);
+    if (isNaN(cantidad) || cantidad <= 0) return false;
+    if (lote.estadoSensorial === undefined) return false;
+    if (lote.estadoRotulado === undefined) return false;
+    if (lote.ubicacionDestino === undefined) return false;
+
+    // Si requiere cadena de frío, la temperatura medida es obligatoria
+    if (lote.categoriaFrio) {
+      if (!lote.temperaturaMedida || lote.temperaturaMedida.trim() === "") return false;
+      const temp = Number(lote.temperaturaMedida);
+      if (isNaN(temp)) return false;
+    }
+
+    return true;
+  };
+
+  const completos = state.lotes.filter(isLoteCompleto).length;
+  const todosCompletos = completos === state.lotes.length;
 
   const sensorialOpts = Object.entries(ESTADO_SENSORIAL_LABELS).map(
     ([k, v]) => ({ value: k, label: v })
@@ -528,7 +552,6 @@ function Paso4Lotes({
   const ubicacionOpts = Object.entries(UBICACION_LABELS).map(
     ([k, v]) => ({ value: k, label: v })
   );
-
 
   const tempFuera = lote.categoriaFrio &&
     lote.temperaturaMedida !== "" && (
@@ -542,14 +565,14 @@ function Paso4Lotes({
         <h2 className="nr-step-title">Registro de lotes</h2>
         <p className="nr-step-sub">
           Completa los datos de cada ítem.{" "}
-          <em>{validos}/{state.lotes.length}</em> lotes completos.
+          <em>{completos}/{state.lotes.length}</em> lotes completos.
         </p>
       </div>
 
       {/* Tabs de ítems */}
       <div className="nr-lote-tabs">
         {state.lotes.map((l, i) => {
-          const ok = l.fechaVencimiento && Number(l.cantidadRecibida) > 0;
+          const ok = isLoteCompleto(l);
           return (
             <button
               key={i} className="nr-lote-tab"
@@ -567,14 +590,18 @@ function Paso4Lotes({
       <div className="nr-lote-body">
         <div className="nr-form-grid-2">
           <TextField
-            label="Lote proveedor" placeholder="Ej: LOT-20260101"
+            label="Lote proveedor"
+            placeholder="Ej: LOT-20260101"
             value={lote.numeroLoteProveedor}
             onChange={e => updLote(activeLote, "numeroLoteProveedor", e.target.value)}
           />
           <div className="nr-qty-wrap">
             <NumberField
-              label="Cantidad recibida" required placeholder="0"
-              min={0} step={0.01}
+              label="Cantidad recibida *"
+              required
+              placeholder="0"
+              min={0}
+              step={0.01}
               value={lote.cantidadRecibida}
               onChange={e => updLote(activeLote, "cantidadRecibida", e.target.value)}
             />
@@ -584,12 +611,15 @@ function Paso4Lotes({
 
         <div className="nr-form-grid-2">
           <DateField
-            label="Fecha fabricación" max={today}
+            label="Fecha fabricación"
+            max={today}
             value={lote.fechaFabricacion}
             onChange={e => updLote(activeLote, "fechaFabricacion", e.target.value)}
           />
           <DateField
-            label="Fecha vencimiento" required min={today}
+            label="Fecha vencimiento *"
+            required
+            min={today}
             value={lote.fechaVencimiento}
             onChange={e => updLote(activeLote, "fechaVencimiento", e.target.value)}
           />
@@ -599,7 +629,10 @@ function Paso4Lotes({
           <div>
             <div className="nr-qty-wrap">
               <NumberField
-                label="Temperatura medida (°C)" placeholder="Ej: 3.2" step={0.1}
+                label="Temperatura medida (°C) *"
+                required
+                placeholder="Ej: 3.2"
+                step={0.1}
                 value={lote.temperaturaMedida}
                 onChange={e => updLote(activeLote, "temperaturaMedida", e.target.value)}
               />
@@ -619,19 +652,22 @@ function Paso4Lotes({
 
         <div className="nr-form-grid-2">
           <SelectField
-            label="Estado sensorial" options={sensorialOpts}
+            label="Estado sensorial *"
+            options={sensorialOpts}
             value={String(lote.estadoSensorial)}
             onChange={e => updLote(activeLote, "estadoSensorial", Number(e.target.value))}
           />
           <SelectField
-            label="Estado de rotulado" options={rotuladoOpts}
+            label="Estado de rotulado *"
+            options={rotuladoOpts}
             value={String(lote.estadoRotulado)}
             onChange={e => updLote(activeLote, "estadoRotulado", Number(e.target.value))}
           />
         </div>
 
         <SelectField
-          label="Ubicación destino" options={ubicacionOpts}
+          label="Ubicación destino *"
+          options={ubicacionOpts}
           value={String(lote.ubicacionDestino)}
           onChange={e => updLote(activeLote, "ubicacionDestino", Number(e.target.value))}
         />
@@ -663,11 +699,13 @@ function Paso4Lotes({
       <div className="nr-step-nav">
         <button className="nr-back-step-btn" onClick={onBack}>← Atrás</button>
         <Button
-          variant="primary" size="sm"
-          disabled={validos === 0} onClick={onNext}
+          variant="primary"
+          size="sm"
+          disabled={!todosCompletos}
+          onClick={onNext}
           iconRight="M9 18l6-6-6-6"
         >
-          Continuar ({validos}/{state.lotes.length})
+          Continuar ({completos}/{state.lotes.length})
         </Button>
       </div>
     </div>
