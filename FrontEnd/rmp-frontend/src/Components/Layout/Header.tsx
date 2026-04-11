@@ -170,26 +170,15 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
                 </div>
               </div>
 
-              {/* Mi perfil */}
-              <div className="header-dropdown-section">
-                <button
-                  className="header-dropdown-item"
-                  role="menuitem"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" className="header-dropdown-icon" aria-hidden="true">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" />
-                  </svg>
-                  Mi perfil
-                </button>
-              </div>
-
-              {/* Cerrar sesión */}
+              {/* Solo botón de cierre de sesión */}
               <div className="header-dropdown-section">
                 <button
                   className="header-dropdown-item header-dropdown-item-danger"
                   role="menuitem"
-                  onClick={() => { setMenuOpen(false); logout(); }}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    logout();
+                  }}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" className="header-dropdown-icon" aria-hidden="true">
                     <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" />

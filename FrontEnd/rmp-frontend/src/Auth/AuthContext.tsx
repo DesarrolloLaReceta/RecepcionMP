@@ -1,194 +1,130 @@
-/**
- * AuthContext.tsx — Interfaz unificada de autenticación.
- *
- * En DEV  (VITE_USE_MOCK_AUTH=true): MockAuthProvider (mockAuth.tsx) provee
- *                                    directamente a AuthContext — sin MSAL.
- * En PROD / staging:                 MsalAuthProvider usa Entra ID (Azure AD).
- *
- * Todos los componentes importan siempre desde este archivo:
- *   import { useAuth, AuthProvider, RoleGuard } from "../Auth/AuthContext"
- */
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { apiClient } from '../Services/apiClient';
 
-import React, {
-  createContext,
-  useContext,
-  useCallback,
-  useMemo,
-} from "react";
-import {
-  useMsal,
-  useIsAuthenticated,
-  useAccount,
-} from "@azure/msal-react";
-import {
-  InteractionRequiredAuthError,
-  type AccountInfo,
-} from "@azure/msal-browser";
-import { silentRequest, loginRequest, type AppRole } from "./msalConfig";
+// ─── TIPOS ────────────────────────────────────────────────────────────────────
 
-// ─── INTERFAZ DEL CONTEXTO ────────────────────────────────────────────────────
+export type AppRole = 
+  | "Administrador"
+  | "Calidad"
+  | "Auditor"
+  | "Compras"
+  | "RecepcionAlmacen";
 
-export interface AuthContextValue {
-  account:          AccountInfo | { name: string; username: string } | null;
-  isAuthenticated:  boolean;
-  isLoading:        boolean;
-  displayName:      string;
-  email:            string;
-  roles:            string[];
-  initials:         string;
-  hasRole:          (role: AppRole | AppRole[]) => boolean;
-  getAccessToken:   () => Promise<string>;
-  login:            () => Promise<void>;
-  logout:           () => void;
+interface User {
+  nombre: string;
+  perfil: AppRole;
 }
 
-/**
- * Contexto exportado para que MockAuthProvider pueda proveer
- * al mismo contexto sin duplicar la interfaz.
- */
-export const AuthContext = createContext<AuthContextValue | null>(null);
-
-// ─── HOOK PÚBLICO ─────────────────────────────────────────────────────────────
-
-/**
- * Hook principal de autenticación — funciona igual en dev (mock) y prod (MSAL).
- *
- * @throws Si se usa fuera de `<AuthProvider>` o `<MockAuthProvider>`.
- *
- * @example
- * const { displayName, roles, hasRole, logout } = useAuth();
- */
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error(
-      "useAuth debe usarse dentro de <AuthProvider> o <MockAuthProvider>"
-    );
-  }
-  return ctx;
+interface AuthContextValue {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  displayName: string;
+  email: string;
+  roles: AppRole[];
+  initials: string;
+  hasRole: (role: AppRole | AppRole[]) => boolean;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => void;
 }
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+// ─── CONTEXTO ─────────────────────────────────────────────────────────────────
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+// ─── HELPER ───────────────────────────────────────────────────────────────────
 
 function getInitials(name: string): string {
   return name
-    .split(" ")
+    .split(' ')
     .slice(0, 2)
     .map(n => n[0])
-    .join("")
+    .join('')
     .toUpperCase();
 }
 
-// ─── PROVIDER REAL (MSAL / Entra ID) ─────────────────────────────────────────
+// ─── PROVIDER ─────────────────────────────────────────────────────────────────
 
-function MsalAuthProvider({ children }: { children: React.ReactNode }) {
-  const { instance, inProgress } = useMsal();
-  const isAuthenticated           = useIsAuthenticated();
-  const account                   = useAccount(instance.getActiveAccount() ?? {});
-  const isLoading                 = inProgress !== "none";
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const roles: string[] = useMemo(() => {
-    const claims = account?.idTokenClaims as Record<string, unknown> | undefined;
-    const r      = claims?.["roles"];
-    return Array.isArray(r) ? (r as string[]) : [];
-  }, [account]);
-
-  const displayName = account?.name     ?? account?.username ?? "";
-  const email       = account?.username ?? "";
-  const initials    = getInitials(displayName);
-
-  const hasRole = useCallback(
-    (role: AppRole | AppRole[]) => {
-      const req = Array.isArray(role) ? role : [role];
-      return req.some(r => roles.includes(r));
-    },
-    [roles]
-  );
-
-  const getAccessToken = useCallback(async (): Promise<string> => {
-    const active = instance.getActiveAccount();
-    if (!active) throw new Error("No hay cuenta activa.");
-    try {
-      const res = await instance.acquireTokenSilent({
-        ...silentRequest,
-        account: active,
-      });
-      return res.accessToken;
-    } catch (err) {
-      if (err instanceof InteractionRequiredAuthError) {
-        const res = await instance.acquireTokenPopup({
-          ...loginRequest,
-          account: active,
-        });
-        return res.accessToken;
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    if (token && storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setUser({ nombre: parsed.nombre, perfil: parsed.perfil });
+      } catch (e) {
+        console.error('Error parsing stored user', e);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
       }
-      throw err;
     }
-  }, [instance]);
+    setIsLoading(false);
+  }, []);
 
-  const login = useCallback(async () => {
-    await instance.loginRedirect(loginRequest);
-  }, [instance]);
+  const login = useCallback(async (username: string, password: string) => {
+    const response = await apiClient.post('/api/auth/login', { username, password });
+    const { token, nombre, perfil } = response.data;
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify({ nombre, perfil }));
+    setUser({ nombre, perfil });
+  }, []);
 
   const logout = useCallback(() => {
-    instance.logoutRedirect({ postLogoutRedirectUri: window.location.origin });
-  }, [instance]);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  }, []);
 
-  // Establece la cuenta activa si aún no está definida
-  React.useEffect(() => {
-    const accounts = instance.getAllAccounts();
-    if (accounts.length > 0 && !instance.getActiveAccount()) {
-      instance.setActiveAccount(accounts[0]);
-    }
-  }, [instance]);
+  const hasRole = useCallback((role: AppRole | AppRole[]): boolean => {
+    if (!user?.perfil) return false;
+    const required = Array.isArray(role) ? role : [role];
+    return required.includes(user.perfil);
+  }, [user]);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        account,
-        isAuthenticated,
-        isLoading,
-        displayName,
-        email,
-        roles,
-        initials,
-        hasRole,
-        getAccessToken,
-        login,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-}
+  const displayName = user?.nombre || '';
+  const email = ''; // El backend no devuelve email por defecto; podrías agregarlo si lo tienes
+  const roles = user?.perfil ? [user.perfil] : [];
+  const initials = getInitials(displayName);
 
-// ─── PROVIDER EXPORTADO ───────────────────────────────────────────────────────
-// Usado en PRODUCCIÓN — main.tsx lo monta dentro de <MsalProvider>.
-// En desarrollo, main.tsx monta <MockAuthProvider> directamente.
+  const value: AuthContextValue = {
+    user,
+    isAuthenticated: !!user,
+    isLoading,
+    displayName,
+    email,
+    roles,
+    initials,
+    hasRole,
+    login,
+    logout,
+  };
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  return <MsalAuthProvider>{children}</MsalAuthProvider>;
-}
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
 
-// ─── ROLE GUARD ───────────────────────────────────────────────────────────────
+// ─── HOOK ─────────────────────────────────────────────────────────────────────
+
+export const useAuth = (): AuthContextValue => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+// ─── ROLE GUARD (opcional) ────────────────────────────────────────────────────
 
 interface RoleGuardProps {
-  roles:     AppRole | AppRole[];
+  roles: AppRole | AppRole[];
   fallback?: React.ReactNode;
-  children:  React.ReactNode;
+  children: React.ReactNode;
 }
 
-/**
- * Renderiza `children` solo si el usuario tiene al menos uno de los roles.
- * Útil para ocultar secciones de UI sin redirigir.
- *
- * @example
- * <RoleGuard roles={[AppRoles.Calidad, AppRoles.Administrador]}>
- *   <BotonLiberar />
- * </RoleGuard>
- */
-export function RoleGuard({ roles, fallback = null, children }: RoleGuardProps) {
+export const RoleGuard: React.FC<RoleGuardProps> = ({ roles, fallback = null, children }) => {
   const { hasRole } = useAuth();
   return hasRole(roles) ? <>{children}</> : <>{fallback}</>;
-}
+};

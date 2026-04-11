@@ -15,7 +15,6 @@ const today   = new Date().toISOString().slice(0, 10);
 const nowTime = new Date().toTimeString().slice(0, 5);
 const DEV_USER_ID = "a0000000-0000-0000-0000-000000000001";
 
-
 // ===== CONSTANTES LOCALES PARA ENUMS (coinciden con backend) =====
 
 const ESTADO_SENSORIAL = {
@@ -87,7 +86,7 @@ interface LoteForm {
   categoriaFrio:       boolean;
   temperaturaMinima?:  number;
   temperaturaMaxima?:  number;
-  unidadMedida:        string;   // ← viene de la OC
+  unidadMedida:        string;
   cantidadEsperada:    number;
   numeroLoteProveedor: string;
   fechaFabricacion:    string;
@@ -116,6 +115,7 @@ interface WizardState {
   obsInspeccion:          string;
   lotes:                  LoteForm[];
   documentos:             { tipo: TipoDocumento; archivo: File | null }[];
+  recepcionId: string | null;
 }
 
 function initWizard(): WizardState {
@@ -124,10 +124,12 @@ function initWizard(): WizardState {
     fechaRecepcion: today, horaLlegada: nowTime,
     placaVehiculo: "", nombreTransportista: "", observaciones: "",
     tempInicial: "",
-    temperaturaDentroRango: true, integridadEmpaque: true,
-    limpiezaVehiculo: true, oloresExtranos: false, plagasVisible: false,
-    documentosTransporteOk: true, obsInspeccion: "",
+    temperaturaDentroRango: false, integridadEmpaque: false,
+    limpiezaVehiculo: false, oloresExtranos: true, plagasVisible: true,
+    documentosTransporteOk: false,
+    obsInspeccion: "",
     lotes: [], documentos: [],
+    recepcionId: null,
   };
 }
 
@@ -218,14 +220,15 @@ function Toggle({
   );
 }
 
-// ── PASO 1: Seleccionar OC ────────────────────────────────────────────────────
+// ── PASO 1: Seleccionar OC (ahora con confirmación) ───────────────────────────
 
 function Paso1OC({
-  state, setState, onNext,
+  state, setState, onConfirm, loadingOC,
 }: {
   state: WizardState;
   setState: React.Dispatch<React.SetStateAction<WizardState>>;
-  onNext: () => void;
+  onConfirm: (oc: OrdenCompraResumen) => Promise<void>;
+  loadingOC: boolean;
 }) {
   const [query,   setQuery]   = useState("");
   const [ocs,     setOcs]     = useState<OrdenCompraResumen[]>([]);
@@ -321,7 +324,9 @@ function Paso1OC({
         <span />
         <Button
           variant="primary" size="sm"
-          disabled={!state.ocSeleccionada} onClick={onNext}
+          disabled={!state.ocSeleccionada || loadingOC}
+          onClick={() => onConfirm(state.ocSeleccionada!)}
+          loading={loadingOC}
           iconRight="M9 18l6-6-6-6"
         >
           Continuar
@@ -331,7 +336,7 @@ function Paso1OC({
   );
 }
 
-// ── PASO 2: Check-in ──────────────────────────────────────────────────────────
+// ── PASO 2: Check-in (sin cambios) ──────────────────────────────────────────
 
 function Paso2Checkin({
   state, setState, onNext, onBack,
@@ -401,7 +406,7 @@ function Paso2Checkin({
   );
 }
 
-// ── PASO 3: Inspección vehículo ───────────────────────────────────────────────
+// ── PASO 3: Inspección vehículo (sin cambios) ────────────────────────────────
 
 function Paso3Inspeccion({
   state, setState, onNext, onBack,
@@ -411,6 +416,7 @@ function Paso3Inspeccion({
   onNext: () => void; onBack: () => void;
 }) {
   const tieneCongelados = state.lotes.some(l => l.categoriaFrio);
+  const isValid = !tieneCongelados || (state.tempInicial.trim() !== "");
 
   const CHECKS: {
     key: keyof WizardState; label: string; sub: string; critical?: boolean;
@@ -434,9 +440,7 @@ function Paso3Inspeccion({
     <div className="nr-form-grid-1">
       <div>
         <h2 className="nr-step-title">Inspección del vehículo</h2>
-        <p className="nr-step-sub">
-          Checklist BPM — Res. 2674/2013.
-        </p>
+        <p className="nr-step-sub">Checklist BPM — Res. 2674/2013.</p>
       </div>
 
       {tieneCongelados && (
@@ -470,7 +474,7 @@ function Paso3Inspeccion({
               const val = key === "oloresExtranos" || key === "plagasVisible" ? !v : v;
               setState(p => ({ ...p, [key]: val }));
             }}
-            label={critical ? `⚡ ${label}` : label}
+            label={critical ? `${label}` : label}
             subLabel={sub}
           />
         ))}
@@ -486,7 +490,9 @@ function Paso3Inspeccion({
       <div className="nr-step-nav">
         <button className="nr-back-step-btn" onClick={onBack}>← Atrás</button>
         <Button
-          variant="primary" size="sm" onClick={onNext}
+          variant="primary" size="sm"
+          onClick={onNext}
+          disabled={!isValid}
           iconRight="M9 18l6-6-6-6"
         >
           Continuar
@@ -496,7 +502,7 @@ function Paso3Inspeccion({
   );
 }
 
-// ── PASO 4: Registro de lotes ─────────────────────────────────────────────────
+// ── PASO 4: Registro de lotes (sin cambios) ──────────────────────────────────
 
 function Paso4Lotes({
   state, setState, onNext, onBack,
@@ -514,10 +520,25 @@ function Paso4Lotes({
       return { ...p, lotes };
     });
 
-  const lote   = state.lotes[activeLote];
-  const validos = state.lotes.filter(
-    l => l.fechaVencimiento && Number(l.cantidadRecibida) > 0
-  ).length;
+  const lote = state.lotes[activeLote];
+
+  const isLoteCompleto = (lote: LoteForm): boolean => {
+    if (!lote.fechaVencimiento) return false;
+    const cantidad = Number(lote.cantidadRecibida);
+    if (isNaN(cantidad) || cantidad <= 0) return false;
+    if (lote.estadoSensorial === undefined) return false;
+    if (lote.estadoRotulado === undefined) return false;
+    if (lote.ubicacionDestino === undefined) return false;
+    if (lote.categoriaFrio) {
+      if (!lote.temperaturaMedida || lote.temperaturaMedida.trim() === "") return false;
+      const temp = Number(lote.temperaturaMedida);
+      if (isNaN(temp)) return false;
+    }
+    return true;
+  };
+
+  const completos = state.lotes.filter(isLoteCompleto).length;
+  const todosCompletos = completos === state.lotes.length;
 
   const sensorialOpts = Object.entries(ESTADO_SENSORIAL_LABELS).map(
     ([k, v]) => ({ value: k, label: v })
@@ -528,7 +549,6 @@ function Paso4Lotes({
   const ubicacionOpts = Object.entries(UBICACION_LABELS).map(
     ([k, v]) => ({ value: k, label: v })
   );
-
 
   const tempFuera = lote.categoriaFrio &&
     lote.temperaturaMedida !== "" && (
@@ -542,14 +562,13 @@ function Paso4Lotes({
         <h2 className="nr-step-title">Registro de lotes</h2>
         <p className="nr-step-sub">
           Completa los datos de cada ítem.{" "}
-          <em>{validos}/{state.lotes.length}</em> lotes completos.
+          <em>{completos}/{state.lotes.length}</em> lotes completos.
         </p>
       </div>
 
-      {/* Tabs de ítems */}
       <div className="nr-lote-tabs">
         {state.lotes.map((l, i) => {
-          const ok = l.fechaVencimiento && Number(l.cantidadRecibida) > 0;
+          const ok = isLoteCompleto(l);
           return (
             <button
               key={i} className="nr-lote-tab"
@@ -563,18 +582,21 @@ function Paso4Lotes({
         })}
       </div>
 
-      {/* Campos del lote activo */}
       <div className="nr-lote-body">
         <div className="nr-form-grid-2">
           <TextField
-            label="Lote proveedor" placeholder="Ej: LOT-20260101"
+            label="Lote proveedor"
+            placeholder="Ej: LOT-20260101"
             value={lote.numeroLoteProveedor}
             onChange={e => updLote(activeLote, "numeroLoteProveedor", e.target.value)}
           />
           <div className="nr-qty-wrap">
             <NumberField
-              label="Cantidad recibida" required placeholder="0"
-              min={0} step={0.01}
+              label="Cantidad recibida *"
+              required
+              placeholder="0"
+              min={0}
+              step={0.01}
               value={lote.cantidadRecibida}
               onChange={e => updLote(activeLote, "cantidadRecibida", e.target.value)}
             />
@@ -584,12 +606,15 @@ function Paso4Lotes({
 
         <div className="nr-form-grid-2">
           <DateField
-            label="Fecha fabricación" max={today}
+            label="Fecha fabricación"
+            max={today}
             value={lote.fechaFabricacion}
             onChange={e => updLote(activeLote, "fechaFabricacion", e.target.value)}
           />
           <DateField
-            label="Fecha vencimiento" required min={today}
+            label="Fecha vencimiento *"
+            required
+            min={today}
             value={lote.fechaVencimiento}
             onChange={e => updLote(activeLote, "fechaVencimiento", e.target.value)}
           />
@@ -599,7 +624,10 @@ function Paso4Lotes({
           <div>
             <div className="nr-qty-wrap">
               <NumberField
-                label="Temperatura medida (°C)" placeholder="Ej: 3.2" step={0.1}
+                label="Temperatura medida (°C) *"
+                required
+                placeholder="Ej: 3.2"
+                step={0.1}
                 value={lote.temperaturaMedida}
                 onChange={e => updLote(activeLote, "temperaturaMedida", e.target.value)}
               />
@@ -619,25 +647,27 @@ function Paso4Lotes({
 
         <div className="nr-form-grid-2">
           <SelectField
-            label="Estado sensorial" options={sensorialOpts}
+            label="Estado sensorial *"
+            options={sensorialOpts}
             value={String(lote.estadoSensorial)}
             onChange={e => updLote(activeLote, "estadoSensorial", Number(e.target.value))}
           />
           <SelectField
-            label="Estado de rotulado" options={rotuladoOpts}
+            label="Estado de rotulado *"
+            options={rotuladoOpts}
             value={String(lote.estadoRotulado)}
             onChange={e => updLote(activeLote, "estadoRotulado", Number(e.target.value))}
           />
         </div>
 
         <SelectField
-          label="Ubicación destino" options={ubicacionOpts}
+          label="Ubicación destino *"
+          options={ubicacionOpts}
           value={String(lote.ubicacionDestino)}
           onChange={e => updLote(activeLote, "ubicacionDestino", Number(e.target.value))}
         />
       </div>
 
-      {/* Nav entre lotes */}
       {state.lotes.length > 1 && (
         <div className="nr-lote-nav">
           <button
@@ -663,18 +693,20 @@ function Paso4Lotes({
       <div className="nr-step-nav">
         <button className="nr-back-step-btn" onClick={onBack}>← Atrás</button>
         <Button
-          variant="primary" size="sm"
-          disabled={validos === 0} onClick={onNext}
+          variant="primary"
+          size="sm"
+          disabled={!todosCompletos}
+          onClick={onNext}
           iconRight="M9 18l6-6-6-6"
         >
-          Continuar ({validos}/{state.lotes.length})
+          Continuar ({completos}/{state.lotes.length})
         </Button>
       </div>
     </div>
   );
 }
 
-// ── PASO 5: Documentos + confirmación ─────────────────────────────────────────
+// ── PASO 5: Documentos + confirmación (sin cambios) ──────────────────────────
 
 function Paso5Documentos({
   state, setState, onSubmit, submitting, onBack,
@@ -749,7 +781,6 @@ function Paso5Documentos({
         })}
       </div>
 
-      {/* Resumen final */}
       <div className="nr-summary">
         <p className="nr-summary-title">Resumen de la recepción</p>
         <div className="nr-summary-grid">
@@ -790,6 +821,27 @@ export default function NuevaRecepcionPage() {
   const [state,      setState]      = useState<WizardState>(initWizard);
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState<string | null>(null);
+  const [loadingOC,  setLoadingOC]  = useState(false);
+
+  // Crear la recepción al confirmar la OC
+  const handleConfirmOC = async (oc: OrdenCompraResumen) => {
+    setLoadingOC(true);
+    try {
+      const { id: recepcionId } = await recepcionesService.iniciar({
+        ordenCompraId: oc.id,
+        proveedorId: oc.proveedorId,
+        usuarioId: DEV_USER_ID,
+        observacionesGenerales: state.observaciones || undefined,
+      });
+      setState(prev => ({ ...prev, recepcionId }));
+      setStep(2);
+    } catch (err) {
+      console.error(err);
+      setError("No se pudo iniciar la recepción. Intenta de nuevo.");
+    } finally {
+      setLoadingOC(false);
+    }
+  };
 
   const handleSubmit = async () => {
     setSubmitting(true); setError(null);
@@ -800,17 +852,12 @@ export default function NuevaRecepcionPage() {
         return;
       }
 
-      const oc = state.ocSeleccionada!;
+      const recepcionId = state.recepcionId;
+      if (!recepcionId) {
+        throw new Error("No hay una recepción activa. Por favor, selecciona una OC nuevamente.");
+      }
 
-      // 1. Iniciar recepción (sin fecha/hora)
-      const { id: recepcionId } = await recepcionesService.iniciar({
-        ordenCompraId: oc.id,
-        proveedorId: oc.proveedorId,
-        usuarioId: DEV_USER_ID,
-        observacionesGenerales: state.observaciones || undefined,
-      });
-
-      // 2. Registrar inspección del vehículo
+      // 1. Registrar inspección del vehículo
       await recepcionesService.registrarInspeccionVehiculo(recepcionId, {
         temperaturaInicial: state.tempInicial ? Number(state.tempInicial) : undefined,
         temperaturaDentroRango: state.temperaturaDentroRango,
@@ -822,8 +869,9 @@ export default function NuevaRecepcionPage() {
         observaciones: state.obsInspeccion || undefined,
       });
 
-      // 3. Crear RecepcionItems para cada detalle de OC
-      const itemIds = new Map<string, string>(); // detalleOcId -> recepcionItemId
+      // 2. Crear RecepcionItems para cada detalle de OC
+      const oc = state.ocSeleccionada!;
+      const itemIds = new Map<string, string>();
       for (const detalle of oc.detalles) {
         const { id: itemId } = await recepcionesService.agregarItem(recepcionId, {
           detalleOrdenCompraId: detalle.id
@@ -831,7 +879,7 @@ export default function NuevaRecepcionPage() {
         itemIds.set(detalle.id, itemId);
       }
 
-      // 4. Registrar lotes asociados a cada RecepcionItem
+      // 3. Registrar lotes asociados a cada RecepcionItem
       for (const l of state.lotes) {
         if (!l.fechaVencimiento || Number(l.cantidadRecibida) <= 0) continue;
         const recepcionItemId = itemIds.get(l.detalleOcId);
@@ -849,7 +897,7 @@ export default function NuevaRecepcionPage() {
         });
       }
 
-      // 5. Subir documentos
+      // 4. Subir documentos
       for (const doc of state.documentos) {
         if (doc.archivo) {
           await recepcionesService.subirDocumento(recepcionId, doc.tipo, doc.archivo);
@@ -899,7 +947,12 @@ export default function NuevaRecepcionPage() {
 
       <div className="nr-card">
         {step === 1 && (
-          <Paso1OC {...stepProps} onNext={() => setStep(2)} />
+          <Paso1OC
+            state={state}
+            setState={setState}
+            onConfirm={handleConfirmOC}
+            loadingOC={loadingOC}
+          />
         )}
         {step === 2 && (
           <Paso2Checkin {...stepProps} onNext={() => setStep(3)} />

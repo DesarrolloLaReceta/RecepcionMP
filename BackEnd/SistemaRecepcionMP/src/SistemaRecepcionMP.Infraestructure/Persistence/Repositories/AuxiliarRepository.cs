@@ -183,17 +183,14 @@ public sealed class UsuarioRepository : GenericRepository<Usuario>, IUsuarioRepo
 {
     public UsuarioRepository(ApplicationDbContext context) : base(context) { }
 
-    public async Task<Usuario?> GetByEntraIdAsync(string entraId)
-        => await DbSet.FirstOrDefaultAsync(u => u.EntraId == entraId);
+    public async Task<Usuario?> GetByUsernameAsync(string username)
+    {
+        return await DbSet.FirstOrDefaultAsync(u => u.Username == username && u.Activo);
+    }
 
     public async Task<Usuario?> GetByEmailAsync(string email)
         => await DbSet.FirstOrDefaultAsync(u => u.Email == email);
 
-    public async Task<IEnumerable<Usuario>> GetByPerfilAsync(PerfilUsuario perfil)
-        => await DbSet
-            .Where(u => u.Perfil == perfil && u.Activo)
-            .OrderBy(u => u.Nombre)
-            .ToListAsync();
 }
 
 public sealed class BitacoraAuditoriaRepository : GenericRepository<BitacoraAuditoria>, IBitacoraAuditoriaRepository

@@ -1,19 +1,28 @@
 import { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../Auth/AuthContext";
-import { AppRoles } from "../../Auth/msalConfig";
 import { ROUTES } from "../../Constants/routes";
 import "./StylesLayout/Layout.css";
 
-// ─── ÍCONO SVG LOCAL ──────────────────────────────────────────────────────────
+// ─── DEFINICIÓN LOCAL DE ROLES (coincide con PerfilUsuario en backend) ──────
+const AppRoles = {
+  Administrador: "Administrador",
+  Calidad: "Calidad",
+  Auditor: "Auditor",
+  Compras: "Compras",
+  RecepcionAlmacen: "RecepcionAlmacen",
+} as const;
 
+type AppRole = typeof AppRoles[keyof typeof AppRoles];
+
+// ─── ÍCONO SVG LOCAL ──────────────────────────────────────────────────────────
 function Icon({ d, size = 16, className = "" }: { d: string; size?: number; className?: string }) {
   return (
     <svg
       width={size} height={size} viewBox="0 0 24 24"
       fill="none" stroke="currentColor"
       strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
-      className={`sidebar-nav-icon ${className}`}  // Usar className aquí
+      className={`sidebar-nav-icon ${className}`}
       aria-hidden="true"
     >
       {d.split(" M").map((seg, i) => (
@@ -24,7 +33,6 @@ function Icon({ d, size = 16, className = "" }: { d: string; size?: number; clas
 }
 
 // ─── ÍCONOS POR SECCIÓN ───────────────────────────────────────────────────────
-
 const ICONS: Record<string, string> = {
   dashboard:     "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10",
   recepciones:   "M5 3h14a2 2 0 012 2v3H3V5a2 2 0 012-2z M3 8h18v13a2 2 0 01-2 2H5a2 2 0 01-2-2V8z M8 8v2 M16 8v2",
@@ -38,12 +46,11 @@ const ICONS: Record<string, string> = {
 };
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
-
 interface NavItem {
   label: string;
   icon:  string;
   path:  string;
-  roles?: string[];
+  roles?: AppRole[];
 }
 
 interface NavGroup {
@@ -52,7 +59,6 @@ interface NavGroup {
 }
 
 // ─── MENÚ DE NAVEGACIÓN ───────────────────────────────────────────────────────
-
 const NAV_MENU: NavGroup[] = [
   {
     group: "Principal",
@@ -116,7 +122,6 @@ const NAV_MENU: NavGroup[] = [
 ];
 
 // ─── SIDEBAR ──────────────────────────────────────────────────────────────────
-
 interface SidebarProps {
   open:    boolean;
   onClose: () => void;
@@ -130,21 +135,18 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
     if (mq.matches) onClose();
-  }, [location.pathname]);
+  }, [location.pathname, onClose]);
 
   const canSee = (item: NavItem) =>
-    !item.roles || hasRole(item.roles as any);
+    !item.roles || item.roles.some(role => hasRole(role));
 
   return (
     <aside
       className="app-sidebar"
-        data-open={open}
-        inert={!open}
+      data-open={open}
+      inert={!open}
     >
-      {/* Wrapper con ancho fijo — evita que el contenido se comprima al animar */}
       <div className="sidebar-inner">
-
-        {/* ── Navegación ── */}
         <nav className="sidebar-nav" aria-label="Navegación principal">
           {NAV_MENU.map(group => {
             const visibleItems = group.items.filter(canSee);
@@ -152,9 +154,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
             return (
               <div key={group.group} className="sidebar-group">
-
                 <p className="sidebar-group-label">{group.group}</p>
-
                 {visibleItems.map(item => {
                   const isActive =
                     location.pathname === item.path ||
@@ -169,33 +169,22 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                       data-active={isActive || undefined}
                       aria-current={isActive ? "page" : undefined}
                     >
-                      {/* Barra indicadora — solo visible cuando está activo */}
                       {isActive && (
                         <span
                           className="sidebar-nav-indicator"
                           aria-hidden="true"
                         />
                       )}
-
-                      <Icon
-                        d={ICONS[item.icon]}
-                        size={16}
-                        className="sidebar-nav-icon"
-                      />
-
-                      <span className="sidebar-nav-label">
-                        {item.label}
-                      </span>
+                      <Icon d={ICONS[item.icon]} size={16} className="sidebar-nav-icon" />
+                      <span className="sidebar-nav-label">{item.label}</span>
                     </NavLink>
                   );
                 })}
-
               </div>
             );
           })}
         </nav>
 
-        {/* ── Perfil activo ── */}
         <div className="sidebar-profile">
           <p className="sidebar-profile-label">Perfil activo</p>
           <div className="sidebar-profile-roles">
@@ -204,7 +193,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             ))}
           </div>
         </div>
-
       </div>
     </aside>
   );

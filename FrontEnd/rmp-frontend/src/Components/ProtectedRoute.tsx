@@ -1,17 +1,20 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../Auth/AuthContext";
-import { type AppRole } from "../Auth/msalConfig";
 import { ROUTES } from "../Constants/routes";
 import { Spinner } from "./UI/Index";
 import "./ProtectedRoute.css";
 
-// ─── TIPOS ────────────────────────────────────────────────────────────────────
+// ─── Definición local de roles (coincide con PerfilUsuario en backend) ───────
+export type AppRole = 
+  | "Administrador"
+  | "Calidad"
+  | "Auditor"
+  | "Compras"
+  | "RecepcionAlmacen";
 
 interface ProtectedRouteProps {
   requiredRoles?: AppRole | AppRole[];
 }
-
-// ─── PROTECTED ROUTE ──────────────────────────────────────────────────────────
 
 /**
  * Guard de ruta que verifica autenticación y roles.
@@ -20,21 +23,17 @@ interface ProtectedRouteProps {
  * - Sin autenticación: redirige a LOGIN.
  * - Sin rol requerido: redirige a SIN_ACCESO con contexto de estado.
  * - Con permisos: renderiza el <Outlet />.
- *
- * @example
- * // Sin restricción de rol
- * <Route element={<ProtectedRoute />}>
- *   <Route path="/" element={<Dashboard />} />
- * </Route>
- *
- * // Con roles requeridos
- * <Route element={<ProtectedRoute requiredRoles={[AppRoles.Calidad, AppRoles.Administrador]} />}>
- *   <Route path="/liberacion" element={<LiberacionPage />} />
- * </Route>
  */
 export function ProtectedRoute({ requiredRoles }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, hasRole } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
+
+  // Función auxiliar para verificar roles
+  const hasRole = (roles: AppRole | AppRole[]): boolean => {
+    if (!user?.perfil) return false;
+    const required = Array.isArray(roles) ? roles : [roles];
+    return required.includes(user.perfil as AppRole);
+  };
 
   // ── Verificando sesión ───────────────────────────────────────────────────
   if (isLoading) {
@@ -61,12 +60,11 @@ export function ProtectedRoute({ requiredRoles }: ProtectedRouteProps) {
 
   // ── Sin rol requerido → Sin acceso ──────────────────────────────────────
   if (requiredRoles && !hasRole(requiredRoles)) {
-    const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
     return (
       <Navigate
         to={ROUTES.SIN_ACCESO}
         replace
-        state={{ requiredRoles: roles, from: location.pathname }}
+        state={{ requiredRoles, from: location.pathname }}
       />
     );
   }

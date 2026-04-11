@@ -4,9 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using SistemaRecepcionMP.Infraestructure.Persistence;
 using SistemaRecepcionMP.Application;
 using SistemaRecepcionMP.Infraestructure;
-using Microsoft.AspNetCore.Authentication;
 using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 using SistemaRecepcionMP.Infraestructure.Persistence.Repositories;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,18 +28,33 @@ builder.Services.AddScoped<ICheckListBPMRepository, CheckListBPMRepository>();
 builder.Services.AddScoped<INoConformidadRepository, NoConformidadRepository>();
 builder.Services.AddScoped<ITemperaturaRegistroRepository, TemperaturaRegistroRepository>();
 builder.Services.AddScoped<IBitacoraAuditoriaRepository, BitacoraAuditoriaRepository>();
+builder.Services.AddScoped<ILDAPAuthRepository, LDAPAuthRepository>();
+builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 
-// ─── Autenticación ─────────────────────────────────────────────────────────
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddAuthentication("DevAuth")
-        .AddScheme<AuthenticationSchemeOptions, DevAuthHandler>("DevAuth", null);
-}
-else
-{
-    builder.Services.AddAuthentication();
-}
+// ─── Autenticación JWT (único esquema) ─────────────────────────────────────
+var jwtKey = builder.Configuration["Jwt:Key"] 
+    ?? throw new InvalidOperationException("JWT Key no configurada. Use 'Jwt:Key' en appsettings o User Secrets.");
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+});
+
+// ─── Configuración de CORS ──────────────────────────────────────────────────
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Dev", policy =>
@@ -60,23 +77,19 @@ if (app.Environment.IsDevelopment())
     await DataSeeder.SeedAsync(db);
 }
 
-// ─── Pipeline HTTP — el orden importa ────────────────────────────────────────
-
-// 1. Manejo global de excepciones — siempre primero para capturar todo
+// ─── Pipeline HTTP ────────────────────────────────────────────────────────────
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// 2. Swagger — solo en Development (ahora en /swagger)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "Recepción MP v1");
-        options.RoutePrefix = "swagger"; // ← Swagger en /swagger, no en la raíz
+        options.RoutePrefix = "swagger";
     });
 }
 
-// 3. Servir archivos estáticos desde wwwroot (donde está el frontend)
 var wwwrootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -84,25 +97,12 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = ""
 });
 
-// 4. HTTPS redirect
 app.UseHttpsRedirection();
-
-// 5. CORS — antes de autenticación
 app.UseCors("Dev");
-
-// 6. Autenticación JWT
 app.UseAuthentication();
-
-// 7. Middleware que resuelve el usuario local desde la BD
-app.UseMiddleware<ResolverUsuarioLocalMiddleware>();
-
-// 8. Autorización
 app.UseAuthorization();
 
-// 9. Controllers
 app.MapControllers();
-
-// 10. Fallback SPA: cualquier ruta no encontrada sirve index.html
 app.MapFallbackToFile("index.html");
 
 await app.RunAsync();

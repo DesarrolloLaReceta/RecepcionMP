@@ -1,6 +1,4 @@
 using SistemaRecepcionMP.API.Filters;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 
 namespace SistemaRecepcionMP.API;
@@ -12,20 +10,13 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // ── Controllers ───────────────────────────────────────────────────────
-        // El Filter se registra globalmente — se aplica a todos los Controllers
-        // sin necesidad de decorar cada uno con [ApiExceptionFilter]
         services.AddControllers(options =>
             options.Filters.Add<ApiExceptionFilterAttribute>());
 
-        // ── Autenticación Azure AD (Microsoft Entra ID) ───────────────────────
-        // Valida el JWT Bearer token emitido por Azure AD.
-        // Requiere el paquete: Microsoft.Identity.Web
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
+        // ── Autenticación JWT (ya no se configura aquí, se hace en Program.cs) ──
+        // Eliminada la configuración de Azure AD
 
         // ── Autorización ──────────────────────────────────────────────────────
-        // Políticas por perfil de usuario — el perfil viene de la BD local,
-        // no de los roles de Azure AD.
         services.AddAuthorization(options =>
         {
             options.AddPolicy("Administrador", policy =>
@@ -75,7 +66,7 @@ public static class DependencyInjection
                 Scheme = "bearer",
                 BearerFormat = "JWT",
                 In = ParameterLocation.Header,
-                Description = "Token JWT de Azure AD. Ejemplo: Bearer {token}"
+                Description = "Token JWT generado por el sistema. Ejemplo: Bearer {token}"
             };
 
             options.AddSecurityDefinition("Bearer", securityScheme);
@@ -96,7 +87,6 @@ public static class DependencyInjection
         });
 
         // ── HttpContextAccessor ───────────────────────────────────────────────
-        // Requerido por CurrentUserService para leer el ClaimsPrincipal
         services.AddHttpContextAccessor();
 
         return services;
