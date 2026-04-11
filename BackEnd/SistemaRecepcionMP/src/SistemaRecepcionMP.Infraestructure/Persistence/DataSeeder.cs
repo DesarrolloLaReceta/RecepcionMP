@@ -19,7 +19,7 @@ public static class DataSeeder
                 Id       = devUserId,
                 Nombre   = "Dev User",
                 Email    = "dev@empresa.com",
-                EntraId  = "dev-entra-id-001",
+                Username  = "userdev",
                 Perfil   = PerfilUsuario.Administrador,
                 Activo   = true,
                 CreadoEn = DateTime.UtcNow,

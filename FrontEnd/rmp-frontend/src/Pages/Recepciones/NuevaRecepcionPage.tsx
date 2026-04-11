@@ -15,7 +15,6 @@ const today   = new Date().toISOString().slice(0, 10);
 const nowTime = new Date().toTimeString().slice(0, 5);
 const DEV_USER_ID = "a0000000-0000-0000-0000-000000000001";
 
-
 // ===== CONSTANTES LOCALES PARA ENUMS (coinciden con backend) =====
 
 const ESTADO_SENSORIAL = {
@@ -87,7 +86,7 @@ interface LoteForm {
   categoriaFrio:       boolean;
   temperaturaMinima?:  number;
   temperaturaMaxima?:  number;
-  unidadMedida:        string;   // ← viene de la OC
+  unidadMedida:        string;
   cantidadEsperada:    number;
   numeroLoteProveedor: string;
   fechaFabricacion:    string;
@@ -116,6 +115,7 @@ interface WizardState {
   obsInspeccion:          string;
   lotes:                  LoteForm[];
   documentos:             { tipo: TipoDocumento; archivo: File | null }[];
+  recepcionId: string | null;
 }
 
 function initWizard(): WizardState {
@@ -129,6 +129,7 @@ function initWizard(): WizardState {
     documentosTransporteOk: false,
     obsInspeccion: "",
     lotes: [], documentos: [],
+    recepcionId: null,
   };
 }
 
@@ -219,14 +220,15 @@ function Toggle({
   );
 }
 
-// ── PASO 1: Seleccionar OC ────────────────────────────────────────────────────
+// ── PASO 1: Seleccionar OC (ahora con confirmación) ───────────────────────────
 
 function Paso1OC({
-  state, setState, onNext,
+  state, setState, onConfirm, loadingOC,
 }: {
   state: WizardState;
   setState: React.Dispatch<React.SetStateAction<WizardState>>;
-  onNext: () => void;
+  onConfirm: (oc: OrdenCompraResumen) => Promise<void>;
+  loadingOC: boolean;
 }) {
   const [query,   setQuery]   = useState("");
   const [ocs,     setOcs]     = useState<OrdenCompraResumen[]>([]);
@@ -322,7 +324,9 @@ function Paso1OC({
         <span />
         <Button
           variant="primary" size="sm"
-          disabled={!state.ocSeleccionada} onClick={onNext}
+          disabled={!state.ocSeleccionada || loadingOC}
+          onClick={() => onConfirm(state.ocSeleccionada!)}
+          loading={loadingOC}
           iconRight="M9 18l6-6-6-6"
         >
           Continuar
@@ -332,7 +336,7 @@ function Paso1OC({
   );
 }
 
-// ── PASO 2: Check-in ──────────────────────────────────────────────────────────
+// ── PASO 2: Check-in (sin cambios) ──────────────────────────────────────────
 
 function Paso2Checkin({
   state, setState, onNext, onBack,
@@ -402,7 +406,7 @@ function Paso2Checkin({
   );
 }
 
-// ── PASO 3: Inspección vehículo ───────────────────────────────────────────────
+// ── PASO 3: Inspección vehículo (sin cambios) ────────────────────────────────
 
 function Paso3Inspeccion({
   state, setState, onNext, onBack,
@@ -412,8 +416,6 @@ function Paso3Inspeccion({
   onNext: () => void; onBack: () => void;
 }) {
   const tieneCongelados = state.lotes.some(l => l.categoriaFrio);
-
-  // Validación: si requiere cadena de frío, la temperatura inicial no puede estar vacía
   const isValid = !tieneCongelados || (state.tempInicial.trim() !== "");
 
   const CHECKS: {
@@ -500,7 +502,7 @@ function Paso3Inspeccion({
   );
 }
 
-// ── PASO 4: Registro de lotes ─────────────────────────────────────────────────
+// ── PASO 4: Registro de lotes (sin cambios) ──────────────────────────────────
 
 function Paso4Lotes({
   state, setState, onNext, onBack,
@@ -520,23 +522,18 @@ function Paso4Lotes({
 
   const lote = state.lotes[activeLote];
 
-  // Función que determina si un lote está completamente diligenciado
   const isLoteCompleto = (lote: LoteForm): boolean => {
-    // Campos siempre obligatorios
     if (!lote.fechaVencimiento) return false;
     const cantidad = Number(lote.cantidadRecibida);
     if (isNaN(cantidad) || cantidad <= 0) return false;
     if (lote.estadoSensorial === undefined) return false;
     if (lote.estadoRotulado === undefined) return false;
     if (lote.ubicacionDestino === undefined) return false;
-
-    // Si requiere cadena de frío, la temperatura medida es obligatoria
     if (lote.categoriaFrio) {
       if (!lote.temperaturaMedida || lote.temperaturaMedida.trim() === "") return false;
       const temp = Number(lote.temperaturaMedida);
       if (isNaN(temp)) return false;
     }
-
     return true;
   };
 
@@ -569,7 +566,6 @@ function Paso4Lotes({
         </p>
       </div>
 
-      {/* Tabs de ítems */}
       <div className="nr-lote-tabs">
         {state.lotes.map((l, i) => {
           const ok = isLoteCompleto(l);
@@ -586,7 +582,6 @@ function Paso4Lotes({
         })}
       </div>
 
-      {/* Campos del lote activo */}
       <div className="nr-lote-body">
         <div className="nr-form-grid-2">
           <TextField
@@ -673,7 +668,6 @@ function Paso4Lotes({
         />
       </div>
 
-      {/* Nav entre lotes */}
       {state.lotes.length > 1 && (
         <div className="nr-lote-nav">
           <button
@@ -712,7 +706,7 @@ function Paso4Lotes({
   );
 }
 
-// ── PASO 5: Documentos + confirmación ─────────────────────────────────────────
+// ── PASO 5: Documentos + confirmación (sin cambios) ──────────────────────────
 
 function Paso5Documentos({
   state, setState, onSubmit, submitting, onBack,
@@ -787,7 +781,6 @@ function Paso5Documentos({
         })}
       </div>
 
-      {/* Resumen final */}
       <div className="nr-summary">
         <p className="nr-summary-title">Resumen de la recepción</p>
         <div className="nr-summary-grid">
@@ -828,6 +821,27 @@ export default function NuevaRecepcionPage() {
   const [state,      setState]      = useState<WizardState>(initWizard);
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState<string | null>(null);
+  const [loadingOC,  setLoadingOC]  = useState(false);
+
+  // Crear la recepción al confirmar la OC
+  const handleConfirmOC = async (oc: OrdenCompraResumen) => {
+    setLoadingOC(true);
+    try {
+      const { id: recepcionId } = await recepcionesService.iniciar({
+        ordenCompraId: oc.id,
+        proveedorId: oc.proveedorId,
+        usuarioId: DEV_USER_ID,
+        observacionesGenerales: state.observaciones || undefined,
+      });
+      setState(prev => ({ ...prev, recepcionId }));
+      setStep(2);
+    } catch (err) {
+      console.error(err);
+      setError("No se pudo iniciar la recepción. Intenta de nuevo.");
+    } finally {
+      setLoadingOC(false);
+    }
+  };
 
   const handleSubmit = async () => {
     setSubmitting(true); setError(null);
@@ -838,17 +852,12 @@ export default function NuevaRecepcionPage() {
         return;
       }
 
-      const oc = state.ocSeleccionada!;
+      const recepcionId = state.recepcionId;
+      if (!recepcionId) {
+        throw new Error("No hay una recepción activa. Por favor, selecciona una OC nuevamente.");
+      }
 
-      // 1. Iniciar recepción (sin fecha/hora)
-      const { id: recepcionId } = await recepcionesService.iniciar({
-        ordenCompraId: oc.id,
-        proveedorId: oc.proveedorId,
-        usuarioId: DEV_USER_ID,
-        observacionesGenerales: state.observaciones || undefined,
-      });
-
-      // 2. Registrar inspección del vehículo
+      // 1. Registrar inspección del vehículo
       await recepcionesService.registrarInspeccionVehiculo(recepcionId, {
         temperaturaInicial: state.tempInicial ? Number(state.tempInicial) : undefined,
         temperaturaDentroRango: state.temperaturaDentroRango,
@@ -860,8 +869,9 @@ export default function NuevaRecepcionPage() {
         observaciones: state.obsInspeccion || undefined,
       });
 
-      // 3. Crear RecepcionItems para cada detalle de OC
-      const itemIds = new Map<string, string>(); // detalleOcId -> recepcionItemId
+      // 2. Crear RecepcionItems para cada detalle de OC
+      const oc = state.ocSeleccionada!;
+      const itemIds = new Map<string, string>();
       for (const detalle of oc.detalles) {
         const { id: itemId } = await recepcionesService.agregarItem(recepcionId, {
           detalleOrdenCompraId: detalle.id
@@ -869,7 +879,7 @@ export default function NuevaRecepcionPage() {
         itemIds.set(detalle.id, itemId);
       }
 
-      // 4. Registrar lotes asociados a cada RecepcionItem
+      // 3. Registrar lotes asociados a cada RecepcionItem
       for (const l of state.lotes) {
         if (!l.fechaVencimiento || Number(l.cantidadRecibida) <= 0) continue;
         const recepcionItemId = itemIds.get(l.detalleOcId);
@@ -887,7 +897,7 @@ export default function NuevaRecepcionPage() {
         });
       }
 
-      // 5. Subir documentos
+      // 4. Subir documentos
       for (const doc of state.documentos) {
         if (doc.archivo) {
           await recepcionesService.subirDocumento(recepcionId, doc.tipo, doc.archivo);
@@ -937,7 +947,12 @@ export default function NuevaRecepcionPage() {
 
       <div className="nr-card">
         {step === 1 && (
-          <Paso1OC {...stepProps} onNext={() => setStep(2)} />
+          <Paso1OC
+            state={state}
+            setState={setState}
+            onConfirm={handleConfirmOC}
+            loadingOC={loadingOC}
+          />
         )}
         {step === 2 && (
           <Paso2Checkin {...stepProps} onNext={() => setStep(3)} />
