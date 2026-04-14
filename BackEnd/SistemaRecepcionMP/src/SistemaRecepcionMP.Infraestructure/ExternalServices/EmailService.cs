@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
-namespace Infrastructure.ExternalServices;
+namespace SistemaRecepcionMP.Infrastructure.ExternalServices;
 
 /// <summary>
 /// Implementa IEmailService usando SendGrid.

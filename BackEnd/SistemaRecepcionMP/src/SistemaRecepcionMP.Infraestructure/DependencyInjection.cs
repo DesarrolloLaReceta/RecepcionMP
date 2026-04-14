@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Infrastructure.Identity;
-using SistemaRecepcionMP.Infrastructure.ExternalServices;
+using SistemaRecepcionMP.Infrastructure.Services;
 using SistemaRecepcionMP.Infraestructure.Persistence.Repositories;
 using SistemaRecepcionMP.Infraestructure.Persistence;
 using SistemaRecepcionMP.Domain.Interfaces.Repositories;

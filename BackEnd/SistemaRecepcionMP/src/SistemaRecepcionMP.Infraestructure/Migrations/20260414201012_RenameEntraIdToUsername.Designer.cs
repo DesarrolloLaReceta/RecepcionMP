@@ -12,8 +12,8 @@ using SistemaRecepcionMP.Infraestructure.Persistence;
 namespace SistemaRecepcionMP.Infraestructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260410151153_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260414201012_RenameEntraIdToUsername")]
+    partial class RenameEntraIdToUsername
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
