@@ -2,6 +2,7 @@ using SistemaRecepcionMP.Application.Common.Exceptions;
 using SistemaRecepcionMP.Domain.Entities;
 using SistemaRecepcionMP.Domain.Interfaces;
 using SistemaRecepcionMP.Domain.ValueObjects;
+using SistemaRecepcionMP.Application.Common.Interfaces;
 using MediatR;
 
 namespace SistemaRecepcionMP.Application.Features.Items.Commands.CrearItem;
@@ -9,10 +10,12 @@ namespace SistemaRecepcionMP.Application.Features.Items.Commands.CrearItem;
 public sealed class CrearItemCommandHandler : IRequestHandler<CrearItemCommand, Guid>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTime _dateTime;
 
-    public CrearItemCommandHandler(IUnitOfWork unitOfWork)
+    public CrearItemCommandHandler(IUnitOfWork unitOfWork, IDateTime dateTime)
     {
         _unitOfWork = unitOfWork;
+        _dateTime = dateTime;
     }
 
     public async Task<Guid> Handle(
@@ -41,7 +44,7 @@ public sealed class CrearItemCommandHandler : IRequestHandler<CrearItemCommand, 
             RangoTemperatura = rangoTemperatura,
             RequiereLoteProveedor = request.RequiereLoteProveedor,
             Estado = true,
-            CreadoEn = DateTime.UtcNow
+            CreadoEn = _dateTime.Now
         };
 
         await _unitOfWork.Items.AddAsync(item);

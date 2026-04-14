@@ -53,6 +53,10 @@ public static class DependencyInjection
         // ── Servicios externos ────────────────────────────────────────────────
         services.AddScoped<IQrCodeService, QrCodeService>();
         services.AddScoped<IEmailService, EmailService>();
+
+        // Agregamos el servicio de fecha para Colombia
+        services.AddTransient<IDateTime, DateTimeService>();
+
         services.AddScoped<IRecepcionRepository, RecepcionRepository>();
         
         return services;
