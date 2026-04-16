@@ -72,10 +72,22 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await db.Database.MigrateAsync();
-    await DataSeeder.SeedAsync(db);
-}
+    try 
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await db.Database.MigrateAsync();
+    
+    
+        // Intentamos sembrar datos, pero si falla, que no mate la app
+        await DataSeeder.SeedAsync(db);
+        Console.WriteLine("✅ Base de datos sincronizada y datos base cargados.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("❌ Error durante la migración o el seeding:");
+        Console.WriteLine(ex.Message);
+    }
+}    
 
 // ─── Pipeline HTTP ────────────────────────────────────────────────────────────
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -90,12 +102,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-var wwwrootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwrootPath),
-    RequestPath = ""
-});
+
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 app.UseCors("Dev");
@@ -103,6 +111,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapFallbackToFile("index.html");
+//app.MapFallbackToFile("index.html");
 
 await app.RunAsync();

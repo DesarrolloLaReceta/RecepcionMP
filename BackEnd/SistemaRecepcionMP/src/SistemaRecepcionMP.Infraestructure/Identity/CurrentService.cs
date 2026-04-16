@@ -24,7 +24,7 @@ public sealed class CurrentUserService : ICurrentUserService
 
     private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
 
-    /// <summary>GUID del usuario en la tabla Usuarios local (no el EntraId).</summary>
+    /// <summary>GUID del usuario en la tabla Usuarios local (mapeado a Username).</summary>
     public Guid UserId
     {
         get

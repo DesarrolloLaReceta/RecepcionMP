@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SistemaRecepcionMP.Infraestructure.Migrations
 {
     /// <inheritdoc />
-    public partial class RenameEntraIdToUsername : Migration
+    public partial class Inicial_Sincronizada : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
+            /*migrationBuilder.CreateTable(
                 name: "CategoriasItem",
                 columns: table => new
                 {
@@ -1079,13 +1079,13 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_TiposDocumentoExigidoCategoria_CategoriaId",
                 table: "TiposDocumentoExigidoCategoria",
-                column: "CategoriaId");
+                column: "CategoriaId");*/
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
+            /*migrationBuilder.DropTable(
                 name: "AccionesCorrectivas");
 
             migrationBuilder.DropTable(
@@ -1161,7 +1161,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 name: "Proveedores");
 
             migrationBuilder.DropTable(
-                name: "Usuarios");
+                name: "Usuarios");*/
         }
     }
 }
