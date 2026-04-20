@@ -41,158 +41,474 @@
   background: none; border: none; cursor: pointer; text-decoration: underline; flex-shrink: 0;
 }
 
-/* ── BARRA DE FILTROS ── */
+/* ── BARRA DE FILTROS (EDICIÓN LA RECETA) ── */
 .rp-filters {
-  display: flex; align-items: center; gap: 0.625rem; flex-wrap: wrap; flex-shrink: 0;
+  display: flex; 
+  align-items: center; 
+  gap: 0.625rem; 
+  flex-wrap: wrap; 
+  flex-shrink: 0;
 }
-.rp-search-wrap { position: relative; flex: 1; min-width: 200px; }
+
+.rp-search-wrap { 
+  position: relative; 
+  flex: 1; 
+  min-width: 200px; 
+}
+
 .rp-search-icon {
-  position: absolute; left: 0.75rem; top: 50%;
-  transform: translateY(-50%); pointer-events: none;
+  position: absolute; 
+  left: 0.75rem; 
+  top: 50%;
+  transform: translateY(-50%); 
+  pointer-events: none;
+  stroke: #a3938d; /* Café suave */
 }
+
 .rp-search-clear {
-  position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
-  background: none; border: none; cursor: pointer;
-  color: var(--text-muted); display: flex; align-items: center;
+  position: absolute; 
+  right: 0.75rem; 
+  top: 50%; 
+  transform: translateY(-50%);
+  background: none; 
+  border: none; 
+  cursor: pointer;
+  color: var(--text-muted); 
+  display: flex; 
+  align-items: center;
   transition: color var(--transition-fast);
 }
-.rp-search-clear:hover { color: var(--text-secondary); }
+
+.rp-search-clear:hover { 
+  color: #df6129; /* Naranja al pasar el mouse */
+}
+
+/* Input de búsqueda principal */
 .rp-input {
-  width: 100%; padding: 0.625rem 2.25rem;
-  border-radius: var(--radius-lg); font-size: var(--text-sm); outline: none;
-  background: var(--sidebar-bg); border:     1px solid var(--dark-border); color: #CBD5E1;
-  transition: border-color var(--transition-fast);
+  width: 100%; 
+  padding: 0.625rem 2.25rem;
+  border-radius: var(--radius-lg); 
+  font-size: var(--text-sm); 
+  outline: none;
+  /* Fondo café muy oscuro para que resalte el texto crema */
+  background: #2a1a14; 
+  border: 1px solid #3d2b24; 
+  color: #fdfbf7; 
+  transition: all var(--transition-fast);
 }
-.rp-input:focus { border-color: rgba(245,158,11,0.30); }
+
+.rp-input:focus { 
+  border-color: #df6129; /* Brillo naranja de la marca */
+  box-shadow: 0 0 0 3px rgba(223, 97, 41, 0.15);
+}
+
+/* Selectores de categoría */
 .rp-select {
-  padding: 0.625rem 0.875rem; border-radius: var(--radius-lg);
-  font-size: var(--text-sm); font-family: var(--font-mono); outline: none;
-  background: var(--dark-bg);  border: 1px solid var(--dark-border); color: #CBD5E1;
-  cursor: pointer; transition: border-color var(--transition-fast);
+  padding: 0.625rem 0.875rem; 
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm); 
+  font-family: var(--font-mono); 
+  outline: none;
+  background: #21140f; 
+  border: 1px solid #3d2b24; 
+  color: #fdfbf7;
+  cursor: pointer; 
+  transition: all var(--transition-fast);
 }
-.rp-select:focus { border-color: rgba(245,158,11,0.30); }
-.rp-select[data-empty="true"] { color: var(--text-muted); }
-.rp-select option { background: var(--sidebar-bg); color: #CBD5E1; }
+
+.rp-select:focus { 
+  border-color: #df6129; 
+}
+
+.rp-select[data-empty="true"] { 
+  color: #a3938d; 
+}
+
+.rp-select option { 
+  background: #2a1a14; 
+  color: #fdfbf7; 
+}
+
+/* Botón de actualizar */
 .rp-refresh-btn {
-  width: 2.5rem; height: 2.5rem; border-radius: var(--radius-lg); flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--sidebar-bg-item); border: 1px solid var(--dark-border); cursor: pointer;
-  transition: background var(--transition-fast);
+  width: 2.5rem; 
+  height: 2.5rem; 
+  border-radius: var(--radius-lg); 
+  flex-shrink: 0;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  background: #3d2b24; /* Café medio */
+  border: 1px solid #4a372f; 
+  color: #fdfbf7;
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
-.rp-refresh-btn:hover:not(:disabled) { background: var(--sidebar-bg-row-hover); }
-.rp-refresh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.rp-refresh-icon { transition: transform 0.4s; }
-.rp-refresh-icon[data-spinning="true"] { animation: spin 0.7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── CHIPS DE ESTADO ── */
+.rp-refresh-btn:hover:not(:disabled) { 
+  background: #df6129; /* Se vuelve naranja al hover */
+  border-color: #df6129;
+}
+
+.rp-refresh-btn:disabled { 
+  opacity: 0.3; 
+  cursor: not-allowed; 
+}
+
+.rp-refresh-icon { 
+  transition: transform 0.4s; 
+  stroke: currentColor;
+}
+
+.rp-refresh-icon[data-spinning="true"] { 
+  animation: spin 0.7s linear infinite; 
+}
+
+@keyframes spin { 
+  to { transform: rotate(360deg); } 
+}
+
+/* ── CHIPS DE ESTADO (EDICIÓN LA RECETA) ── */
 .rp-chips-row {
-  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; flex-shrink: 0;
+  display: flex; 
+  align-items: center; 
+  gap: 0.75rem; 
+  flex-wrap: wrap; 
+  flex-shrink: 0;
+  padding: 0.25rem 0;
 }
-.rp-count {
-  font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-tertiary);
-}
-.rp-clear-btn {
-  font-size: var(--text-xs); font-family: var(--font-mono); color: var(--primary);
-  background: none; border: none; cursor: pointer;
-  transition: opacity var(--transition-fast);
-}
-.rp-clear-btn:hover { opacity: 0.7; }
-.rp-chips { display: flex; gap: 0.375rem; flex-wrap: wrap; margin-left: auto; }
-.rp-chip {
-  display: inline-flex; align-items: center; gap: 0.375rem;
-  padding: 0.25rem 0.625rem; border-radius: var(--radius-md);
-  font-size: var(--text-xs); font-family: var(--font-mono); cursor: pointer;
-  border: none; transition: opacity var(--transition-fast);
-}
-.rp-chip[data-dimmed="true"] { opacity: 0.35; }
-.rp-chip-dot { width: 0.375rem; height: 0.375rem; border-radius: var(--radius-full); flex-shrink: 0; }
 
-/* ── TABLA ── */
+.rp-count {
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono); 
+  /* Color café suave para que no compita con los datos */
+  color: #a3938d; 
+}
+
+.rp-clear-btn {
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono); 
+  /* Naranja de la marca para la acción de limpiar */
+  color: #df6129; 
+  background: none; 
+  border: none; 
+  cursor: pointer;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all var(--transition-fast);
+}
+
+.rp-clear-btn:hover { 
+  color: #fdfbf7;
+  opacity: 1; 
+}
+
+.rp-chips { 
+  display: flex; 
+  gap: 0.5rem; 
+  flex-wrap: wrap; 
+  margin-left: auto; 
+}
+
+.rp-chip {
+  display: inline-flex; 
+  align-items: center; 
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem; 
+  border-radius: 20px; /* Más redondeado para un look más moderno */
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono); 
+  cursor: pointer;
+  /* Fondo café oscuro integrado con el AppShell */
+  background: #3d2b24; 
+  color: #fdfbf7;
+  border: 1px solid transparent; 
+  transition: all var(--transition-fast);
+}
+
+/* Estado cuando no está seleccionado (atenuado) */
+.rp-chip[data-dimmed="true"] { 
+  opacity: 0.4;
+  background: #2a1a14;
+  color: #a3938d;
+}
+
+/* Efecto hover para invitar al clic */
+.rp-chip:hover:not([data-dimmed="true"]) {
+  background: #4a372f;
+  transform: translateY(-1px);
+}
+
+/* Cuando el chip está activo/seleccionado, brilla con la marca */
+.rp-chip[data-active="true"] {
+  background: rgba(223, 97, 41, 0.15);
+  border-color: #df6129;
+  color: #df6129;
+  font-weight: 700;
+}
+
+.rp-chip-dot { 
+  width: 0.5rem; 
+  height: 0.5rem; 
+  border-radius: var(--radius-full); 
+  flex-shrink: 0;
+  /* Por defecto el punto es crema, pero el componente lo sobreescribirá por estado */
+  background: #fdfbf7; 
+}
+
+/* Ajuste para el punto cuando el chip está activo */
+.rp-chip[data-active="true"] .rp-chip-dot {
+  background: #df6129;
+  box-shadow: 0 0 8px rgba(223, 97, 41, 0.4);
+}
+/* ── TABLA (EDICIÓN LA RECETA) ── */
 .rp-table-wrap {
-  border-radius: var(--radius-xl); overflow: hidden;
-  background: var(--dark-bg); border: 1px solid var(--dark-border);
+  border-radius: var(--radius-xl); 
+  overflow: hidden;
+  /* Fondo café profundo para que resalte la tipografía clara */
+  background: #2a1a14; 
+  border: 1px solid #3d2b24;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
-.rp-table { width: 100%; border-collapse: collapse; }
-.rp-thead-row { border-bottom: 1px solid var(--dark-border); }
+
+.rp-table { 
+  width: 100%; 
+  border-collapse: collapse; 
+}
+
+.rp-thead-row { 
+  /* Línea divisoria en un tono café cobrizo */
+  border-bottom: 1px solid #4a372f; 
+  background: #21140f; /* Un tono más oscuro para el encabezado */
+}
+
 .rp-th {
-  padding: 0.875rem 1rem; text-align: left;
+  padding: 1rem 1.25rem; 
+  text-align: left;
 }
+
 .rp-th-label {
-  font-size: var(--text-xs); font-weight: 700;
-  letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--text-tertiary); font-family: var(--font-mono);
+  font-size: var(--text-xs); 
+  font-weight: 700;
+  /* Espaciado elegante para títulos técnicos */
+  letter-spacing: 0.15em; 
+  text-transform: uppercase;
+  /* Color Crema/Trigo para máxima legibilidad */
+  color: #a3938d; 
+  font-family: var(--font-mono);
 }
-/* Columnas ocultas en móvil / tablet */
+
+/* ── RESPONSIVIDAD ── */
 .rp-col-md { display: none; }
 .rp-col-lg { display: none; }
-@media (min-width: 768px) { .rp-col-md { display: table-cell; } }
-@media (min-width: 1024px) { .rp-col-lg { display: table-cell; } }
 
-/* ── FILA ── */
-.rp-row {
-  cursor: pointer; border-bottom: 1px solid var(--dark-border-sub);
-  transition: background var(--transition-fast);
+@media (min-width: 768px) { 
+  .rp-col-md { display: table-cell; } 
 }
-.rp-row:hover { background: var(--dark-hover); }
-.rp-row:last-child { border-bottom: none; }
-.rp-td { padding: 0.875rem 1rem; vertical-align: middle; }
-.rp-td-last { padding: 0.875rem 1rem; text-align: right; }
+
+@media (min-width: 1024px) { 
+  .rp-col-lg { display: table-cell; } 
+}
+
+/* Detalle extra: Un sutil degradado al final de la tabla para dar profundidad */
+.rp-table-wrap::after {
+  content: "";
+  display: block;
+  height: 4px;
+  background: linear-gradient(to bottom, #3d2b24, transparent);
+  opacity: 0.5;
+}
+/* ── FILA (EDICIÓN LA RECETA) ── */
+.rp-row {
+  cursor: pointer; 
+  /* Un borde sutil que separa las recepciones sin ensuciar la vista */
+  border-bottom: 1px solid #3d2b24; 
+  background: transparent;
+  transition: all var(--transition-fast);
+}
+
+.rp-row:hover { 
+  /* Un fondo café un poco más claro que el fondo general para resaltar la fila */
+  background: rgba(74, 55, 47, 0.4); 
+  /* Añadimos una pequeña línea naranja a la izquierda para guiar el ojo de Aníbal */
+  box-shadow: inset 4px 0 0 0 #df6129; 
+}
+
+.rp-row:last-child { 
+  border-bottom: none; 
+}
+
+.rp-td { 
+  padding: 1rem; 
+  vertical-align: middle; 
+  /* Color de texto base para los datos */
+  color: #fdfbf7; 
+}
+
+.rp-td-last { 
+  padding: 1rem; 
+  text-align: right; 
+}
 
 /* Número de recepción */
 .rp-rec-num {
-  font-size: var(--text-sm); font-weight: 700; color: var(--text-primary); font-family: var(--font-mono);
+  font-size: var(--text-sm); 
+  font-weight: 700; 
+  /* Usamos el Crema/Trigo por defecto */
+  color: #fdfbf7; 
+  font-family: var(--font-mono);
   transition: color var(--transition-fast);
 }
-.rp-row:hover .rp-rec-num { color: var(--primary); }
-.rp-rec-oc { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.125rem; }
+
+/* Al hacer hover, el número se ilumina con el Naranja de la marca */
+.rp-row:hover .rp-rec-num { 
+  color: #df6129; 
+}
+
+.rp-rec-oc { 
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono); 
+  /* Café suave para la Orden de Compra */
+  color: #a3938d; 
+  margin-top: 0.125rem; 
+}
 
 /* Proveedor */
-.rp-prov { font-size: var(--text-sm); color: #CBD5E1; font-weight: 500; }
+.rp-prov { 
+  font-size: var(--text-sm); 
+  /* Color Crema para resaltar el nombre del proveedor */
+  color: #fdfbf7; 
+  font-weight: 500; 
+}
 
 /* Fecha / hora */
-.rp-fecha { font-size: var(--text-sm); color: #94A3B8; }
-.rp-hora  { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); margin-top: 0.125rem; }
+.rp-fecha { 
+  font-size: var(--text-sm); 
+  /* Un tono tierra claro */
+  color: #c9bcaf; 
+}
 
-/* Placa badge */
+.rp-hora { 
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono); 
+  color: #a3938d; 
+  margin-top: 0.125rem; 
+}
+
+/* Placa badge (El identificador del camión) */
 .rp-placa {
-  font-size: var(--text-xs); font-family: var(--font-mono);
-  padding: 0.25rem 0.5rem; border-radius: var(--radius-sm);
-  background: var(--sidebar-bg-item); color: #64748B;
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono);
+  padding: 0.25rem 0.5rem; 
+  border-radius: var(--radius-sm);
+  /* Fondo café medio y texto trigo */
+  background: #3d2b24; 
+  color: #fdfbf7;
+  border: 1px solid #4a372f;
+  text-transform: uppercase;
 }
 
 /* Estado badge */
 .rp-badge {
-  display: inline-flex; align-items: center; gap: 0.375rem;
-  padding: 0.25rem 0.625rem; border-radius: var(--radius-md);
-  font-size: var(--text-xs); font-weight: 600;
+  display: inline-flex; 
+  align-items: center; 
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem; 
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs); 
+  font-weight: 600;
+  /* Fondo oscuro para que el punto de color destaque */
+  background: rgba(33, 20, 15, 0.5); 
+  color: #fdfbf7;
 }
-.rp-badge-dot { width: 0.375rem; height: 0.375rem; border-radius: var(--radius-full); flex-shrink: 0; }
 
-/* Chevron */
-.rp-chevron { stroke: var(--text-tertiary); transition: stroke var(--transition-fast); display: inline; }
-.rp-row:hover .rp-chevron { stroke: var(--primary); }
+.rp-badge-dot { 
+  width: 0.375rem; 
+  height: 0.375rem; 
+  border-radius: var(--radius-full); 
+  flex-shrink: 0; 
+}
 
-/* Barra de lotes (mini) */
+/* Chevron (Indicador de flecha) */
+.rp-chevron { 
+  stroke: #7d6b63; 
+  transition: all var(--transition-fast); 
+  display: inline; 
+}
+
+.rp-row:hover .rp-chevron { 
+  stroke: #df6129; /* Se ilumina en naranja al seleccionar la fila */
+  transform: translateX(2px); /* Un pequeño salto sutil */
+}
+
+/* ── BARRA DE LOTES (MINI) ── */
 .rp-lotes-bar {
-  display: flex; align-items: center; gap: 0.5rem;
+  display: flex; 
+  align-items: center; 
+  gap: 0.5rem;
 }
-.rp-lotes-track {
-  display: flex; height: 6px; border-radius: var(--radius-full); overflow: hidden;
-  width: 5rem; background: var(--sidebar-bg-item); gap: 1px;
-}
-.rp-lotes-liberados  { height: 100%; background: #4ADE80; }
-.rp-lotes-rechazados { height: 100%; background: #F87171; }
-.rp-lotes-count { font-size: var(--text-xs); font-family: var(--font-mono); color: #64748B; }
 
-/* Skeleton + empty */
-.rp-skeleton-td { padding: 0.875rem 1rem; }
+.rp-lotes-track {
+  display: flex; 
+  height: 6px; 
+  border-radius: var(--radius-full); 
+  overflow: hidden;
+  width: 5rem; 
+  /* Fondo café neutro para el track */
+  background: #3d2b24; 
+  gap: 1px;
+}
+
+/* Colores de Calidad La Receta */
+.rp-lotes-liberados { 
+  height: 100%; 
+  background: #3d8c40; /* Verde Esmeralda (Corporativo) */
+}
+
+.rp-lotes-rechazados { 
+  height: 100%; 
+  background: #b93d3d; /* Rojo Arcilla / Terracota */
+}
+
+.rp-lotes-count { 
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono); 
+  /* Color crema suave para el contador */
+  color: #a3938d; 
+}
+/* ── SKELETON + EMPTY (EDICIÓN LA RECETA) ── */
+.rp-skeleton-td { 
+  padding: 1rem; 
+}
+
 .rp-skeleton-line {
-  border-radius: var(--radius-sm); background: var(--sidebar-bg-item);
+  border-radius: var(--radius-sm); 
+  /* Usamos un café medio para que el pulso sea sutil sobre el fondo oscuro */
+  background: #3d2b24; 
   animation: pulse 1.5s ease-in-out infinite;
 }
+
 .rp-empty {
-  padding: 4rem 1rem; text-align: center;
-  font-size: var(--text-sm); color: var(--text-tertiary);
+  padding: 5rem 1rem; 
+  text-align: center;
+  font-size: var(--text-sm); 
+  /* Color café grisáceo para que el mensaje de "No hay datos" sea discreto */
+  color: #a3938d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* El icono o texto de 'vacío' puede llevar un toque de la marca */
+.rp-empty::before {
+  content: "📂"; /* O un componente de icono si lo prefieres */
+  font-size: 2rem;
+  opacity: 0.3;
+}
+
+@keyframes pulse { 
+  0%, 100% { opacity: 1; background: #3d2b24; } 
+  50% { opacity: 0.5; background: #4a372f; } 
+}

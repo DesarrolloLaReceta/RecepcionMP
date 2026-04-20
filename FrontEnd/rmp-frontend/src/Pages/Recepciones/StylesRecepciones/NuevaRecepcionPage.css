@@ -1,5 +1,5 @@
 /* ============================================================
-   NUEVA RECEPCION PAGE — prefix .nr-*
+   NUEVA RECEPCION PAGE — prefix .nr-* (EDICIÓN LA RECETA)
    Wizard de 5 pasos: OC → Check-in → Inspección → Lotes → Documentos
    ============================================================ */
 
@@ -7,267 +7,751 @@
 .nr-page {
   max-width: 42rem;
   margin: 0 auto;
-  animation: fadeSlideUp 0.35s ease both;
+  /* Mantenemos la animación, pero nos aseguramos de que sea fluida */
+  animation: fadeSlideUp 0.35s ease-out both;
 }
 
 /* ── ENCABEZADO ── */
 .nr-header {
-  display: flex; align-items: center; gap: 0.875rem; margin-bottom: 1.5rem;
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+  margin-bottom: 2rem;
 }
-.nr-back-btn {
-  width: 2rem; height: 2rem; border-radius: var(--radius-md); flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
-  cursor: pointer; color: var(--text-muted);
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-.nr-back-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
-.nr-header-label {
-  font-size: var(--text-xs); font-family: var(--font-mono);
-  letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.125rem;
-}
-.nr-header-title { font-size: 1.125rem; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
 
-/* ── STEP BAR ── */
+.nr-back-btn {
+  width: 2.25rem; 
+  height: 2.25rem; 
+  border-radius: var(--radius-lg); 
+  flex-shrink: 0;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  /* Fondo café oscuro integrado al sistema */
+  background: #2a1a14; 
+  border: 1px solid #3d2b24;
+  cursor: pointer; 
+  color: #a3938d; /* Color Trigo */
+  transition: all var(--transition-fast);
+}
+
+.nr-back-btn:hover { 
+  background: #3d2b24; 
+  color: #df6129; /* El icono cambia a naranja al querer volver */
+  border-color: #df6129;
+  transform: translateX(-2px); /* Pequeño feedback de retroceso */
+}
+
+.nr-header-label {
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono);
+  letter-spacing: 0.25em; 
+  text-transform: uppercase; 
+  color: #a3938d; 
+  margin-bottom: 0.25rem;
+}
+
+.nr-header-title { 
+  font-size: 1.25rem; 
+  font-weight: 800; 
+  font-family: 'Dosis', sans-serif; /* Usamos la fuente de marca */
+  color: #3d2b24; 
+  line-height: 1.2; 
+}
+
+/* ── STEP BAR (EDICIÓN LA RECETA) ── */
 .nr-stepbar {
-  display: flex; align-items: center; margin-bottom: 2rem;
+  display: flex; 
+  align-items: center; 
+  margin-bottom: 2.5rem; /* Un poco más de espacio para que respire */
 }
-.nr-step-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.375rem; flex: 1; }
+
+.nr-step-wrap { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: 0.5rem; 
+  flex: 1; 
+}
+
 .nr-step-circle {
-  width: 2rem; height: 2rem; border-radius: var(--radius-full);
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--text-xs); font-weight: 700;
-  transition: background 0.3s, border-color 0.3s, color 0.3s;
+  width: 2.25rem; 
+  height: 2.25rem; 
+  border-radius: var(--radius-full);
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  font-size: var(--text-xs); 
+  font-weight: 800; /* Números más legibles */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
 }
+
+/* Paso completado: Verde Esmeralda La Receta */
 .nr-step-circle[data-state="done"] {
-  background: #22C55E; border: 2px solid #22C55E; color: #000;
+  background: #3d8c40; 
+  border-color: #3d8c40; 
+  color: #fdfbf7; /* Texto crema para contraste */
 }
+
+/* Paso activo: El naranja protagonista */
 .nr-step-circle[data-state="active"] {
-  background: var(--primary); border: 2px solid var(--primary); color: #000;
+  background: #df6129; 
+  border-color: #df6129; 
+  color: #fdfbf7;
+  box-shadow: 0 0 15px rgba(223, 97, 41, 0.3); /* Resplandor sutil */
 }
+
+/* Paso pendiente: Integrado al fondo café */
 .nr-step-circle[data-state="pending"] {
-  background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.08); color: var(--text-tertiary);
+  background: #2a1a14; 
+  border-color: #3d2b24; 
+  color: #7d6b63;
 }
+
 .nr-step-label {
-  font-size: 9px; font-family: var(--font-mono); letter-spacing: 0.05em; text-align: center;
+  font-size: 10px; /* Un punto más para legibilidad */
+  font-family: var(--font-mono); 
+  letter-spacing: 0.1em; 
+  text-transform: uppercase;
+  text-align: center;
   transition: color 0.3s;
+  font-weight: 600;
 }
-.nr-step-label[data-state="done"]    { color: #22C55E; }
-.nr-step-label[data-state="active"]  { color: var(--primary); }
-.nr-step-label[data-state="pending"] { color: var(--text-tertiary); }
+
+.nr-step-label[data-state="done"]   { color: #3d8c40; }
+.nr-step-label[data-state="active"]  { color: #df6129; }
+.nr-step-label[data-state="pending"] { color: #7d6b63; }
+
 .nr-step-line {
-  flex: 1; height: 2px; margin-top: -1rem; /* alinea con círculo */
-  transition: background 0.3s;
+  flex: 1; 
+  height: 2px; 
+  margin-top: -1.25rem; /* Ajustado al nuevo tamaño del círculo */
+  transition: background 0.4s;
 }
-.nr-step-line[data-done="true"]  { background: #22C55E; }
-.nr-step-line[data-done="false"] { background: rgba(255,255,255,0.07); }
+
+.nr-step-line[data-done="true"]  { background: #3d8c40; }
+.nr-step-line[data-done="false"] { background: #3d2b24; }
 
 @media (max-width: 640px) {
   .nr-step-label {
-    display: none;   /* ocultar texto, dejar solo círculo con número */
+    display: none;   
   }
   .nr-step-circle {
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 2rem;
+    height: 2rem;
   }
 }
 
-/* ── ERROR GLOBAL ── */
+/* ── ERROR GLOBAL (EDICIÓN LA RECETA) ── */
 .nr-error {
-  margin-bottom: 1.25rem; padding: 0.875rem 1.25rem;
+  margin-bottom: 1.5rem; /* Un poco más de aire */
+  padding: 1rem 1.25rem;
   border-radius: var(--radius-lg);
-  background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.15);
-  display: flex; align-items: center; gap: 0.75rem;
+  /* Un rojo arcilla muy sutil que armoniza con el café chocolate */
+  background: rgba(185, 61, 61, 0.1); 
+  border: 1px solid rgba(185, 61, 61, 0.25);
+  display: flex; 
+  align-items: center; 
+  gap: 0.875rem;
+  /* Una pequeña sombra roja para dar profundidad al mensaje de alerta */
+  box-shadow: 0 4px 12px rgba(185, 61, 61, 0.05);
 }
-.nr-error-text { font-size: var(--text-sm); color: #FCA5A5; }
 
-/* ── CARD DEL PASO ── */
+.nr-error-text { 
+  font-size: var(--text-sm); 
+  /* Color salmón claro/crema para máxima legibilidad sobre fondo oscuro */
+  color: #fca5a5; 
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Sugerencia: Añadir un icono de advertencia si no lo tienes */
+.nr-error::before {
+  content: "⚠️";
+  font-size: 1rem;
+  filter: sepia(1) saturate(5) hue-rotate(-10deg); /* Lo hace ver más anaranjado/marca */
+}
+
+/* ── CARD DEL PASO (EDICIÓN LA RECETA) ── */
 .nr-card {
-  padding: 1.5rem; border-radius: var(--radius-2xl);
-  background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.07);
-  display: flex; flex-direction: column; gap: 1.25rem;
+  padding: 1.75rem; 
+  border-radius: var(--radius-xl);
+  /* CAMBIO CLAVE: De azul pizarra a Café Chocolate con sutil transparencia */
+  background: rgba(33, 20, 15, 0.95); 
+  border: 1px solid #3d2b24;
+  display: flex; 
+  flex-direction: column; 
+  gap: 1.5rem;
+  /* Añadimos una sombra suave para que la tarjeta "flote" sobre el fondo */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
-.nr-step-title { font-size: 1.125rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
-.nr-step-sub   { font-size: var(--text-sm); color: var(--text-muted); }
-.nr-step-sub em { font-style: normal; color: #CBD5E1; }
 
-/* ── NAVEGACIÓN ENTRE PASOS ── */
+.nr-step-title { 
+  font-size: 1.25rem; 
+  font-weight: 800; 
+  font-family: 'Dosis', sans-serif;
+  color: #fdfbf7; /* Blanco Crema */
+  margin-bottom: 0.25rem; 
+}
+
+.nr-step-sub { 
+  font-size: var(--text-sm); 
+  color: #a3938d; /* Café Trigo */
+  line-height: 1.5;
+}
+
+.nr-step-sub em { 
+  font-style: normal; 
+  /* Resaltamos el énfasis en Naranja Marca en lugar de gris azulado */
+  color: #df6129; 
+  font-weight: 600;
+}
+
+/* ── NAVEGACIÓN ENTRE PASOS (EDICIÓN LA RECETA) ── */
 .nr-step-nav {
-  display: flex; align-items: center; justify-content: space-between; padding-top: 0.5rem;
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding-top: 1rem; /* Más espacio para separar del contenido de la card */
+  margin-top: 0.5rem;
 }
-.nr-back-step-btn {
-  padding: 0.625rem 1.25rem; border-radius: var(--radius-lg);
-  font-size: var(--text-sm); color: var(--text-muted);
-  background: none; border: none; cursor: pointer;
-  transition: color var(--transition-fast);
-}
-.nr-back-step-btn:hover { color: var(--text-secondary); }
 
-/* ── BÚSQUEDA OC (PASO 1) ── */
-.nr-search-row {
-  display: flex; gap: 0.625rem;
+.nr-back-step-btn {
+  padding: 0.625rem 1.5rem; 
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm); 
+  font-weight: 600;
+  /* Color café suave que ya es marca registrada de nuestra interfaz */
+  color: #a3938d; 
+  background: transparent; 
+  border: 1px solid transparent; 
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
+
+.nr-back-step-btn:hover { 
+  /* En lugar de solo cambiar el color, le damos un fondo sutil */
+  background: rgba(163, 147, 141, 0.1);
+  color: #fdfbf7; /* Blanco crema al hover */
+  border-color: rgba(163, 147, 141, 0.2);
+}
+
+/* Si tienes un icono de flecha dentro del botón */
+.nr-back-step-btn svg {
+  transition: transform var(--transition-fast);
+}
+
+.nr-back-step-btn:hover svg {
+  transform: translateX(-3px); /* Pequeño guiño visual de retroceso */
+}
+
+/* ── BÚSQUEDA OC (PASO 1 - EDICIÓN LA RECETA) ── */
+.nr-search-row {
+  display: flex; gap: 0.75rem;
+}
+
 .nr-search-wrap { position: relative; flex: 1; }
-.nr-search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); pointer-events: none; }
+
+.nr-search-icon { 
+  position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); 
+  pointer-events: none;
+  stroke: #a3938d; /* Café suave */
+}
+
 .nr-search-input {
   width: 100%; padding: 0.625rem 0.75rem 0.625rem 2.25rem;
   border-radius: var(--radius-lg); font-size: var(--text-sm); outline: none;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #CBD5E1;
-  transition: border-color var(--transition-fast);
+  /* Fondo café profundo */
+  background: #2a1a14; border: 1px solid #3d2b24; color: #fdfbf7;
+  transition: all var(--transition-fast);
 }
-.nr-search-input:focus { border-color: rgba(245,158,11,0.35); }
+
+.nr-search-input:focus { 
+  border-color: #df6129; 
+  box-shadow: 0 0 0 3px rgba(223, 97, 41, 0.15);
+}
 
 /* Lista de resultados OC */
-.nr-oc-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.nr-oc-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
 .nr-oc-card {
-  width: 100%; text-align: left; padding: 1rem;
+  width: 100%; text-align: left; padding: 1.25rem;
   border-radius: var(--radius-lg);
-  background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06);
-  cursor: pointer; transition: border-color var(--transition-fast), background var(--transition-fast);
+  /* Un tono más oscuro que el fondo para que la tarjeta sea el foco */
+  background: #21140f; border: 1px solid #3d2b24;
+  cursor: pointer; transition: all var(--transition-fast);
 }
-.nr-oc-card:hover           { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10); }
-.nr-oc-card[data-active="true"] { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.04); }
-.nr-oc-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem; }
-.nr-oc-num  { font-size: var(--text-sm); font-weight: 700; font-family: var(--font-mono); color: var(--primary); }
-.nr-oc-prov { font-size: var(--text-sm); color: #CBD5E1; font-weight: 500; }
-.nr-oc-items-wrap { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+
+.nr-oc-card:hover { 
+  background: #2a1a14; 
+  border-color: #4a372f; 
+  transform: translateY(-2px);
+}
+
+.nr-oc-card[data-active="true"] { 
+  border-color: #df6129; 
+  background: rgba(223, 97, 41, 0.05); 
+}
+
+.nr-oc-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.75rem; }
+
+.nr-oc-num { 
+  font-size: var(--text-sm); font-weight: 700; font-family: var(--font-mono); 
+  color: #df6129; /* El número de OC es el ID principal, lo resaltamos */
+}
+
+.nr-oc-prov { font-size: var(--text-sm); color: #fdfbf7; font-weight: 600; }
+
+.nr-oc-items-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
 .nr-oc-item-tag {
-  font-size: var(--text-xs); font-family: var(--font-mono);
-  padding: 0.125rem 0.5rem; border-radius: var(--radius-sm);
-  background: rgba(255,255,255,0.05); color: #64748B;
-}
-.nr-oc-empty {
-  padding: 2rem; text-align: center; border-radius: var(--radius-lg);
-  background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.06);
-  font-size: var(--text-sm); color: var(--text-tertiary);
-}
-.nr-oc-placeholder {
-  padding: 2rem; text-align: center; border-radius: var(--radius-lg);
-  background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.06);
-  font-size: var(--text-sm); color: var(--text-tertiary);
+  font-size: 10px; font-family: var(--font-mono);
+  padding: 0.25rem 0.5rem; border-radius: var(--radius-sm);
+  /* Etiquetas en café oscuro con texto trigo */
+  background: #3d2b24; color: #a3938d;
+  text-transform: uppercase;
 }
 
-/* ── FORM GRID (pasos 2, 4…) ── */
-.nr-form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-@media (max-width: 480px) { .nr-form-grid-2 { grid-template-columns: 1fr; } }
-.nr-form-grid-1 { display: flex; flex-direction: column; gap: 0.875rem; }
+.nr-oc-empty, .nr-oc-placeholder {
+  padding: 3rem 1.5rem; text-align: center; border-radius: var(--radius-lg);
+  /* Fondo chocolate con borde punteado integrado */
+  background: #21140f; border: 1px dashed #3d2b24;
+  font-size: var(--text-sm); color: #7d6b63;
+}
 
-/* ── CADENA DE FRÍO (paso 3) ── */
+/* ── FORM GRID (EDICIÓN LA RECETA) ── */
+.nr-form-grid-2 { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 1.25rem; /* Un poco más de aire para los inputs */
+}
+
+@media (max-width: 480px) { 
+  .nr-form-grid-2 { grid-template-columns: 1fr; } 
+}
+
+.nr-form-grid-1 { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 1rem; 
+}
+
+/* ── CADENA DE FRÍO (PASO 3 - EDICIÓN TÉCNICA) ── */
 .nr-frio-box {
-  padding: 1rem; border-radius: var(--radius-lg);
-  background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15);
-  display: flex; flex-direction: column; gap: 0.875rem;
+  padding: 1.25rem; 
+  border-radius: var(--radius-lg);
+  /* Cambiamos el azul saturado por un tono gélido sutil sobre el fondo chocolate */
+  background: rgba(147, 197, 253, 0.05); 
+  border: 1px solid rgba(147, 197, 253, 0.2);
+  display: flex; 
+  flex-direction: column; 
+  gap: 1rem;
+  /* Un ligero resplandor azulado para indicar que es una zona de temperatura */
+  box-shadow: inset 0 0 15px rgba(147, 197, 253, 0.03);
 }
-.nr-frio-header { display: flex; align-items: center; gap: 0.5rem; }
-.nr-frio-label  { font-size: var(--text-sm); color: #93C5FD; font-weight: 600; }
-.nr-temp-row    { display: flex; align-items: center; gap: 0.75rem; }
-.nr-temp-unit   { font-size: var(--text-sm); color: var(--text-muted); }
 
-/* ── TOGGLE BPM ── */
+.nr-frio-header { 
+  display: flex; 
+  align-items: center; 
+  gap: 0.625rem; 
+}
+
+.nr-frio-label { 
+  font-size: var(--text-sm); 
+  /* Un azul cielo muy claro para legibilidad y sensación de frío */
+  color: #93c5fd; 
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.nr-temp-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+}
+
+.nr-temp-unit { 
+  font-size: var(--text-sm); 
+  /* Color crema suave para la unidad (ºC) */
+  color: #a3938d; 
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+/* ── TOGGLE BPM (EDICIÓN LA RECETA) ── */
 .nr-toggles-card {
-  border-radius: var(--radius-lg); overflow: hidden;
-  background: rgba(15,23,42,0.60); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-lg); 
+  overflow: hidden;
+  /* Fondo café integrado con el resto de la App */
+  background: #21140f; 
+  border: 1px solid #3d2b24;
 }
-.nr-toggle-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-.nr-toggle-row:last-child { border-bottom: none; }
-.nr-toggle-info {}
-.nr-toggle-label { font-size: var(--text-sm); color: #CBD5E1; }
-.nr-toggle-sub   { font-size: var(--text-xs); color: var(--text-muted); margin-top: 0.125rem; }
-.nr-toggle-btn {
-  width: 2.5rem; height: 1.25rem; border-radius: var(--radius-full); position: relative;
-  border: none; cursor: pointer; flex-shrink: 0;
-  transition: background 0.2s;
-}
-.nr-toggle-btn[data-on="true"]  { background: #22C55E; }
-.nr-toggle-btn[data-on="false"] { background: rgba(255,255,255,0.08); }
-.nr-toggle-knob {
-  position: absolute; top: 2px;
-  width: 1rem; height: 1rem; border-radius: var(--radius-full);
-  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  transition: left 0.2s;
-}
-.nr-toggle-btn[data-on="true"]  .nr-toggle-knob { left: calc(100% - 1.125rem); }
-.nr-toggle-btn[data-on="false"] .nr-toggle-knob { left: 2px; }
 
-/* ── TABS LOTES (paso 4) ── */
-.nr-lote-tabs { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; }
+.nr-toggle-row {
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between;
+  padding: 0.875rem 1rem; 
+  border-bottom: 1px solid #2a1a14;
+  transition: background var(--transition-fast);
+}
+
+.nr-toggle-row:hover {
+  background: rgba(61, 140, 64, 0.03); /* Un sutil tinte verde al pasar el mouse */
+}
+
+.nr-toggle-row:last-child { border-bottom: none; }
+
+.nr-toggle-label { 
+  font-size: var(--text-sm); 
+  color: #fdfbf7; /* Blanco Crema */
+  font-weight: 500;
+}
+
+.nr-toggle-sub { 
+  font-size: var(--text-xs); 
+  color: #a3938d; /* Café Trigo */
+  margin-top: 0.25rem; 
+}
+
+/* El Interruptor (Toggle) */
+.nr-toggle-btn {
+  width: 2.75rem; 
+  height: 1.5rem; 
+  border-radius: var(--radius-full); 
+  position: relative;
+  border: none; 
+  cursor: pointer; 
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estado Encendido: Verde Esmeralda Corporativo */
+.nr-toggle-btn[data-on="true"] { 
+  background: #3d8c40; 
+  box-shadow: 0 0 10px rgba(61, 140, 64, 0.2);
+}
+
+/* Estado Apagado: Café Oscuro */
+.nr-toggle-btn[data-on="false"] { 
+  background: #3d2b24; 
+}
+
+.nr-toggle-knob {
+  position: absolute; 
+  top: 3px;
+  width: 1.125rem; 
+  height: 1.125rem; 
+  border-radius: var(--radius-full);
+  background: #fdfbf7; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nr-toggle-btn[data-on="true"] .nr-toggle-knob { 
+  left: calc(100% - 1.3rem); 
+}
+
+.nr-toggle-btn[data-on="false"] .nr-toggle-knob { 
+  left: 3px; 
+}
+
+/* ── TABS LOTES (PASO 4 - EDICIÓN LA RECETA) ── */
+.nr-lote-tabs { 
+  display: flex; 
+  gap: 0.625rem; 
+  overflow-x: auto; 
+  padding-bottom: 0.5rem; 
+  /* Scrollbar sutil para no romper la estética */
+  scrollbar-width: thin;
+  scrollbar-color: #3d2b24 transparent;
+}
+
 .nr-lote-tab {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.5rem 0.875rem; border-radius: var(--radius-md);
-  font-size: var(--text-sm); font-weight: 500; white-space: nowrap; cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03);
-  color: var(--text-muted); flex-shrink: 0;
-  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+  display: flex; 
+  align-items: center; 
+  gap: 0.5rem;
+  padding: 0.625rem 1rem; 
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm); 
+  font-weight: 600; 
+  white-space: nowrap; 
+  cursor: pointer;
+  /* Fondo café oscuro base */
+  border: 1px solid #3d2b24; 
+  background: #21140f;
+  color: #a3938d; 
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
 }
+
+.nr-lote-tab:hover:not([data-active="true"]) {
+  background: #2a1a14;
+  border-color: #4a372f;
+  color: #fdfbf7;
+}
+
 .nr-lote-tab[data-active="true"] {
-  background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: var(--primary);
+  background: rgba(223, 97, 41, 0.1); 
+  border-color: #df6129; 
+  color: #df6129;
+  box-shadow: 0 4px 12px rgba(223, 97, 41, 0.05);
 }
+
 .nr-lote-ok-dot {
-  width: 0.375rem; height: 0.375rem; border-radius: var(--radius-full);
-  background: #22C55E; flex-shrink: 0;
+  width: 0.5rem; 
+  height: 0.5rem; 
+  border-radius: var(--radius-full);
+  /* Verde Esmeralda Corporativo */
+  background: #3d8c40; 
+  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(61, 140, 64, 0.4);
 }
-.nr-lote-body { display: flex; flex-direction: column; gap: 0.875rem; }
+
+.nr-lote-body { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 1.25rem; 
+  padding: 0.5rem 0;
+}
+
+/* Navegación interna de lotes */
 .nr-lote-nav {
-  display: flex; align-items: center; justify-content: space-between; padding-top: 0.75rem;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding-top: 1rem;
+  border-top: 1px solid #3d2b24;
 }
+
 .nr-lote-nav-btn {
-  font-size: var(--text-sm); color: var(--text-muted); background: none; border: none; cursor: pointer;
-  transition: color var(--transition-fast);
+  font-size: var(--text-sm); 
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a3938d; 
+  background: none; 
+  border: none; 
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
-.nr-lote-nav-btn:hover:not(:disabled) { color: var(--text-secondary); }
-.nr-lote-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.nr-lote-nav-idx { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-tertiary); }
+
+.nr-lote-nav-btn:hover:not(:disabled) { 
+  color: #df6129; 
+}
+
+.nr-lote-nav-btn:disabled { 
+  opacity: 0.2; 
+  cursor: not-allowed; 
+}
+
+.nr-lote-nav-idx { 
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono); 
+  color: #7d6b63; 
+  background: #21140f;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+/* ── DETALLES NUMÉRICOS (EDICIÓN LA RECETA) ── */
 
 /* Cantidad con UM inline */
-.nr-qty-wrap { position: relative; }
-.nr-qty-um {
-  position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
-  font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); pointer-events: none;
+.nr-qty-wrap { 
+  position: relative; 
 }
-.nr-temp-hint {
-  font-size: var(--text-xs); color: var(--text-muted); margin-top: 0.25rem;
-}
-.nr-temp-bad  { font-size: var(--text-xs); color: #FCA5A5; margin-top: 0.25rem; }
 
-/* ── DOCUMENTOS (paso 5) ── */
-.nr-doc-list  { display: flex; flex-direction: column; gap: 0.75rem; }
+.nr-qty-um {
+  position: absolute; 
+  right: 0.875rem; 
+  top: 50%; 
+  transform: translateY(-50%);
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono); 
+  /* Color Trigo/Café suave para que la unidad no distraiga del número */
+  color: #7d6b63; 
+  pointer-events: none;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.nr-temp-hint {
+  font-size: var(--text-xs); 
+  /* Color café neutro para el rango de referencia (ej: 0°C a 4°C) */
+  color: #a3938d; 
+  margin-top: 0.375rem;
+  padding-left: 0.25rem;
+}
+
+/* Advertencia de temperatura fuera de rango */
+.nr-temp-bad { 
+  font-size: var(--text-xs); 
+  /* Rojo Arcilla para alertar sin ser un color 'neón' molesto */
+  color: #fca5a5; 
+  margin-top: 0.375rem; 
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Opcional: Un pequeño indicador visual para el error */
+.nr-temp-bad::before {
+  content: "●";
+  font-size: 0.6rem;
+  color: #b93d3d;
+}
+
+/* ── DOCUMENTOS (PASO 5 - EDICIÓN LA RECETA) ── */
+.nr-doc-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.875rem; 
+}
+
 .nr-doc-card {
-  display: flex; align-items: center; gap: 1rem; padding: 1rem;
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+  padding: 1rem;
   border-radius: var(--radius-lg);
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition: all var(--transition-fast);
 }
-.nr-doc-card[data-ok="true"]  { background: rgba(34,197,94,0.05);  border: 1px solid rgba(34,197,94,0.15); }
-.nr-doc-card[data-ok="false"] { background: rgba(15,23,42,0.60);    border: 1px solid rgba(255,255,255,0.07); }
+
+/* Documento Cargado: Verde Esmeralda sutil */
+.nr-doc-card[data-ok="true"] { 
+  background: rgba(61, 140, 64, 0.08); 
+  border: 1px solid rgba(61, 140, 64, 0.3); 
+}
+
+/* Documento Pendiente: Café Chocolate */
+.nr-doc-card[data-ok="false"] { 
+  background: #21140f; 
+  border: 1px solid #3d2b24; 
+}
+
 .nr-doc-icon {
-  width: 2rem; height: 2rem; border-radius: var(--radius-md); flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
+  width: 2.5rem; 
+  height: 2.5rem; 
+  border-radius: var(--radius-md); 
+  flex-shrink: 0;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  background: #2a1a14;
+  color: #df6129; /* El icono resalta en naranja */
+  border: 1px solid #3d2b24;
 }
-.nr-doc-name { font-size: var(--text-sm); color: #CBD5E1; font-weight: 500; }
-.nr-doc-file-name { font-size: var(--text-xs); font-family: var(--font-mono); color: #86EFAC; margin-top: 0.125rem; }
-.nr-doc-no-file  { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 0.125rem; }
+
+.nr-doc-name { 
+  font-size: var(--text-sm); 
+  color: #fdfbf7; 
+  font-weight: 600; 
+}
+
+/* Nombre del archivo cargado: Usamos el verde de éxito corporativo */
+.nr-doc-file-name { 
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono); 
+  color: #86efac; 
+  margin-top: 0.25rem; 
+}
+
+.nr-doc-no-file { 
+  font-size: var(--text-xs); 
+  color: #7d6b63; 
+  margin-top: 0.25rem; 
+}
+
 .nr-doc-upload-btn {
-  margin-left: auto; flex-shrink: 0;
-  padding: 0.375rem 0.875rem; border-radius: var(--radius-md); font-size: var(--text-xs); font-weight: 600;
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94A3B8;
-  cursor: pointer; transition: background var(--transition-fast), color var(--transition-fast);
+  margin-left: auto; 
+  flex-shrink: 0;
+  padding: 0.5rem 1rem; 
+  border-radius: var(--radius-md); 
+  font-size: var(--text-xs); 
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  /* Botón discreto en café */
+  background: #3d2b24; 
+  border: 1px solid #4a372f; 
+  color: #c9bcaf;
+  cursor: pointer; 
+  transition: all var(--transition-fast);
 }
-.nr-doc-upload-btn:hover { background: rgba(255,255,255,0.09); color: var(--text-primary); }
+
+.nr-doc-upload-btn:hover { 
+  background: #df6129; 
+  border-color: #df6129;
+  color: #fdfbf7; 
+  transform: translateY(-1px);
+}
+
 .nr-doc-input { display: none; }
 
-/* Resumen final */
+/* ── RESUMEN FINAL (EDICIÓN LA RECETA) ── */
 .nr-summary {
-  padding: 1.25rem; border-radius: var(--radius-lg);
-  background: rgba(245,158,11,0.04); border: 1px solid rgba(245,158,11,0.10);
+  padding: 1.5rem; 
+  border-radius: var(--radius-lg);
+  /* Fondo café oscuro con un borde naranja muy sutil para indicar importancia */
+  background: rgba(33, 20, 15, 0.6); 
+  border: 1px solid rgba(223, 97, 41, 0.2);
+  /* Un ligero brillo para que resalte como el paso final */
+  box-shadow: inset 0 0 20px rgba(223, 97, 41, 0.02);
 }
+
 .nr-summary-title {
-  font-size: var(--text-xs); font-family: var(--font-mono);
-  letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary); margin-bottom: 0.875rem;
+  font-size: var(--text-xs); 
+  font-family: var(--font-mono);
+  letter-spacing: 0.2em; 
+  text-transform: uppercase; 
+  /* Naranja La Receta para el título del resumen */
+  color: #df6129; 
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-.nr-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.375rem 2rem; }
-.nr-summary-kv   { display: flex; gap: 0.5rem; align-items: baseline; }
-.nr-summary-key  { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted); flex-shrink: 0; }
-.nr-summary-val  { font-size: var(--text-sm); color: #CBD5E1; }
+
+.nr-summary-title::before {
+  content: "📋"; /* Un pequeño icono visual de reporte */
+  font-size: 1rem;
+}
+
+.nr-summary-grid { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 0.75rem 2.5rem; 
+}
+
+.nr-summary-kv { 
+  display: flex; 
+  gap: 0.75rem; 
+  align-items: baseline;
+  border-bottom: 1px dashed rgba(163, 147, 141, 0.1);
+  padding-bottom: 0.25rem;
+}
+
+.nr-summary-key { 
+  font-size: 10px; 
+  font-family: var(--font-mono); 
+  /* Color Trigo/Café suave para las etiquetas */
+  color: #a3938d; 
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.nr-summary-val { 
+  font-size: var(--text-sm); 
+  /* Blanco Crema para el valor real del dato */
+  color: #fdfbf7; 
+  font-weight: 600;
+  text-align: right;
+  flex: 1;
+}
