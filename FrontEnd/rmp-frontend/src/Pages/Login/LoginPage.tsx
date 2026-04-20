@@ -194,15 +194,6 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
-
-            <div className="lp-roles">
-              <p className="lp-roles-label">Perfiles de acceso</p>
-              <div className="lp-roles-list">
-                {SYSTEM_ROLES.map(role => (
-                  <Badge key={role} color="slate" size="sm">{role}</Badge>
-                ))}
-              </div>
-            </div>
           </div>
 
           <p className="lp-note">
