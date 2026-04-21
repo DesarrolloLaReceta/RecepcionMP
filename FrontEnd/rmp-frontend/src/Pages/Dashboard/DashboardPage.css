@@ -25,17 +25,17 @@
 }
 
 .db-greeting-title {
-  font-size:      1.75rem; /* Un poco más grande para destacar */
+  font-size:      1.75rem; 
   font-weight:    700;
-  color:          #273719; /* Verde oscuro il Forno */
+  color:          #3d2b24; 
   line-height:    1.2;
-  font-family:    'Dosis', sans-serif !important;
+  font-family:    var(--font-sans) !important; /* Mantenemos consistencia con la App */
 }
 
 .db-greeting-sub {
   font-size:   0.9rem;
-  font-family: 'Dosis', sans-serif !important; /* Cambiamos mono por Dosis */
-  color:       #877d70; /* Gris tierra */
+  font-family: var(--font-mono) !important; /* Fuente técnica para el subtítulo */
+  color:       #a3938d; /* Trigo ceniza */
   margin-top:  0.125rem;
   font-weight: 500;
 }
@@ -52,27 +52,27 @@
 .db-period-select {
   appearance:     none;
   font-size:      0.85rem;
-  font-family:    'Dosis', sans-serif !important;
+  font-family:    var(--font-mono) !important;
   font-weight:    600;
-  color:          #48271a; /* Café oscuro */
-  background:     #ffffff; /* Blanco puro para contraste */
-  border:         1px solid #e1d5af; /* Crema del login */
-  border-radius:  12px; /* Más redondeado */
+  color:          #fdfbf7; /* Texto claro */
+  background:     #2a1a14; /* Chocolate base */
+  border:         1px solid #3d2b24; /* Borde óxido */
+  border-radius:  8px; /* Menos redondeado */
   padding:        0.45rem 1.75rem 0.45rem 0.75rem;
   cursor:         pointer;
   outline:        none;
   transition:     all 0.2s ease;
   
-  /* Flecha personalizada con el color café de la marca */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2348271A' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  /* Flecha con el color naranja de la marca */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23df6129' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:   no-repeat;
   background-position: right 0.6rem center;
 }
 
 .db-period-select:focus,
 .db-period-select:hover {
-  border-color: #df6129; /* Naranja al hacer foco */
-  box-shadow: 0 2px 8px rgba(225, 213, 175, 0.3);
+  border-color: #df6129; 
+  box-shadow: 0 0 8px rgba(223, 97, 41, 0.2);
 }
 
 /* Botón de actualizar */
@@ -81,42 +81,41 @@
   align-items:   center;
   gap:           0.375rem;
   padding:       0.45rem 0.85rem;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size:     0.85rem;
-  font-family:   'Dosis', sans-serif !important;
+  font-family:   var(--font-sans) !important;
   font-weight:   600;
-  color:         #877d70;
-  background:    #ffffff;
-  border:        1px solid #e1d5af;
+  color:         #df6129; /* Naranja para la acción */
+  background:    #2a1a14;
+  border:        1px solid #3d2b24;
   cursor:        pointer;
   transition:    all 0.2s ease;
 }
 
 .db-refresh-btn:hover {
   border-color: #df6129;
-  color:        #df6129;
-  background:   #fcfbf7;
+  color:         #fdfbf7; /* Blanco crema para que resalte en el hover */
+  background:   #3d2b24; /* Chocolate más claro (óxido) al pasar el mouse */
 }
 
 .db-refresh-icon {
   fill:           none;
   stroke:         currentColor;
-  stroke-width:   2.5; /* Un poco más grueso */
+  stroke-width:   2.5; 
   stroke-linecap: round;
   flex-shrink:    0;
 }
 
 .db-last-updated {
   font-size:   0.75rem;
-  font-family: 'Dosis', sans-serif !important;
-  color:       #877d70;
+  font-family: var(--font-mono) !important; /* Fuente técnica para marcas de tiempo */
+  color:       #7d6b63; /* Café ceniza técnico */
   display:     none;
 }
 
 @media (min-width: 1024px) {
   .db-last-updated { display: block; }
 }
-
 
 /* ============================================================
    ERROR BANNER (Estilo Informativo Corporativo)
@@ -127,31 +126,31 @@
   align-items:   center;
   gap:           0.75rem;
   padding:       1rem 1.25rem;
-  border-radius: 16px; /* Más redondeado para suavizar el impacto */
+  border-radius: 8px; /* Menos redondeado para estilo industrial */
   
-  /* Fondo naranja muy sutil (basado en el disclaimer del login) */
+  /* Fondo chocolate con toque naranja sutil */
   background:    rgba(223, 97, 41, 0.05);
-  /* Borde naranja suave */
+  /* Borde óxido/naranja suave */
   border:        1px solid rgba(223, 97, 41, 0.2);
 }
 
 .db-error-text {
   font-size:   0.95rem;
-  /* Café oscuro para que sea legible y serio */
-  color:       #48271a; 
+  /* CAMBIO: Blanco crema para legibilidad en modo oscuro */
+  color:       #3d2b24; 
   flex:        1;
-  font-family: 'Dosis', sans-serif !important;
+  font-family: var(--font-sans) !important;
   font-weight: 500;
 }
 
 .db-error-retry {
   font-size:       0.85rem;
-  /* Naranja il Forno para la acción de reintentar */
+  /* Naranja marca para la acción */
   color:           #df6129; 
   background:      transparent;
   border:          none;
   cursor:          pointer;
-  font-family:     'Dosis', sans-serif !important;
+  font-family:     var(--font-sans) !important;
   font-weight:     700;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -160,38 +159,37 @@
 }
 
 .db-error-retry:hover {
-  /* Café oscuro al pasar el mouse */
-  color: #48271a;
+  /* CAMBIO: Blanco crema al pasar el mouse */
+  color: #fdfbf7;
 }
-
 
 /* ============================================================
    LABEL DE SECCIÓN (Sutil y Elegante)
    ============================================================ */
 
 .db-section-label {
-  font-size:      0.7rem; /* Un poco más pequeño para elegancia */
-  font-family:    'Dosis', sans-serif !important; /* Adiós al estilo consola */
+  font-size:      0.7rem; 
+  font-family:    var(--font-mono) !important; /* Estilo técnico para etiquetas de sección */
   font-weight:    700;
-  letter-spacing: 0.25em; /* Mantenemos el aire expandido */
+  letter-spacing: 0.25em; 
   text-transform: uppercase;
   
-  /* Gris tierra suave de la marca */
-  color:          #877d70; 
+  /* Café ceniza técnico */
+  color:          #7d6b63; 
   
   margin-bottom:  1rem;
-  display:        block;
-  opacity:        0.9;
+  display:         block;
+  opacity:         0.8; /* Un poco más sutil contra el fondo oscuro */
 }
 
 /* ============================================================
-   KPI CARDS — Fila de 5 Recepciones (Estilo Orgánico)
+   KPI CARDS — Fila de 5 Recepciones (Estilo Industrial)
    ============================================================ */
 
 .db-kpi-grid {
   display:               grid;
   grid-template-columns: repeat(2, 1fr);
-  gap:                   1rem; /* Un poco más de aire */
+  gap:                   1rem; 
 }
 
 @media (min-width: 640px) {
@@ -205,25 +203,29 @@
 .db-kpi-card {
   position:      relative;
   padding:       1.5rem 1.25rem;
-  border-radius: 20px; /* Bordes más suaves */
+  border-radius: 8px; /* Menos redondeado para consistencia industrial */
   overflow:      hidden;
-  /* Fondo blanco-hueso igual que la tarjeta de login */
-  background:    #ffffff;
-  border:        1px solid #e1d5af; /* Borde crema */
-  box-shadow:    0 4px 12px rgba(72, 39, 26, 0.04);
+  /* Fondo chocolate base para integrarse con el Dashboard */
+  background:    #1a110d;
+  /* Borde óxido sutil */
+  border:        1px solid #3d2b24; 
+  box-shadow:    0 4px 12px rgba(0, 0, 0, 0.2);
   animation:     fadeSlideUp 0.4s ease both;
-  transition:    transform 0.2s ease, box-shadow 0.2s ease;
+  transition:    transform 0.2s ease, border-color 0.2s ease;
 }
 
 .db-kpi-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(72, 39, 26, 0.08);
+  /* Brillo naranja al pasar el mouse */
+  border-color: #df6129;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* Estado resaltado (ej. Recepciones Aceptadas) */
 .db-kpi-card[data-accent="true"] {
-  background:    #fdf6ed; /* Un tono naranja crema muy suave */
-  border-color:  #df6129; /* Borde Naranja il Forno */
+  /* CAMBIO: Fondo chocolate profundo con borde naranja brillante */
+  background:    rgba(223, 97, 41, 0.08); 
+  border-color:  #df6129; 
 }
 
 .db-kpi-accent-line {
@@ -231,25 +233,28 @@
   top:        0;
   left:       0;
   right:      0;
-  height:     3px; /* Un poco más grueso para que se note el color */
-  background: linear-gradient(to right, #df6129, #f59e0b);
+  height:     3px; 
+  /* Gradiente industrial de Naranja a Óxido */
+  background: linear-gradient(to right, #df6129, #3d2b24);
 }
 
 .db-kpi-label {
   font-size:      0.7rem;
-  font-family:    'Dosis', sans-serif !important;
+  font-family:    var(--font-mono) !important;
   font-weight:    700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color:          #877d70; /* Gris tierra */
+  /* CAMBIO: Color café ceniza */
+  color:          #7d6b63; 
 }
 
 .db-kpi-value {
   font-size:   2.25rem;
   font-weight: 800;
   line-height: 1;
-  font-family: 'Dosis', sans-serif !important;
-  color:       #48271a; /* Café oscuro de la marca */
+  font-family: var(--font-sans) !important;
+  /* CAMBIO: Blanco crema para resaltar el valor técnico */
+  color:       #fdfbf7; 
   margin-top:  0.5rem;
 }
 
@@ -260,9 +265,9 @@
 
 .db-kpi-sub {
   font-size:   0.8rem;
-  font-family: 'Dosis', sans-serif !important;
+  font-family: var(--font-mono) !important; /* Fuente técnica para info secundaria */
   font-weight: 500;
-  color:       #a39a82; /* Crema oscuro */
+  color:       #7d6b63; /* Café ceniza */
   margin-top:  0.25rem;
 }
 
@@ -275,7 +280,7 @@
 .db-alerts-grid {
   display:               grid;
   grid-template-columns: 1fr;
-  /* Aumentamos un poco el gap para que el diseño premium no se vea amontonado */
+  /* Gap ajustado para equilibrio visual en el panel oscuro */
   gap:                   1.25rem; 
   margin-bottom:         1.5rem;
 }
@@ -283,30 +288,29 @@
 @media (min-width: 1024px) {
   .db-mid-grid,
   .db-alerts-grid {
-    /* Mantenemos tu estructura original de 3 columnas para escritorio */
+    /* Estructura de 3 columnas para escritorio */
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-
 /* ============================================================
-   PANEL — Contenedor Genérico (Estilo Premium)
+   PANEL — Contenedor Genérico (Estilo Industrial)
    ============================================================ */
 
 .db-panel {
-  border-radius: 20px; /* Bordes suaves consistentes */
+  border-radius: 8px; /* Bordes más rectos para look técnico */
   overflow:      hidden;
   display:       flex;
   flex-direction: column;
-  /* Fondo blanco y borde crema suave */
-  background:    #ffffff;
-  border:        1px solid #e1d5af;
-  box-shadow:    0 4px 15px rgba(72, 39, 26, 0.03);
-  transition:    box-shadow 0.3s ease;
+  /* Fondo chocolate y borde óxido */
+  background:    #1a110d;
+  border:        1px solid #3d2b24;
+  box-shadow:    0 4px 15px rgba(0, 0, 0, 0.2);
+  transition:    border-color 0.3s ease;
 }
 
 .db-panel:hover {
-  box-shadow: 0 8px 25px rgba(72, 39, 26, 0.06);
+  border-color: #7d6b63; /* Resalte sutil al pasar el mouse */
 }
 
 .db-panel-header {
@@ -314,9 +318,9 @@
   align-items:     center;
   justify-content: space-between;
   padding:         1rem 1.25rem;
-  /* Separador sutil en color crema */
-  border-bottom:   1px solid #f1ede2;
-  background:      rgba(252, 251, 247, 0.5); /* Un toque de textura al fondo del header */
+  /* Separador óxido */
+  border-bottom:   1px solid #3d2b24;
+  background:      rgba(0, 0, 0, 0.2); /* Fondo más profundo para el header */
 }
 
 .db-panel-title-wrap {
@@ -330,18 +334,18 @@
   font-weight:    800;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  /* Café tierra para el título */
-  color:          #877d70; 
-  font-family:    'Dosis', sans-serif !important;
+  /* Café ceniza para el título */
+  color:          #7d6b63; 
+  font-family:    var(--font-mono) !important;
 }
 
 /* Enlace "Ver todo →" */
 .db-panel-more {
   font-size:       0.75rem;
-  font-family:     'Dosis', sans-serif !important;
+  font-family:     var(--font-mono) !important;
   font-weight:     700;
-  /* Gris tierra que pasa a Naranja en hover */
-  color:           #a39a82; 
+  /* CAMBIO: Café ceniza que pasa a Naranja en hover */
+  color:           #7d6b63; 
   background:      transparent;
   border:          none;
   cursor:          pointer;
@@ -355,9 +359,9 @@
 
 .db-panel-body {
   flex: 1;
-  padding: 1.25rem; /* Aseguramos espacio interno para el contenido */
+  /* Espacio interno para el contenido sobre el fondo chocolate */
+  padding: 1.25rem; 
 }
-
 
 /* ============================================================
    ROW — Fila Clickable (Listados de Lotes/Docs)
@@ -367,18 +371,18 @@
   display:       flex;
   align-items:   center;
   gap:           0.75rem;
-  padding:       0.85rem 1.25rem; /* Un poco más de aire */
+  padding:       0.85rem 1.25rem; 
   cursor:        pointer;
-  /* Línea divisoria en crema suave */
-  border-bottom: 1px solid #f1ede2; 
+  /* Línea divisoria en color óxido sutil */
+  border-bottom: 1px solid #3d2b24; 
   transition:    all 0.2s ease;
   background:    transparent;
 }
 
 .db-row:hover {
-  /* Hover sutil en color hueso */
-  background: #fcfbf7;
-  padding-left: 1.5rem; /* Pequeño efecto de desplazamiento */
+  /* Hover en tono chocolate ligeramente más claro */
+  background: rgba(223, 97, 41, 0.05);
+  padding-left: 1.5rem; /* Efecto de desplazamiento mantenido */
 }
 
 .db-row:last-child {
@@ -391,16 +395,17 @@
   height:        0.5rem;
   border-radius: 50%;
   flex-shrink:   0;
-  box-shadow:    0 0 8px rgba(0, 0, 0, 0.05);
+  /* Sombra más marcada para que brille en el fondo oscuro */
+  box-shadow:    0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Texto principal de la fila (Nombre del Item/Proveedor) */
 .db-row-name {
   font-size:   0.95rem;
   font-weight: 700;
-  /* Café oscuro de il Forno */
-  color:       #48271a; 
-  font-family: 'Dosis', sans-serif !important;
+  /* CAMBIO: Blanco crema para destacar sobre el chocolate */
+  color:       #fdfbf7; 
+  font-family: var(--font-sans) !important;
   white-space: nowrap;
   overflow:    hidden;
   text-overflow: ellipsis;
@@ -408,13 +413,13 @@
 
 .db-row-sub {
   font-size:   0.8rem;
-  /* Gris tierra */
-  color:       #877d70; 
+  /* CAMBIO: Café ceniza técnico */
+  color:       #7d6b63; 
   font-weight: 500;
   white-space: nowrap;
   overflow:    hidden;
   text-overflow: ellipsis;
-  font-family: 'Dosis', sans-serif !important;
+  font-family: var(--font-mono) !important;
   margin-top:  0.1rem;
 }
 
@@ -422,14 +427,17 @@
 .db-row-value {
   font-size:   1rem;
   font-weight: 800;
-  font-family: 'Dosis', sans-serif !important;
-  margin-left: auto; /* Empuja el valor al extremo derecho */
+  font-family: var(--font-sans) !important;
+  margin-left: auto;
+  /* El color lo hereda o se puede forzar a #fdfbf7 si es necesario */
+  color: #fdfbf7;
 }
 
 .db-row-date {
   font-size:   0.75rem;
-  color:       #a39a82; /* Crema oscuro */
-  font-family: 'Dosis', sans-serif !important;
+  /* CAMBIO: Trigo ceniza para fechas */
+  color:       #a3938d; 
+  font-family: var(--font-mono) !important;
 }
 
 /* Badge de entidad (NIT, Prefijo, etc.) */
@@ -437,16 +445,15 @@
   font-size:      0.65rem;
   padding:        0.15rem 0.45rem;
   border-radius:  4px;
-  font-family:    'Dosis', sans-serif !important;
+  font-family:    var(--font-mono) !important;
   font-weight:    700;
   flex-shrink:    0;
-  /* Estilo neutro tipo "tag" */
-  background:     #f1ede2;
-  color:          #877d70;
-  border:         1px solid #e1d5af;
+  /* Estilo industrial: fondo oscuro con borde óxido */
+  background:     #2a1a14;
+  color:          #a3938d;
+  border:         1px solid #3d2b24;
   text-transform: uppercase;
 }
-
 
 /* ============================================================
    MINI STAT — Fila de Label + Valor (Estilo Limpio)
@@ -549,20 +556,21 @@
 
 /* ===== ESTADO LOTES — Texto Grande de Total (Estilo Impactante) ===== */
 .db-lots-panel {
-  padding: 1.5rem; /* Un poco más de aire para el número grande */
+  padding: 1.5rem; 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  /* El fondo y borde los hereda de .db-panel */
 }
 
 .db-lots-total {
-  /* Tamaño imponente para que sea el dato estrella del panel */
+  /* Tamaño imponente para lectura rápida en planta */
   font-size:   2.5rem; 
   font-weight: 800;
-  /* Cambiamos Mono por Dosis para suavizar el diseño técnico */
-  font-family: 'Dosis', sans-serif !important;
-  /* Café oscuro institucional */
-  color:       #48271a; 
+  /* CAMBIO: Fuente sans-serif de la app para máxima claridad numérica */
+  font-family: var(--font-sans) !important;
+  /* Blanco crema para destacar sobre el chocolate profundo */
+  color:       #fdfbf7; 
   line-height: 1;
   margin-bottom: 0.25rem;
   letter-spacing: -0.02em;
@@ -571,24 +579,24 @@
 .db-lots-sub {
   font-size:     0.85rem;
   font-weight:   600;
-  /* Gris tierra suave */
-  color:         #877d70; 
+  /* CAMBIO: Café ceniza técnico */
+  color:         #7d6b63; 
   margin-bottom: 1.25rem;
-  font-family:   'Dosis', sans-serif !important;
+  /* CAMBIO: Fuente técnica para etiquetas de sistema */
+  font-family:   var(--font-mono) !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-
 /* ============================================================
-   ACCIONES RÁPIDAS (Interactividad Corporativa)
+   ACCIONES RÁPIDAS (Interactividad Industrial)
    ============================================================ */
 
 .db-actions-panel {
   padding:        1.25rem;
   display:        flex;
   flex-direction: column;
-  gap:            0.75rem; /* Un poco más de separación */
+  gap:            0.75rem; 
 }
 
 .db-action-btn {
@@ -596,39 +604,40 @@
   align-items:   center;
   gap:           0.75rem;
   width:         100%;
-  border-radius: 12px; /* Redondeado consistente con el login */
+  border-radius: 8px; /* Menos redondeado para look técnico */
   padding:       0.85rem 1.15rem;
   text-align:    left;
   font-size:     0.95rem;
   font-weight:   600;
-  font-family:   'Dosis', sans-serif !important;
+  font-family:   var(--font-sans) !important;
   cursor:        pointer;
   transition:    all 0.2s ease;
 }
 
 /* BOTÓN PRINCIPAL (Ej: Nueva Recepción) */
 .db-action-btn[data-accent="true"] {
-  background:   #df6129; /* Naranja il Forno sólido */
+  background:   #df6129; /* Naranja Marca sólido */
   border:       1px solid #df6129;
-  color:        #ffffff; /* Texto blanco para máximo contraste */
-  box-shadow:   0 4px 12px rgba(223, 97, 41, 0.2);
+  color:        #fdfbf7; /* Blanco crema para contraste */
+  box-shadow:   0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .db-action-btn[data-accent="true"]:hover {
-  background:   #c45220; /* Un naranja más profundo */
+  background:   #c45220; 
   transform:    translateY(-2px);
-  box-shadow:   0 6px 15px rgba(223, 97, 41, 0.3);
+  box-shadow:   0 6px 15px rgba(223, 97, 41, 0.2);
 }
 
-/* BOTONES SECUNDARIOS  */
+/* BOTONES SECUNDARIOS */
 .db-action-btn[data-accent="false"] {
-  background:   #ffffff;
-  border:       1px solid #e1d5af; 
-  color:        #48271a; 
+  /* CAMBIO: Fondo oscuro y borde óxido */
+  background:   #2a1a14;
+  border:       1px solid #3d2b24; 
+  color:        #fdfbf7; 
 }
 
 .db-action-btn[data-accent="false"]:hover {
-  background:   #fcfbf7;
+  background:   #3d2b24;
   border-color: #df6129;
   color:        #df6129;
   transform:    translateY(-2px);
@@ -639,6 +648,7 @@
   width:  1.25rem;
   height: 1.25rem;
   stroke-width: 2.5;
+  /* El icono hereda el color del texto (currentColor) */
 }
 
 

@@ -212,41 +212,31 @@ export default function RecepcionesPage() {
         </div>
       </div>
 
-      {/* ── KPIs ── */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(2, 1fr)",
-        gap: "0.75rem",
-      }}>
-        {[
-          { label: "Total",      value: kpis.total,      color: "#CBD5E1" },
-          { label: "Liberadas",  value: kpis.liberadas,  color: "#86EFAC" },
-          { label: "Pendientes", value: kpis.pendientes, color: "#FCA5A5" },
-          { label: "Rechazadas", value: kpis.rechazadas, color: "#94A3B8" },
-        ].map(k => (
-          <div key={k.label} style={{
-            padding: "1rem 1.25rem",
-            borderRadius: "var(--radius-xl)",
-            background: "var(--dark-bg)",
-            border: "1px solid var(--dark-border)",
-          }}>
-            <p style={{
-              fontSize: "var(--text-xs)", fontFamily: "var(--font-mono)",
-              letterSpacing: "0.1em", textTransform: "uppercase",
-              color: "var(--text-muted)",
-            }}>
-              {k.label}
-            </p>
-            <p style={{
-              fontSize: "1.5rem", fontWeight: 700,
-              fontFamily: "var(--font-mono)", color: k.color,
-              marginTop: "0.25rem", lineHeight: 1,
-            }}>
-              {k.value}
-            </p>
-          </div>
-        ))}
-      </div>
+<div className="db-kpi-grid"> {/* Usamos la grilla que definimos antes */}
+  {[
+    { label: "Total",      value: kpis.total,      accent: "#fdfbf7" }, // Blanco crema
+    { label: "Liberadas",  value: kpis.liberadas,  accent: "#82c91e" }, // Verde éxito
+    { label: "Pendientes", value: kpis.pendientes, accent: "#df6129" }, // Naranja marca
+    { label: "Rechazadas", value: kpis.rechazadas, accent: "#ff6b6b" }, // Rojo alerta
+  ].map(k => (
+    <div 
+      key={k.label} 
+      className="db-kpi-card"
+      style={{ borderColor: k.label === "Pendientes" ? "#df6129" : undefined }}
+    >
+      {/* Línea de acento superior opcional */}
+      <div className="db-kpi-accent-line" style={{ background: k.accent }} />
+      
+      <p className="db-kpi-label">
+        {k.label}
+      </p>
+      
+      <p className="db-kpi-value" style={{ color: k.accent }}>
+        {k.value}
+      </p>
+    </div>
+  ))}
+</div>
 
       {/* ── Error ── */}
       {error && (

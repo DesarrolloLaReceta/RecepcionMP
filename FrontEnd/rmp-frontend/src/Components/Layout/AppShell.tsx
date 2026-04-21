@@ -7,17 +7,26 @@ import "./StylesLayout/Layout.css";
 const OPEN_KEY = "sidebar_open";
 
 export function AppShell() {
-  const [open, setOpen] = useState(() =>
-    window.innerWidth >= 1024 
-      ? localStorage.getItem(OPEN_KEY) !== "false"
-      : false
-  );
+  const [open, setOpen] = useState(() => {
+    // En escritorio (>= 1024), respetamos el localStorage. En móvil, siempre inicia cerrado.
+    if (window.innerWidth >= 1024) {
+      return localStorage.getItem(OPEN_KEY) !== "false";
+    }
+    return false;
+  });
 
-  const toggle = () =>
+  const toggle = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation(); // Evita que el clic "atraviese" hacia el backdrop
+    
     setOpen(prev => {
-      localStorage.setItem(OPEN_KEY, String(!prev));
-      return !prev;
+      const newState = !prev;
+      // Solo persistimos el estado si estamos en modo escritorio
+      if (window.innerWidth >= 1024) {
+        localStorage.setItem(OPEN_KEY, String(newState));
+      }
+      return newState;
     });
+  };
 
   const close = () => setOpen(false);
 
