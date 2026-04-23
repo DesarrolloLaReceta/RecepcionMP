@@ -4,6 +4,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using SistemaRecepcionMP.Domain.Services;
 
 namespace SistemaRecepcionMP.Application;
 
@@ -42,6 +43,8 @@ public static class DependencyInjection
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuditBehaviour<,>));
         });
+
+        services.AddScoped<RecepcionDomainService>();
 
         return services;
     }

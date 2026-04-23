@@ -14,7 +14,7 @@ public class LoteRecibido : BaseEntity
     public string? NumeroLoteProveedor { get; private set; }
     public string CodigoLoteInterno { get; private set; } = string.Empty;
     public DateOnly? FechaFabricacion { get; private set; }
-    public VidaUtil? VidaUtil { get; private set; } = null!;
+    public VidaUtil VidaUtil { get; private set; } = null!;
     public decimal CantidadRecibida { get; private set; }
     public decimal CantidadRechazada { get; private set; }
     public decimal CantidadAceptada => CantidadRecibida - CantidadRechazada;
@@ -28,7 +28,6 @@ public class LoteRecibido : BaseEntity
     public string? CodigoQr { get; private set; }
     public Guid RegistradoPor { get; private set; }
     public DateTime FechaRegistro { get; private set; } = DateTime.UtcNow;
-    public DateOnly FechaVencimiento { get; private set; }
 
     // Navegación
     public Recepcion Recepcion { get; init; } = null!;
@@ -72,7 +71,7 @@ public class LoteRecibido : BaseEntity
 
     NumeroLoteProveedor = numeroLoteProveedor;
     FechaFabricacion = fechaFabricacion;
-    FechaVencimiento = fechaVencimiento;
+    VidaUtil = new VidaUtil(fechaVencimiento);
 
     CantidadRecibida = cantidadRecibida;
     CantidadRechazada = cantidadRechazada;

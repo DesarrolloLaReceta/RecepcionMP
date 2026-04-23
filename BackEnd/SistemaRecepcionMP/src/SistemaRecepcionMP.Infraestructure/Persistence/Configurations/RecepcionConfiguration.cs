@@ -75,6 +75,11 @@ public sealed class RecepcionConfiguration : IEntityTypeConfiguration<Recepcion>
             .WithOne(t => t.Recepcion)
             .HasForeignKey(t => t.RecepcionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(r => r.Items)
+            .WithOne(i => i.Recepcion)
+            .HasForeignKey(i => i.RecepcionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 

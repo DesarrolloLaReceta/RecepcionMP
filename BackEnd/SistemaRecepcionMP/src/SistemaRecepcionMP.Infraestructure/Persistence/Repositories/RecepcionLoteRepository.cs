@@ -86,7 +86,7 @@ public sealed class RecepcionRepository : GenericRepository<Recepcion>, IRecepci
         public async Task<Recepcion?> GetWithItemsAndLotesAsync(Guid id)
         {
             return await DbSet
-                .Include(r => r.ProveedorId)
+                .Include(r => r.Proveedor)
                 .Include(r => r.Items)
                     .ThenInclude(i => i.DetalleOrdenCompra)
                 .Include(r => r.Items)
