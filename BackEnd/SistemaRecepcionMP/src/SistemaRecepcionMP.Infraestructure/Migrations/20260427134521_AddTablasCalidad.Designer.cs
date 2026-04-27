@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SistemaRecepcionMP.Infraestructure.Persistence;
 
@@ -11,9 +12,11 @@ using SistemaRecepcionMP.Infraestructure.Persistence;
 namespace SistemaRecepcionMP.Infraestructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260427134521_AddTablasCalidad")]
+    partial class AddTablasCalidad
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -626,55 +629,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .IsUnique();
 
                     b.ToTable("ItemsChecklist", (string)null);
-                });
-
-            modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.LavadoBotasManos", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Entrada")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FotoEvidenciaPath")
-                        .HasMaxLength(800)
-                        .HasColumnType("nvarchar(800)");
-
-                    b.Property<string>("Novedades")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("Observaciones")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("PersonasRevisadas")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Piso")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<string>("Turno")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<Guid>("UsuarioId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("LavadosBotasManos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.LiberacionLote", b =>
@@ -1572,17 +1526,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Checklist");
-                });
-
-            modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.LavadoBotasManos", b =>
-                {
-                    b.HasOne("SistemaRecepcionMP.Domain.Entities.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("SistemaRecepcionMP.Domain.Entities.LiberacionLote", b =>

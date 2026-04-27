@@ -16,6 +16,7 @@ public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     private ICheckListBPMRepository? _checklists;
     private INoConformidadRepository? _noConformidades;
     private ITemperaturaRegistroRepository? _temperaturas;
+    private ILavadoBotasManosRepository? _lavadosBotasManos;
     private IUsuarioRepository? _usuarios;
     private IBitacoraAuditoriaRepository? _bitacora;
     private IVerificacionInstalacionRepository? _verificacionesInstalaciones;
@@ -48,6 +49,9 @@ public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
     public ITemperaturaRegistroRepository Temperaturas
         => _temperaturas ??= new TemperaturaRegistroRepository(_context);
+
+    public ILavadoBotasManosRepository LavadosBotasManos
+        => _lavadosBotasManos ??= new LavadoBotasManosRepository(_context);
 
     public IUsuarioRepository Usuarios
         => _usuarios ??= new UsuarioRepository(_context);

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarLavadoBotasManos;
 using SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarVerificacionInstalacion;
 using SistemaRecepcionMP.API.Models;
 using System.Text.Json;
@@ -74,6 +75,37 @@ public sealed class CalidadController : BaseController
 
         var id = await Mediator.Send(command, ct);
 
+        return Created(string.Empty, new { id });
+    }
+
+    [HttpPost("lavado-botas-manos")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RegistrarLavadoBotasManos(
+        [FromForm] RegistrarLavadoBotasManosRequest request,
+        CancellationToken ct = default)
+    {
+        var command = new RegistrarLavadoBotasManosCommand
+        {
+            Fecha = request.Fecha,
+            Turno = request.Turno,
+            Piso = request.Piso,
+            Entrada = request.Entrada,
+            PersonasRevisadas = request.PersonasRevisadas,
+            Novedades = request.Novedades,
+            Observaciones = request.Observaciones
+        };
+
+        if (request.FotoEvidencia is { Length: > 0 })
+        {
+            await using var ms = new MemoryStream();
+            await request.FotoEvidencia.CopyToAsync(ms, ct);
+            command.FotoNombreArchivo = request.FotoEvidencia.FileName;
+            command.FotoContenido = ms.ToArray();
+        }
+
+        var id = await Mediator.Send(command, ct);
         return Created(string.Empty, new { id });
     }
 }

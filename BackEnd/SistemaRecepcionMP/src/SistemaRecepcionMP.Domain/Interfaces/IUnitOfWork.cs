@@ -13,6 +13,7 @@ public interface IUnitOfWork : IDisposable
     INoConformidadRepository NoConformidades { get; }
     IUsuarioRepository Usuarios { get; }
     ITemperaturaRegistroRepository Temperaturas { get; }
+    ILavadoBotasManosRepository LavadosBotasManos { get; }
     IBitacoraAuditoriaRepository Bitacora { get; }
     IVerificacionInstalacionRepository VerificacionesInstalaciones { get; }
 

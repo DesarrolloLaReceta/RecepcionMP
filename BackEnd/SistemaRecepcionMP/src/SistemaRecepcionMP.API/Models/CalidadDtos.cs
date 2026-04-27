@@ -32,3 +32,15 @@ public sealed class VerificacionInstalacionFilaDto
     public string PlanAccion { get; set; } = string.Empty;
     public string Responsable { get; set; } = string.Empty;
 }
+
+public sealed class RegistrarLavadoBotasManosRequest
+{
+    public DateTime Fecha { get; set; }
+    public string Turno { get; set; } = string.Empty;
+    public string Piso { get; set; } = string.Empty;
+    public string Entrada { get; set; } = string.Empty;
+    public int PersonasRevisadas { get; set; }
+    public string? Novedades { get; set; }
+    public string? Observaciones { get; set; }
+    public IFormFile? FotoEvidencia { get; set; }
+}

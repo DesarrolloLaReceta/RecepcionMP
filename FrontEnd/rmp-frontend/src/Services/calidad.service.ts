@@ -20,6 +20,16 @@ export interface GuardarVerificacionPayload {
   observacionesGenerales?: string;
 }
 
+export interface RegistrarLavadoBotasManosPayload {
+  fecha: string;
+  turno: string;
+  piso: string;
+  entrada: string;
+  personasRevisadas: number;
+  novedades?: string;
+  observaciones?: string;
+}
+
 export const calidadService = {
   async guardarVerificacionInstalaciones(
     payload: GuardarVerificacionPayload,
@@ -42,6 +52,26 @@ export const calidadService = {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
+    return data;
+  },
+
+  async registrarLavadoBotasManos(
+    payload: RegistrarLavadoBotasManosPayload,
+    fotoEvidencia: File | null
+  ): Promise<{ id: string }> {
+    const form = new FormData();
+    form.append("Fecha", payload.fecha);
+    form.append("Turno", payload.turno);
+    form.append("Piso", payload.piso);
+    form.append("Entrada", payload.entrada);
+    form.append("PersonasRevisadas", String(payload.personasRevisadas));
+    if (payload.novedades?.trim()) form.append("Novedades", payload.novedades.trim());
+    if (payload.observaciones?.trim()) form.append("Observaciones", payload.observaciones.trim());
+    if (fotoEvidencia) form.append("FotoEvidencia", fotoEvidencia);
+
+    const { data } = await apiClient.post("/api/Calidad/lavado-botas-manos", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return data;
   },
 };
