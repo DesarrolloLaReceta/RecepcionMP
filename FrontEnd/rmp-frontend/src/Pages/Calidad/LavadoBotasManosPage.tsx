@@ -78,6 +78,16 @@ export default function LavadoBotasManosPage() {
 
       <div className="nr-card">
         <div className="nr-form-grid-2">
+          <div className="field-group">
+            <label className="field-label">Fecha de Revisión</label>
+            <input
+              className="nr-search-input" // Usa la clase que ya tienes para los inputs
+              type="date"
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+            />
+          </div>
+
           <SelectField
             label="Turno"
             required
