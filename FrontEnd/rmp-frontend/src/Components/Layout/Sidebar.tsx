@@ -80,15 +80,9 @@ const NAV_MENU: NavGroup[] = [
         roles: [AppRoles.Calidad, AppRoles.Administrador],
       },
       {
-        label: "Verificación instalaciones",
-        icon: "verificacion",
-        path: ROUTES.VERIFICACION_INSTALACIONES,
-        roles: [AppRoles.Calidad, AppRoles.Administrador],
-      },
-      {
-        label: "Lavado botas y manos",
-        icon: "lavado",
-        path: ROUTES.LAVADO_BOTAS_MANOS,
+        label: "Gestión de Calidad",
+        icon: "liberacion", // O puedes usar "dashboard" si ese icono ya existe en tu proyecto
+        path: ROUTES.GESTION_CALIDAD, 
         roles: [AppRoles.Calidad, AppRoles.Administrador],
       },
       {

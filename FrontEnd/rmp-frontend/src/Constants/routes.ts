@@ -19,8 +19,7 @@ export const ROUTES = {
   // Calidad
   LIBERACION:       "/liberacion",
   NO_CONFORMIDADES: "/no-conformidades",
-  VERIFICACION_INSTALACIONES: "/calidad/verificacion-instalaciones",
-  LAVADO_BOTAS_MANOS: "/calidad/lavado-botas-manos",
+  GESTION_CALIDAD: "/calidad",
 
   // Órdenes de compra
   ORDENES_COMPRA:        "/ordenes-compra",

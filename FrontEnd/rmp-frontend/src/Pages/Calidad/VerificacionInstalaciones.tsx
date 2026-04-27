@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../../Components/UI/Index";
 import { SelectField, TextAreaField } from "../../Components/Forms/Index";
 import { ROUTES } from "../../Constants/routes";
-import { ZONAS_CALIDAD } from "../../constants/zonasCalidad";
+import { ZONAS_CALIDAD } from "../../Constants/zonasCalidad";
 import { calidadService, type VerificacionSeccionPayload } from "../../Services/calidad.service";
 import "../Recepciones/StylesRecepciones/NuevaRecepcionPage.css";
 import "./StylesCalidad/VerificacionInstalaciones.css";
@@ -153,7 +153,7 @@ export default function VerificacionInstalaciones() {
 
       const fotos = secciones.flatMap((seccion) => seccion.filas.flatMap((fila) => fila.fotos));
       await calidadService.guardarVerificacionInstalaciones(payload, fotos);
-      navigate(ROUTES.LIBERACION);
+      navigate(ROUTES.GESTION_CALIDAD);
     } catch (e) {
       console.error(e);
       setError("No fue posible guardar la verificación. Intenta de nuevo.");
@@ -165,7 +165,7 @@ export default function VerificacionInstalaciones() {
   return (
     <div className="nr-page">
       <div className="nr-header">
-        <button className="nr-back-btn" onClick={() => navigate(ROUTES.LIBERACION)} aria-label="Volver">
+        <button className="nr-back-btn" onClick={() => navigate(ROUTES.GESTION_CALIDAD)} aria-label="Volver">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
@@ -280,7 +280,7 @@ export default function VerificacionInstalaciones() {
         </div>
 
         <div className="nr-step-nav">
-          <button className="nr-back-step-btn" onClick={() => navigate(ROUTES.LIBERACION)}>← Atrás</button>
+          <button className="nr-back-step-btn" onClick={() => navigate(ROUTES.GESTION_CALIDAD)}>← Atrás</button>
           <Button variant="primary" size="md" loading={submitting} onClick={onGuardar}>
             Guardar
           </Button>

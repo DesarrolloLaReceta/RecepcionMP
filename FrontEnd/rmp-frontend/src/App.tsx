@@ -21,6 +21,7 @@ const RecepcionesPage   = lazy(() => import("./Pages/Recepciones/RecepcionesPage
 const NuevaRecepcionPage = lazy(() => import("./Pages/Recepciones/NuevaRecepcionPage"));
 const DetalleRecepcionPage = lazy(() => import("./Pages/Recepciones/DetalleRecepcionPage"));
 const LiberacionPage    = lazy(() => import("./Pages/Liberacion/LiberacionLotesPage"));
+const CalidadDashboard = lazy(() => import('./Pages/Calidad/CalidadDashboard'));
 const VerificacionInstalacionesPage = lazy(() => import("./Pages/Calidad/VerificacionInstalaciones"));
 const LavadoBotasManosPage = lazy(() => import("./Pages/Calidad/LavadoBotasManosPage"));
 const NoConformPage     = lazy(() => import("./Pages/NoConformidades/NoConformidadesPage"));
@@ -73,8 +74,9 @@ export default function App() {
               {/* Calidad + Admin */}
               <Route element={<ProtectedRoute requiredRoles={[AppRoles.Calidad, AppRoles.Administrador]} />}>
                 <Route path={ROUTES.LIBERACION} element={<LiberacionPage />} />
-                <Route path={ROUTES.VERIFICACION_INSTALACIONES} element={<VerificacionInstalacionesPage />} />
-                <Route path={ROUTES.LAVADO_BOTAS_MANOS} element={<LavadoBotasManosPage />} />
+                <Route path="/calidad" element={<CalidadDashboard />} />
+                <Route path="/calidad/verificacion-instalaciones" element={<VerificacionInstalacionesPage />} />
+                <Route path="/calidad/lavado-botas-manos" element={<LavadoBotasManosPage />} />
               </Route>
 
               {/* Calidad + Admin + Auditor */}
