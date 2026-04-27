@@ -67,6 +67,7 @@ public static class DependencyInjection
         
         // Si no tienes el IItemRepository agregado, agrégalo también:
         services.AddScoped<IItemRepository, ItemRepository>();
+        services.AddScoped<IVerificacionInstalacionRepository, VerificacionInstalacionRepository>();
 
         // ── Servicios de Dominio ──────────────────────────────────────────────
         // Lo registramos como Scoped para que viva lo que dura la petición HTTP

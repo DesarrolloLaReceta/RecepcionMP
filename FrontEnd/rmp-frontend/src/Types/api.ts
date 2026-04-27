@@ -4,6 +4,45 @@
  */
 
 export interface paths {
+    "/api/Auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["LoginRequest"];
+                    "text/json": components["schemas"]["LoginRequest"];
+                    "application/*+json": components["schemas"]["LoginRequest"];
+                };
+            };
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/Categorias": {
         parameters: {
             query?: never;
@@ -2649,6 +2688,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/Recepciones/{id}/registrar-lotes-completo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["RegistrarLotesCommand"];
+                    "text/json": components["schemas"]["RegistrarLotesCommand"];
+                    "application/*+json": components["schemas"]["RegistrarLotesCommand"];
+                };
+            };
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": boolean;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2847,6 +2929,19 @@ export interface components {
          * @enum {integer}
          */
         DecisionLiberacion: 0 | 1;
+        DetalleLoteDto: {
+            numeroLoteProveedor?: string | null;
+            /** Format: double */
+            cantidadRecibida?: number;
+            /** Format: date */
+            fechaVencimiento?: string;
+            /** Format: double */
+            temperaturaMedida?: number | null;
+            /** Format: int32 */
+            estadoSensorial?: number;
+            /** Format: int32 */
+            estadoRotulado?: number;
+        };
         DetalleOrdenCompraRequest: {
             /** Format: uuid */
             itemId?: string;
@@ -2894,6 +2989,11 @@ export interface components {
             /** Format: int32 */
             orden?: number;
         };
+        ItemConLotesDto: {
+            /** Format: uuid */
+            recepcionItemId?: string;
+            lotes?: components["schemas"]["DetalleLoteDto"][] | null;
+        };
         LiberarLoteCommand: {
             /** Format: uuid */
             loteId?: string;
@@ -2901,6 +3001,10 @@ export interface components {
             observaciones?: string | null;
             readonly entidadAfectada?: string | null;
             readonly registroId?: string | null;
+        };
+        LoginRequest: {
+            username?: string | null;
+            password?: string | null;
         };
         /**
          * Format: int32
@@ -2954,6 +3058,11 @@ export interface components {
             observaciones?: string | null;
             readonly entidadAfectada?: string | null;
             readonly registroId?: string | null;
+        };
+        RegistrarLotesCommand: {
+            /** Format: uuid */
+            recepcionId?: string;
+            items?: components["schemas"]["ItemConLotesDto"][] | null;
         };
         RegistrarResultadoChecklistCommand: {
             /** Format: uuid */

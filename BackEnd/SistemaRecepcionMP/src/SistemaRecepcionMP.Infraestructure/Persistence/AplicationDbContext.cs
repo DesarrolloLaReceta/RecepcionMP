@@ -47,6 +47,10 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<AccionCorrectiva> AccionesCorrectivas => Set<AccionCorrectiva>();
     public DbSet<ComentarioNoConformidad> ComentariosNoConformidad => Set<ComentarioNoConformidad>();
 
+    // ── Calidad: Verificación de instalaciones ───────────────────────────────
+    public DbSet<VerificacionInstalacion> VerificacionesInstalaciones => Set<VerificacionInstalacion>();
+    public DbSet<VerificacionInstalacionDetalle> VerificacionesInstalacionesDetalle => Set<VerificacionInstalacionDetalle>();
+
     // ── Auditoría ─────────────────────────────────────────────────────────────
     public DbSet<BitacoraAuditoria> BitacoraAuditoria => Set<BitacoraAuditoria>();
 

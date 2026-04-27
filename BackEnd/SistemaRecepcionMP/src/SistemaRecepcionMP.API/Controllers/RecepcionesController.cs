@@ -8,6 +8,7 @@ using SistemaRecepcionMP.Application.Features.Recepciones.Queries;
 using SistemaRecepcionMP.API.Models;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.AgregarItemRecepcion;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.FinalizarRecepcion;
+using SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarLotes;
 
 namespace SistemaRecepcionMP.API.Controllers;
 
@@ -158,4 +159,15 @@ public sealed class RecepcionesController : BaseController
         }, ct);
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/registrar-lotes-completo")] // <--- Añadimos el {id:guid}
+    public async Task<ActionResult<bool>> RegistrarLotes(Guid id, [FromBody] RegistrarLotesCommand command)
+    {
+        // Aseguramos que el ID de la URL sea el mismo del comando
+        if (id != command.RecepcionId) return BadRequest("El ID de recepción no coincide.");
+    
+        var result = await Mediator.Send(command);
+        return Ok(result);
+    }
+
 }

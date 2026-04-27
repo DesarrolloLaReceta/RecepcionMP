@@ -28,6 +28,7 @@ builder.Services.AddScoped<ICheckListBPMRepository, CheckListBPMRepository>();
 builder.Services.AddScoped<INoConformidadRepository, NoConformidadRepository>();
 builder.Services.AddScoped<ITemperaturaRegistroRepository, TemperaturaRegistroRepository>();
 builder.Services.AddScoped<IBitacoraAuditoriaRepository, BitacoraAuditoriaRepository>();
+builder.Services.AddScoped<IVerificacionInstalacionRepository, VerificacionInstalacionRepository>();
 builder.Services.AddScoped<ILDAPAuthRepository, LDAPAuthRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 

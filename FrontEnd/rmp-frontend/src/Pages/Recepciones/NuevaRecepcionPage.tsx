@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
 import { recepcionesService } from "../../Services/recepciones.service";
 import { ordenesCompraService, type OrdenCompraResumen } from "../../Services/ordenes-compra.service";
@@ -79,15 +80,7 @@ const TIPO_DOCUMENTO_LABELS: Record<TipoDocumento, string> = {
 
 // ── Tipos internos del wizard ─────────────────────────────────────────────────
 
-interface LoteForm {
-  detalleOcId:         string;
-  itemId:              string;
-  itemNombre:          string;
-  categoriaFrio:       boolean;
-  temperaturaMinima?:  number;
-  temperaturaMaxima?:  number;
-  unidadMedida:        string;
-  cantidadEsperada:    number;
+interface LoteDetalle {
   numeroLoteProveedor: string;
   fechaFabricacion:    string;
   fechaVencimiento:    string;
@@ -96,6 +89,18 @@ interface LoteForm {
   estadoSensorial:     EstadoSensorial;
   estadoRotulado:      EstadoRotulado;
   ubicacionDestino:    UbicacionDestino;
+}
+
+interface ItemConLotes {
+  detalleOcId:         string;
+  itemId:              string;
+  itemNombre:          string;
+  categoriaFrio:       boolean;
+  temperaturaMinima?:  number;
+  temperaturaMaxima?:  number;
+  unidadMedida:        string;
+  cantidadEsperada:    number;
+  lotes:               LoteDetalle[];
 }
 
 interface WizardState {
@@ -113,10 +118,21 @@ interface WizardState {
   plagasVisible:          boolean;
   documentosTransporteOk: boolean;
   obsInspeccion:          string;
-  lotes:                  LoteForm[];
+  itemsConLotes:          ItemConLotes[];
   documentos:             { tipo: TipoDocumento; archivo: File | null }[];
   recepcionId: string | null;
 }
+
+type StringFieldKey = {
+  [K in keyof WizardState]: WizardState[K] extends string ? K : never
+}[keyof WizardState];
+
+const createStringUpdater =
+  (setState: Dispatch<SetStateAction<WizardState>>) =>
+  <K extends StringFieldKey>(field: K) =>
+  (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setState(prev => ({ ...prev, [field]: e.target.value }));
+  };
 
 function initWizard(): WizardState {
   return {
@@ -128,12 +144,25 @@ function initWizard(): WizardState {
     limpiezaVehiculo: false, oloresExtranos: true, plagasVisible: true,
     documentosTransporteOk: false,
     obsInspeccion: "",
-    lotes: [], documentos: [],
+    itemsConLotes: [], documentos: [],
     recepcionId: null,
   };
 }
 
-function buildLotes(oc: OrdenCompraResumen): LoteForm[] {
+function buildEmptyLote(cantidadEsperada: number): LoteDetalle {
+  return {
+    numeroLoteProveedor: "",
+    fechaFabricacion: "",
+    fechaVencimiento: "",
+    cantidadRecibida: String(cantidadEsperada),
+    temperaturaMedida: "",
+    estadoSensorial: ESTADO_SENSORIAL.Aceptable,
+    estadoRotulado: ESTADO_ROTULADO.Conforme,
+    ubicacionDestino: UBICACION_DESTINO.CD,
+  };
+}
+
+function buildItemsConLotes(oc: OrdenCompraResumen): ItemConLotes[] {
   return oc.detalles.map(d => ({
     detalleOcId:         d.id,
     itemId:              d.itemId,
@@ -143,14 +172,7 @@ function buildLotes(oc: OrdenCompraResumen): LoteForm[] {
     temperaturaMaxima:   d.temperaturaMaxima,
     unidadMedida:        d.unidadMedida,
     cantidadEsperada:    d.cantidadSolicitada,
-    numeroLoteProveedor: "",
-    fechaFabricacion:    "",
-    fechaVencimiento:    "",
-    cantidadRecibida:    String(d.cantidadSolicitada),
-    temperaturaMedida:   "",
-    estadoSensorial:     ESTADO_SENSORIAL.Aceptable,
-    estadoRotulado:      ESTADO_ROTULADO.Conforme,
-    ubicacionDestino:    UBICACION_DESTINO.CD,
+    lotes: [buildEmptyLote(d.cantidadSolicitada)],
   }));
 }
 
@@ -226,7 +248,7 @@ function Paso1OC({
   state, setState, onConfirm, loadingOC,
 }: {
   state: WizardState;
-  setState: React.Dispatch<React.SetStateAction<WizardState>>;
+  setState: Dispatch<SetStateAction<WizardState>>;
   onConfirm: (oc: OrdenCompraResumen) => Promise<void>;
   loadingOC: boolean;
 }) {
@@ -249,7 +271,7 @@ function Paso1OC({
   }, [query]);
 
   const seleccionar = (oc: OrdenCompraResumen) =>
-    setState(p => ({ ...p, ocSeleccionada: oc, lotes: buildLotes(oc) }));
+    setState(p => ({ ...p, ocSeleccionada: oc }));
 
   return (
     <div className="nr-form-grid-1">
@@ -342,12 +364,10 @@ function Paso2Checkin({
   state, setState, onNext, onBack,
 }: {
   state: WizardState;
-  setState: React.Dispatch<React.SetStateAction<WizardState>>;
+  setState: Dispatch<SetStateAction<WizardState>>;
   onNext: () => void; onBack: () => void;
 }) {
-  const upd = (field: keyof WizardState) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setState(p => ({ ...p, [field]: e.target.value }));
+  const upd = createStringUpdater(setState);
 
   const valid = state.fechaRecepcion && state.horaLlegada;
 
@@ -412,10 +432,10 @@ function Paso3Inspeccion({
   state, setState, onNext, onBack,
 }: {
   state: WizardState;
-  setState: React.Dispatch<React.SetStateAction<WizardState>>;
+  setState: Dispatch<SetStateAction<WizardState>>;
   onNext: () => void; onBack: () => void;
 }) {
-  const tieneCongelados = state.lotes.some(l => l.categoriaFrio);
+  const tieneCongelados = state.itemsConLotes.some(i => i.categoriaFrio);
   const isValid = !tieneCongelados || (state.tempInicial.trim() !== "");
 
   const CHECKS: {
@@ -508,28 +528,41 @@ function Paso4Lotes({
   state, setState, onNext, onBack,
 }: {
   state: WizardState;
-  setState: React.Dispatch<React.SetStateAction<WizardState>>;
+  setState: Dispatch<SetStateAction<WizardState>>;
   onNext: () => void; onBack: () => void;
 }) {
+  const [activeItem, setActiveItem] = useState(0);
   const [activeLote, setActiveLote] = useState(0);
 
-  const updLote = (idx: number, field: keyof LoteForm, value: unknown) =>
-    setState(p => {
-      const lotes = [...p.lotes];
-      lotes[idx] = { ...lotes[idx], [field]: value };
-      return { ...p, lotes };
+  const updLote = (itemIdx: number, loteIdx: number, field: keyof LoteDetalle, value: unknown) =>
+    setState(prev => {
+      const itemsConLotes = [...prev.itemsConLotes];
+      const item = itemsConLotes[itemIdx];
+      const lotes = [...item.lotes];
+      lotes[loteIdx] = { ...lotes[loteIdx], [field]: value };
+      itemsConLotes[itemIdx] = { ...item, lotes };
+      return { ...prev, itemsConLotes };
     });
 
-  const lote = state.lotes[activeLote];
+  const addLote = (itemIdx: number) =>
+    setState(prev => {
+      const itemsConLotes = [...prev.itemsConLotes];
+      const item = itemsConLotes[itemIdx];
+      itemsConLotes[itemIdx] = {
+        ...item,
+        lotes: [...item.lotes, buildEmptyLote(item.cantidadEsperada)],
+      };
+      return { ...prev, itemsConLotes };
+    });
 
-  const isLoteCompleto = (lote: LoteForm): boolean => {
+  const isLoteCompleto = (item: ItemConLotes, lote: LoteDetalle): boolean => {
     if (!lote.fechaVencimiento) return false;
     const cantidad = Number(lote.cantidadRecibida);
     if (isNaN(cantidad) || cantidad <= 0) return false;
     if (lote.estadoSensorial === undefined) return false;
     if (lote.estadoRotulado === undefined) return false;
     if (lote.ubicacionDestino === undefined) return false;
-    if (lote.categoriaFrio) {
+    if (item.categoriaFrio) {
       if (!lote.temperaturaMedida || lote.temperaturaMedida.trim() === "") return false;
       const temp = Number(lote.temperaturaMedida);
       if (isNaN(temp)) return false;
@@ -537,8 +570,14 @@ function Paso4Lotes({
     return true;
   };
 
-  const completos = state.lotes.filter(isLoteCompleto).length;
-  const todosCompletos = completos === state.lotes.length;
+  const currentItem = state.itemsConLotes[activeItem];
+  const currentLote = currentItem?.lotes[activeLote];
+  const completos = state.itemsConLotes.reduce(
+    (acc, item) => acc + item.lotes.filter(l => isLoteCompleto(item, l)).length,
+    0
+  );
+  const totalLotes = state.itemsConLotes.reduce((acc, item) => acc + item.lotes.length, 0);
+  const todosCompletos = totalLotes > 0 && completos === totalLotes;
 
   const sensorialOpts = Object.entries(ESTADO_SENSORIAL_LABELS).map(
     ([k, v]) => ({ value: k, label: v })
@@ -550,10 +589,10 @@ function Paso4Lotes({
     ([k, v]) => ({ value: k, label: v })
   );
 
-  const tempFuera = lote.categoriaFrio &&
-    lote.temperaturaMedida !== "" && (
-      Number(lote.temperaturaMedida) < (lote.temperaturaMinima ?? -Infinity) ||
-      Number(lote.temperaturaMedida) > (lote.temperaturaMaxima ?? Infinity)
+  const tempFuera = currentItem?.categoriaFrio &&
+    currentLote?.temperaturaMedida !== "" && (
+      Number(currentLote?.temperaturaMedida) < (currentItem?.temperaturaMinima ?? -Infinity) ||
+      Number(currentLote?.temperaturaMedida) > (currentItem?.temperaturaMaxima ?? Infinity)
     );
 
   return (
@@ -562,33 +601,62 @@ function Paso4Lotes({
         <h2 className="nr-step-title">Registro de lotes</h2>
         <p className="nr-step-sub">
           Completa los datos de cada ítem.{" "}
-          <em>{completos}/{state.lotes.length}</em> lotes completos.
+          <em>{completos}/{totalLotes}</em> lotes completos.
         </p>
       </div>
 
       <div className="nr-lote-tabs">
-        {state.lotes.map((l, i) => {
-          const ok = isLoteCompleto(l);
+        {state.itemsConLotes.map((item, i) => {
+          const ok = item.lotes.every(l => isLoteCompleto(item, l));
           return (
             <button
-              key={i} className="nr-lote-tab"
-              data-active={activeLote === i}
-              onClick={() => setActiveLote(i)}
+              key={item.detalleOcId} className="nr-lote-tab"
+              data-active={activeItem === i}
+              onClick={() => {
+                setActiveItem(i);
+                setActiveLote(0);
+              }}
             >
               {ok && <span className="nr-lote-ok-dot" />}
-              {l.itemNombre}
+              {item.itemNombre}
             </button>
           );
         })}
       </div>
 
+      {currentItem && currentLote && (
       <div className="nr-lote-body">
+        <div className="nr-lote-tabs" style={{ marginBottom: "0.75rem" }}>
+          {currentItem.lotes.map((lote, loteIdx) => (
+            <button
+              key={`${currentItem.detalleOcId}-${loteIdx}`}
+              className="nr-lote-tab"
+              data-active={activeLote === loteIdx}
+              onClick={() => setActiveLote(loteIdx)}
+            >
+              {isLoteCompleto(currentItem, lote) && <span className="nr-lote-ok-dot" />}
+              Lote {loteIdx + 1}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="nr-lote-tab"
+            data-active={false}
+            onClick={() => {
+              addLote(activeItem);
+              setActiveLote(currentItem.lotes.length);
+            }}
+          >
+            + Agregar lote
+          </button>
+        </div>
+
         <div className="nr-form-grid-2">
           <TextField
             label="Lote proveedor"
             placeholder="Ej: LOT-20260101"
-            value={lote.numeroLoteProveedor}
-            onChange={e => updLote(activeLote, "numeroLoteProveedor", e.target.value)}
+            value={currentLote.numeroLoteProveedor}
+            onChange={e => updLote(activeItem, activeLote, "numeroLoteProveedor", e.target.value)}
           />
           <div className="nr-qty-wrap">
             <NumberField
@@ -597,10 +665,10 @@ function Paso4Lotes({
               placeholder="0"
               min={0}
               step={0.01}
-              value={lote.cantidadRecibida}
-              onChange={e => updLote(activeLote, "cantidadRecibida", e.target.value)}
+              value={currentLote.cantidadRecibida}
+              onChange={e => updLote(activeItem, activeLote, "cantidadRecibida", e.target.value)}
             />
-            <span className="nr-qty-um">{lote.unidadMedida}</span>
+            <span className="nr-qty-um">{currentItem.unidadMedida}</span>
           </div>
         </div>
 
@@ -608,19 +676,19 @@ function Paso4Lotes({
           <DateField
             label="Fecha fabricación"
             max={today}
-            value={lote.fechaFabricacion}
-            onChange={e => updLote(activeLote, "fechaFabricacion", e.target.value)}
+            value={currentLote.fechaFabricacion}
+            onChange={e => updLote(activeItem, activeLote, "fechaFabricacion", e.target.value)}
           />
           <DateField
             label="Fecha vencimiento *"
             required
             min={today}
-            value={lote.fechaVencimiento}
-            onChange={e => updLote(activeLote, "fechaVencimiento", e.target.value)}
+            value={currentLote.fechaVencimiento}
+            onChange={e => updLote(activeItem, activeLote, "fechaVencimiento", e.target.value)}
           />
         </div>
 
-        {lote.categoriaFrio && (
+        {currentItem.categoriaFrio && (
           <div>
             <div className="nr-qty-wrap">
               <NumberField
@@ -628,18 +696,18 @@ function Paso4Lotes({
                 required
                 placeholder="Ej: 3.2"
                 step={0.1}
-                value={lote.temperaturaMedida}
-                onChange={e => updLote(activeLote, "temperaturaMedida", e.target.value)}
+                value={currentLote.temperaturaMedida}
+                onChange={e => updLote(activeItem, activeLote, "temperaturaMedida", e.target.value)}
               />
               <span className="nr-qty-um">°C</span>
             </div>
             {tempFuera
               ? <p className="nr-temp-bad">
                   ⚠ Fuera del rango aceptable (
-                  {lote.temperaturaMinima}°C – {lote.temperaturaMaxima}°C)
+                  {currentItem.temperaturaMinima}°C – {currentItem.temperaturaMaxima}°C)
                 </p>
               : <p className="nr-temp-hint">
-                  Rango aceptable: {lote.temperaturaMinima}°C – {lote.temperaturaMaxima}°C
+                  Rango aceptable: {currentItem.temperaturaMinima}°C – {currentItem.temperaturaMaxima}°C
                 </p>
             }
           </div>
@@ -649,41 +717,48 @@ function Paso4Lotes({
           <SelectField
             label="Estado sensorial *"
             options={sensorialOpts}
-            value={String(lote.estadoSensorial)}
-            onChange={e => updLote(activeLote, "estadoSensorial", Number(e.target.value))}
+            value={String(currentLote.estadoSensorial)}
+            onChange={e => updLote(activeItem, activeLote, "estadoSensorial", Number(e.target.value))}
           />
           <SelectField
             label="Estado de rotulado *"
             options={rotuladoOpts}
-            value={String(lote.estadoRotulado)}
-            onChange={e => updLote(activeLote, "estadoRotulado", Number(e.target.value))}
+            value={String(currentLote.estadoRotulado)}
+            onChange={e => updLote(activeItem, activeLote, "estadoRotulado", Number(e.target.value))}
           />
         </div>
 
         <SelectField
           label="Ubicación destino *"
           options={ubicacionOpts}
-          value={String(lote.ubicacionDestino)}
-          onChange={e => updLote(activeLote, "ubicacionDestino", Number(e.target.value))}
+          value={String(currentLote.ubicacionDestino)}
+          onChange={e => updLote(activeItem, activeLote, "ubicacionDestino", Number(e.target.value))}
         />
       </div>
+      )}
 
-      {state.lotes.length > 1 && (
+      {state.itemsConLotes.length > 1 && (
         <div className="nr-lote-nav">
           <button
             className="nr-lote-nav-btn"
-            disabled={activeLote === 0}
-            onClick={() => setActiveLote(p => Math.max(0, p - 1))}
+            disabled={activeItem === 0}
+            onClick={() => {
+              setActiveItem(p => Math.max(0, p - 1));
+              setActiveLote(0);
+            }}
           >
             ← Ítem anterior
           </button>
           <span className="nr-lote-nav-idx">
-            {activeLote + 1} / {state.lotes.length}
+            {activeItem + 1} / {state.itemsConLotes.length}
           </span>
           <button
             className="nr-lote-nav-btn"
-            disabled={activeLote === state.lotes.length - 1}
-            onClick={() => setActiveLote(p => Math.min(state.lotes.length - 1, p + 1))}
+            disabled={activeItem === state.itemsConLotes.length - 1}
+            onClick={() => {
+              setActiveItem(p => Math.min(state.itemsConLotes.length - 1, p + 1));
+              setActiveLote(0);
+            }}
           >
             Ítem siguiente →
           </button>
@@ -699,7 +774,7 @@ function Paso4Lotes({
           onClick={onNext}
           iconRight="M9 18l6-6-6-6"
         >
-          Continuar ({completos}/{state.lotes.length})
+          Continuar ({completos}/{totalLotes})
         </Button>
       </div>
     </div>
@@ -712,10 +787,10 @@ function Paso5Documentos({
   state, setState, onSubmit, submitting, onBack,
 }: {
   state: WizardState;
-  setState: React.Dispatch<React.SetStateAction<WizardState>>;
+  setState: Dispatch<SetStateAction<WizardState>>;
   onSubmit: () => void; submitting: boolean; onBack: () => void;
 }) {
-  const necesitaFrio = state.lotes.some(l => l.categoriaFrio);
+  const necesitaFrio = state.itemsConLotes.some(i => i.categoriaFrio);
   const TIPOS_REQ = [
     TIPO_DOCUMENTO.RegistroINVIMA,
     TIPO_DOCUMENTO.COA,
@@ -789,7 +864,7 @@ function Paso5Documentos({
             ["Proveedor",  state.ocSeleccionada?.proveedorNombre],
             ["Fecha",      state.fechaRecepcion],
             ["Placa",      state.placaVehiculo || "—"],
-            ["Lotes",      `${state.lotes.filter(l => l.fechaVencimiento).length} de ${state.lotes.length}`],
+            ["Lotes",      `${state.itemsConLotes.reduce((acc, item) => acc + item.lotes.filter(l => l.fechaVencimiento).length, 0)} de ${state.itemsConLotes.reduce((acc, item) => acc + item.lotes.length, 0)}`],
             ["Documentos", `${state.documentos.length} adjunto(s)`],
           ].map(([k, v]) => (
             <div key={k} className="nr-summary-kv">
@@ -833,7 +908,11 @@ export default function NuevaRecepcionPage() {
         usuarioId: DEV_USER_ID,
         observacionesGenerales: state.observaciones || undefined,
       });
-      setState(prev => ({ ...prev, recepcionId }));
+      setState(prev => ({
+        ...prev,
+        recepcionId,
+        itemsConLotes: buildItemsConLotes(oc),
+      }));
       setStep(2);
     } catch (err) {
       console.error(err);
@@ -869,35 +948,37 @@ export default function NuevaRecepcionPage() {
         observaciones: state.obsInspeccion || undefined,
       });
 
-      // 2. Crear RecepcionItems para cada detalle de OC
-      const oc = state.ocSeleccionada!;
-      const itemIds = new Map<string, string>();
-      for (const detalle of oc.detalles) {
-        const { id: itemId } = await recepcionesService.agregarItem(recepcionId, {
-          detalleOrdenCompraId: detalle.id
+      // 2. Crear RecepcionItems y asociarles sus lotes
+      const items = [];
+      for (const item of state.itemsConLotes) {
+        const { id: recepcionItemId } = await recepcionesService.agregarItem(recepcionId, {
+          detalleOrdenCompraId: item.detalleOcId,
         });
-        itemIds.set(detalle.id, itemId);
+
+        const lotes = item.lotes
+          .filter(l => l.fechaVencimiento && Number(l.cantidadRecibida) > 0)
+          .map(l => ({
+            numeroLoteProveedor: l.numeroLoteProveedor || undefined,
+            cantidadRecibida: Number(l.cantidadRecibida),
+            fechaVencimiento: l.fechaVencimiento,
+            temperaturaMedida: l.temperaturaMedida ? Number(l.temperaturaMedida) : undefined,
+            estadoSensorial: l.estadoSensorial,
+            estadoRotulado: l.estadoRotulado,
+          }));
+
+        if (lotes.length > 0) {
+          items.push({ recepcionItemId, lotes });
+        }
       }
 
-      // 3. Registrar lotes asociados a cada RecepcionItem
-      for (const l of state.lotes) {
-        if (!l.fechaVencimiento || Number(l.cantidadRecibida) <= 0) continue;
-        const recepcionItemId = itemIds.get(l.detalleOcId);
-        if (!recepcionItemId) continue;
-        await recepcionesService.agregarLoteAItem(recepcionId, recepcionItemId, {
-          numeroLoteProveedor: l.numeroLoteProveedor || undefined,
-          fechaFabricacion: l.fechaFabricacion || undefined,
-          fechaVencimiento: l.fechaVencimiento,
-          cantidadRecibida: Number(l.cantidadRecibida),
-          unidadMedida: l.unidadMedida,
-          temperaturaMedida: l.temperaturaMedida ? Number(l.temperaturaMedida) : undefined,
-          estadoSensorial: l.estadoSensorial,
-          estadoRotulado: l.estadoRotulado,
-          ubicacionDestino: l.ubicacionDestino,
-        });
-      }
+      const command = {
+        recepcionId: recepcionId,
+        items,
+      };
 
-      // 4. Subir documentos
+      await recepcionesService.registrarLotesCompleto(recepcionId, command);
+
+      // 3. Subir documentos
       for (const doc of state.documentos) {
         if (doc.archivo) {
           await recepcionesService.subirDocumento(recepcionId, doc.tipo, doc.archivo);

@@ -6,6 +6,7 @@ import type {
   TipoDocumento,
   EstadoRecepcion,
   AgregarItemRecepcionCommand,
+  RegistrarLotesCommand,
 } from "../Types";
 
 // ─── DTOs DE RESPUESTA (basados en el backend) ─────────────────────────────────
@@ -193,5 +194,13 @@ export const recepcionesService = {
   async agregarLoteAItem(recepcionId: string, itemId: string, cmd: AgregarLoteAItemCommand): Promise<{ id: string }> {
     const { data } = await apiClient.post(`/api/Recepciones/${recepcionId}/items/${itemId}/lotes`, cmd);
     return data;
+  },
+
+  // Registro masivo de ítems con sus respectivos lotes
+  async registrarLotesCompleto(
+    recepcionId: string, 
+    cmd: RegistrarLotesCommand
+  ): Promise<void> {
+    await apiClient.post(`/api/Recepciones/${recepcionId}/registrar-lotes-completo`, cmd);
   },
 };

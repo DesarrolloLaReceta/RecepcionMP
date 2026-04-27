@@ -21,6 +21,7 @@ const RecepcionesPage   = lazy(() => import("./Pages/Recepciones/RecepcionesPage
 const NuevaRecepcionPage = lazy(() => import("./Pages/Recepciones/NuevaRecepcionPage"));
 const DetalleRecepcionPage = lazy(() => import("./Pages/Recepciones/DetalleRecepcionPage"));
 const LiberacionPage    = lazy(() => import("./Pages/Liberacion/LiberacionLotesPage"));
+const VerificacionInstalacionesPage = lazy(() => import("./Pages/Calidad/VerificacionInstalaciones"));
 const NoConformPage     = lazy(() => import("./Pages/NoConformidades/NoConformidadesPage"));
 const DetalleNoConformPage = lazy(() => import("./Pages/NoConformidades/DetalleNoConformidadPage"));
 const ProveedoresPage   = lazy(() => import("./Pages/Maestros/ProveedoresPage"));
@@ -71,6 +72,7 @@ export default function App() {
               {/* Calidad + Admin */}
               <Route element={<ProtectedRoute requiredRoles={[AppRoles.Calidad, AppRoles.Administrador]} />}>
                 <Route path={ROUTES.LIBERACION} element={<LiberacionPage />} />
+                <Route path={ROUTES.VERIFICACION_INSTALACIONES} element={<VerificacionInstalacionesPage />} />
               </Route>
 
               {/* Calidad + Admin + Auditor */}

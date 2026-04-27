@@ -38,6 +38,7 @@ const ICONS: Record<string, string> = {
   recepciones:   "M5 3h14a2 2 0 012 2v3H3V5a2 2 0 012-2z M3 8h18v13a2 2 0 01-2 2H5a2 2 0 01-2-2V8z M8 8v2 M16 8v2",
   lotes:         "M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z M7 7h.01",
   liberacion:    "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z",
+  verificacion:  "M9 2h6 M12 2v4 M7 8h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2 M9 14l2 2 4-4",
   noConformidad: "M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z M12 9v4 M12 17h.01",
   proveedores:   "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 11a4 4 0 100-8 4 4 0 000 8z M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75",
   items:         "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2 M9 5a2 2 0 002 2h2a2 2 0 002-2 M9 5a2 2 0 012-2h2a2 2 0 012 2 M9 12h6 M9 16h4",
@@ -75,6 +76,12 @@ const NAV_MENU: NavGroup[] = [
         label: "Liberación de lotes",
         icon:  "liberacion",
         path:  ROUTES.LIBERACION,
+        roles: [AppRoles.Calidad, AppRoles.Administrador],
+      },
+      {
+        label: "Verificación instalaciones",
+        icon: "verificacion",
+        path: ROUTES.VERIFICACION_INSTALACIONES,
         roles: [AppRoles.Calidad, AppRoles.Administrador],
       },
       {

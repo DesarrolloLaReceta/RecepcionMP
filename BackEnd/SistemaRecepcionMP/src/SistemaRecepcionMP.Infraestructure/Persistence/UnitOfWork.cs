@@ -18,6 +18,7 @@ public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     private ITemperaturaRegistroRepository? _temperaturas;
     private IUsuarioRepository? _usuarios;
     private IBitacoraAuditoriaRepository? _bitacora;
+    private IVerificacionInstalacionRepository? _verificacionesInstalaciones;
 
     public UnitOfWork(ApplicationDbContext context)
     {
@@ -53,6 +54,9 @@ public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
     public IBitacoraAuditoriaRepository Bitacora
         => _bitacora ??= new BitacoraAuditoriaRepository(_context);
+
+    public IVerificacionInstalacionRepository VerificacionesInstalaciones
+        => _verificacionesInstalaciones ??= new VerificacionInstalacionRepository(_context);
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => await _context.SaveChangesAsync(cancellationToken);

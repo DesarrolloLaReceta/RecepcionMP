@@ -14,6 +14,7 @@ public interface IUnitOfWork : IDisposable
     IUsuarioRepository Usuarios { get; }
     ITemperaturaRegistroRepository Temperaturas { get; }
     IBitacoraAuditoriaRepository Bitacora { get; }
+    IVerificacionInstalacionRepository VerificacionesInstalaciones { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
