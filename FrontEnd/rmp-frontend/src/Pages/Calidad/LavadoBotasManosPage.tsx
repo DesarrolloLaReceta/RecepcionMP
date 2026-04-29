@@ -23,36 +23,48 @@ export default function LavadoBotasManosPage() {
   const [observaciones, setObservaciones] = useState("");
   const [fotoEvidencia, setFotoEvidencia] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onGuardar = async () => {
+    // Validaciones locales (opcional, ya que el backend ahora es potente)
     if (!turno || !piso || !entrada) {
-      setError("Completa Turno, Piso y Entrada.");
-      return;
+        setFieldErrors({
+            General: ["Completa Turno, Piso y Entrada."]
+        });
+        return;
     }
 
     setSubmitting(true);
-    setError(null);
+    setFieldErrors({}); // Limpiar errores previos
+
     try {
-      await calidadService.registrarLavadoBotasManos(
-        {
-          fecha,
-          turno,
-          piso,
-          entrada,
-          personasRevisadas: Number(personasRevisadas || "0"),
-          novedades,
-          observaciones,
-        },
-        fotoEvidencia
-      );
-      navigate(ROUTES.LIBERACION);
-    } catch (e) {
-      console.error(e);
-      setError("No fue posible guardar la revisión de lavado.");
+        await calidadService.registrarLavadoBotasManos(
+            {
+                fecha,
+                turno,
+                piso,
+                entrada,
+                personasRevisadas: Number(personasRevisadas || "0"),
+                novedades,
+                observaciones,
+            },
+            fotoEvidencia
+        );
+        navigate(ROUTES.LIBERACION);
+    } catch (e: any) {
+        console.error(e);
+        
+        // SI EL BACKEND DEVUELVE EL ERROR ESTRUCTURADO (400)
+        if (e.response && e.response.status === 400) {
+            const erroresServidor = e.response.data.errors;
+            setFieldErrors(erroresServidor);
+        } else {
+            // Error genérico si se cae el servidor o algo falla
+            setFieldErrors({ General: ["No fue posible guardar la revisión."] });
+        }
     } finally {
-      setSubmitting(false);
+        setSubmitting(false);
     }
   };
 
@@ -70,9 +82,9 @@ export default function LavadoBotasManosPage() {
         </div>
       </div>
 
-      {error && (
+      {fieldErrors.General && (
         <div className="nr-error">
-          <p className="nr-error-text">{error}</p>
+          <p className="nr-error-text">{fieldErrors.General[0]}</p>
         </div>
       )}
 
@@ -95,6 +107,7 @@ export default function LavadoBotasManosPage() {
             value={turno}
             onChange={(e) => setTurno(e.target.value)}
             options={TURNOS.map((t) => ({ value: t, label: t }))}
+            error={fieldErrors.Turno?.[0]}
           />
           <SelectField
             label="Piso"
@@ -103,6 +116,7 @@ export default function LavadoBotasManosPage() {
             value={piso}
             onChange={(e) => setPiso(e.target.value)}
             options={PISOS.map((p) => ({ value: p, label: p }))}
+            error={fieldErrors.Piso?.[0]}
           />
         </div>
 
@@ -114,6 +128,7 @@ export default function LavadoBotasManosPage() {
             value={entrada}
             onChange={(e) => setEntrada(e.target.value)}
             options={ENTRADAS.map((ent) => ({ value: ent, label: ent }))}
+            error={fieldErrors.Entrada?.[0]}
           />
           <NumberField
             label="Personas revisadas"
@@ -121,6 +136,7 @@ export default function LavadoBotasManosPage() {
             min={0}
             value={personasRevisadas}
             onChange={(e) => setPersonasRevisadas(e.target.value)}
+            error={fieldErrors.PersonasRevisadas?.[0]}
           />
         </div>
 

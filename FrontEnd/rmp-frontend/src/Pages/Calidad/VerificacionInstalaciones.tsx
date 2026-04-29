@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useMemo, useRef, useState, useEffect, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../Components/UI/Index";
 import { SelectField, TextAreaField } from "../../Components/Forms/Index";
@@ -30,36 +30,48 @@ const SECCIONES_BASE: Seccion[] = [
     id: "instalaciones-fisicas",
     titulo: "Instalaciones físicas",
     filas: [
-      { id: "if-1", item: "Pisos y paredes en buen estado sanitario", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
-      { id: "if-2", item: "Iluminación y ventilación adecuadas", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
-      { id: "if-3", item: "Áreas delimitadas y señalizadas", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-1", item: "Existen sifones y rejillas de drenaje adecuadas y las aguas de lavado.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-2", item: "Las instalaciones eléctricas están debidamente aisladas y protegidas.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-3", item: "Los pisos se encuentran en buen estado, limpios, sin grietas, perforaciones o roturas y tiene la inclinación adecuada para efectos del drenaje.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-4", item: "Las paredes son de material resistente, de colores claros, de material no absorbente, lisas y de fácil limpieza y desinfección, se encuentran limpias y en buen estado.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-5", item: "Las uniones entre las paredes y entre éstas y los pisos son redondeadas, y están diseñadas de tal manera que evite la acumulación de polvo y suciedad.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-6", item: "Techos de fácil limpieza, desinfección y mantenimiento y se encuentra limpio.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-7", item: "No existe evidencia de formación de hongos y levaduras, desprendimiento superficial en techos o zonas altas.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-8", item: "Las puertas y cortinas se encuentran limpias, en buen estado, libres de corrosión o moho y bien ubicadas.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-9", item: "La sala se encuentra con adecuada iluminación en calidad e intensidad (natural o artificial).", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-10", item: "Las lamparas y accesorios son de seguridad, están protegidos para evitar la contaminación en caso de ruptura, están en buen estado y limpias.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-11", item: "La ventilación es adecuada y no afecta la calidad del producto ni la comodidad de los operarios.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-12", item: "La cocina cuenta con lavamanos de accionamiento no manual, dotado con dispensador de jabón desinfectante, toallas de manos desechables.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-13", item: "El dispensador de jabón de manos se encuentra limpio y en buen estado.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-14", item: "El dispensador de toallas de mano se encuentra limpio y en buen estado.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-15", item: "Son apropiados los avisos alusivos al lavado de manos.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-16", item: "Los equipos y utensilios en contacto directo con el alimento están fabricados en materiales resistentes al uso y a la corrosión, libres de grietas y defectos, lisos, no absorbentes, no recubiertas con pintura o materiales desprendibles, fáciles de limpiar y desinfectar.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "if-17", item: "La cava están construidos con materiales resistentes, fáciles de limpiar, impermeable, se encuentran en buen estado y no presentan condensaciones y estan equipados con termómetro de precisión de fácil lectura desde el exterior, se llevan lo registros.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
     ],
   },
   {
     id: "agua-potable",
     titulo: "Agua potable",
     filas: [
-      { id: "ap-1", item: "Puntos de agua limpios y operativos", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
-      { id: "ap-2", item: "No hay fugas ni estancamientos", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
-      { id: "ap-3", item: "Evidencia de control de potabilidad vigente", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "ap-1", item: "El suministro de agua y su presión es suficiente para todas las operaciones.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
     ],
   },
   {
     id: "residuos",
     titulo: "Residuos",
     filas: [
-      { id: "re-1", item: "Canecas identificadas por tipo de residuo", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
-      { id: "re-2", item: "Frecuencia de recolección adecuada", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
-      { id: "re-3", item: "Zona de almacenamiento temporal limpia", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "re-1", item: "El contenedor de residuos se encuentra en buen estado, cuenta con su tapa y bolsa de color según corresponda.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "re-2", item: "Son removidas las basuras con la frecuencia necesaria para evitar generación de olores, molestias sanitarias y proliferación de plagas.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
     ],
   },
   {
     id: "limpieza",
     titulo: "Limpieza",
     filas: [
-      { id: "li-1", item: "Plan de limpieza y desinfección visible", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
-      { id: "li-2", item: "Utensilios/equipos de aseo en buen estado", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
-      { id: "li-3", item: "No se observan residuos en superficies críticas", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "li-1", item: "Se encuentra limpia y ordenada el área de trabajo (mesones, utensilios, grameras).", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "li-2", item: "Los atomizadores para desinfectante se encuentran en buen estado y con la rotulación.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "li-3", item: "Los dispensadores de detergente se encuentran en buen estado y debidamente marcados.", calificacion: 2, hallazgos: "", planAccion: "", fotos: [] },
+      { id: "li-4", item: "Los utensilios de aseo se encuentran en buen estado y con el color correspondiente al área.", calificacion: 2, hallazgos: "", planAccion: "" , fotos: [] },
     ],
   },
 ];
@@ -76,8 +88,26 @@ export default function VerificacionInstalaciones() {
   const [secciones, setSecciones] = useState<Seccion[]>(SECCIONES_BASE);
   const [observacionesGenerales, setObservacionesGenerales] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  // --- ESTADOS DEL STEPPER Y CHECKLIST ---
+  const [currentStep, setCurrentStep] = useState(0);
+  const [progresoZonas, setProgresoZonas] = useState<{ nombre: string; completada: boolean }[]>(() => {
+    const hoy = new Date().toLocaleDateString();
+    const guardado = localStorage.getItem('progreso_calidad_total');
+    if (guardado) {
+      const { fecha, zonas } = JSON.parse(guardado);
+      if (fecha === hoy) return zonas;
+    }
+    return ZONAS_CALIDAD.map(z => ({ nombre: z, completada: false }));
+  });
+
+  // Guardar progreso cada vez que cambie
+  useEffect(() => {
+    const hoy = new Date().toLocaleDateString();
+    localStorage.setItem('progreso_calidad_total', JSON.stringify({ fecha: hoy, zonas: progresoZonas }));
+  }, [progresoZonas]);
 
   const seccionesCumplimiento = useMemo(() => {
     return secciones.map((seccion) => ({
@@ -91,12 +121,7 @@ export default function VerificacionInstalaciones() {
     return calcCumplimiento(todasLasFilas);
   }, [secciones]);
 
-  const actualizarFila = (
-    seccionId: string,
-    filaId: string,
-    key: keyof ItemFila,
-    value: string | Calificacion | File[]
-  ) => {
+  const actualizarFila = (seccionId: string, filaId: string, key: keyof ItemFila, value: string | Calificacion | File[]) => {
     setSecciones((prev) =>
       prev.map((seccion) =>
         seccion.id !== seccionId
@@ -123,12 +148,13 @@ export default function VerificacionInstalaciones() {
 
   const onGuardar = async () => {
     if (!zona) {
-      setError("Selecciona una zona para registrar la verificación.");
+      setFieldErrors({ Zona: ["Selecciona una zona para registrar la verificación."] });
       return;
     }
 
     setSubmitting(true);
-    setError(null);
+    setFieldErrors({});
+
     try {
       const payload: {
         zona: string;
@@ -153,10 +179,18 @@ export default function VerificacionInstalaciones() {
 
       const fotos = secciones.flatMap((seccion) => seccion.filas.flatMap((fila) => fila.fotos));
       await calidadService.guardarVerificacionInstalaciones(payload, fotos);
+      
+      // Marcar como completada en la lista visual
+      setProgresoZonas(prev => prev.map(z => z.nombre === zona ? { ...z, completada: true } : z));
+      
       navigate(ROUTES.GESTION_CALIDAD);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setError("No fue posible guardar la verificación. Intenta de nuevo.");
+      if (e.response && e.response.status === 400) {
+        setFieldErrors(e.response.data.errors);
+      } else {
+        setFieldErrors({ General: ["No fue posible guardar la verificación."] });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -173,34 +207,96 @@ export default function VerificacionInstalaciones() {
         <div>
           <p className="nr-header-label">Calidad</p>
           <h1 className="nr-header-title">Verificación de instalaciones planta</h1>
+          <span className="vi-cumplimiento" style={{ fontSize: '12px' }}>
+            Paso {currentStep + 1} de {secciones.length + 2}
+          </span>
         </div>
       </div>
 
-      {error && (
+      {fieldErrors.General && (
         <div className="nr-error">
-          <p className="nr-error-text">{error}</p>
+          <p className="nr-error-text">{fieldErrors.General[0]}</p>
+        </div>
+      )}
+      
+      {Object.keys(fieldErrors).length > 0 && !fieldErrors.General && (
+        <div className="nr-error">
+          <p className="nr-error-text">Hay errores en el formulario. Por favor revisa los campos marcados.</p>
         </div>
       )}
 
       <div className="nr-card">
-        <div className="nr-form-grid-1">
-          <SelectField
-            label="Zona"
-            required
-            placeholder="Selecciona una zona"
-            value={zona}
-            onChange={(e) => setZona(e.target.value)}
-            options={ZONAS_CALIDAD.map((z) => ({ value: z, label: z }))}
-          />
-        </div>
+        
+        {/* --- PASO 0: HOJA DE RUTA INTERACTIVA --- */}
+        {currentStep === 0 && (
+          <div className="vi-section">
+            <h2 className="nr-step-title" style={{ marginBottom: '0.5rem' }}>Plan de Inspección</h2>
+            <p style={{ color: '#a3938d', fontSize: '14px', marginBottom: '1.5rem' }}>
+              Selecciona la zona que vas a verificar a continuación:
+            </p>
+    
+            <div className="vi-checklist-grid" style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', 
+              gap: '12px', 
+              marginBottom: '2rem' 
+            }}>
+              {progresoZonas.map((item, i) => {
+                const esSeleccionada = zona === item.nombre;
+        
+                return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setZona(item.nombre)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    // Estilos dinámicos según estado
+                    background: esSeleccionada ? 'rgba(223, 97, 41, 0.2)' : 'rgba(255,255,255,0.03)',
+                    border: esSeleccionada ? '2px solid #df6129' : '1px solid #3d2b24',
+                    color: item.completada ? '#86efac' : (esSeleccionada ? '#fdfbf7' : '#a3938d')
+                  }}
+                >
+                  <span style={{ fontSize: '16px' }}>
+                    {item.completada ? '✅' : (esSeleccionada ? '🔘' : '⚪')}
+                  </span>
+                  <span style={{ 
+                    fontWeight: esSeleccionada ? 'bold' : 'normal',
+                    textDecoration: item.completada ? 'line-through' : 'none'
+                  }}>
+                    {item.nombre}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-        {secciones.map((seccion) => {
+            {/* Mensaje de validación visual */}
+            {!zona && (
+              <p style={{ color: '#ff6b6b', fontSize: '12px', marginTop: '-1rem' }}>
+                * Debes seleccionar una zona para poder continuar.
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* --- PASOS DE SECCIONES --- */}
+        {secciones.map((seccion, seccionIndex) => {
+          if (currentStep !== seccionIndex + 1) return null;
           const cumplimiento = seccionesCumplimiento.find((s) => s.id === seccion.id)?.cumplimiento ?? 0;
+  
           return (
             <section key={seccion.id} className="vi-section">
               <div className="vi-section-header">
                 <h2 className="nr-step-title">{seccion.titulo}</h2>
-                <span className="vi-cumplimiento">Cumplimiento: {cumplimiento}%</span>
+                <span className="vi-cumplimiento">Cumplimiento Sección: {cumplimiento}%</span>
               </div>
 
               <div className="vi-grid-head">
@@ -211,79 +307,102 @@ export default function VerificacionInstalaciones() {
                 <span>Fotos</span>
               </div>
 
-              {seccion.filas.map((fila) => (
-                <div key={fila.id} className="vi-grid-row">
-                  <p className="vi-item-text">{fila.item}</p>
-                  <SelectField
-                    label=""
-                    value={fila.calificacion}
-                    onChange={(e) => actualizarFila(seccion.id, fila.id, "calificacion", Number(e.target.value) as Calificacion)}
-                    options={[
-                      { value: 1, label: "1" },
-                      { value: 2, label: "2" },
-                    ]}
-                  />
-                  <TextAreaField
-                    label=""
-                    rows={2}
-                    placeholder="Hallazgos encontrados..."
-                    value={fila.hallazgos}
-                    onChange={(e) => actualizarFila(seccion.id, fila.id, "hallazgos", e.target.value)}
-                  />
-                  <TextAreaField
-                    label=""
-                    rows={2}
-                    placeholder="Plan de acción..."
-                    value={fila.planAccion}
-                    onChange={(e) => actualizarFila(seccion.id, fila.id, "planAccion", e.target.value)}
-                  />
-                  <div className="vi-fotos-col">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      iconLeft="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8"
-                      onClick={() => fileRefs.current[fila.id]?.click()}
-                    >
-                      Cámara
-                    </Button>
-                    <input
-                      ref={(el) => {
-                        fileRefs.current[fila.id] = el;
-                      }}
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      multiple
-                      className="vi-file-input"
-                      onChange={(e) => onSelectFotos(seccion.id, fila.id, e)}
+              {seccion.filas.map((fila, indexFila) => {
+                const baseKey = `Secciones[${seccionIndex}].Filas[${indexFila}]`;
+                return (
+                  <div key={fila.id} className="vi-grid-row">
+                    <p className="vi-item-text">{fila.item}</p>
+                    <SelectField
+                      label=""
+                      value={fila.calificacion}
+                      onChange={(e) => actualizarFila(seccion.id, fila.id, "calificacion", Number(e.target.value) as Calificacion)}
+                      options={[{ value: 1, label: "1" }, { value: 2, label: "2" }]}    
+                      error={fieldErrors[`${baseKey}.Calificacion`]?.[0]}
                     />
-                    <p className="vi-fotos-count">{fila.fotos.length} foto(s)</p>
+                    <TextAreaField
+                      label=""
+                      rows={2}
+                      placeholder="Hallazgos..."
+                      value={fila.hallazgos}
+                      onChange={(e) => actualizarFila(seccion.id, fila.id, "hallazgos", e.target.value)}
+                      error={fieldErrors[`${baseKey}.Hallazgos`]?.[0]}
+                    />
+                    <TextAreaField
+                      label=""
+                      rows={2}
+                      placeholder="Plan de acción..."
+                      value={fila.planAccion}
+                      onChange={(e) => actualizarFila(seccion.id, fila.id, "planAccion", e.target.value)}
+                      error={fieldErrors[`${baseKey}.PlanAccion`]?.[0]}
+                    />
+                    <div className="vi-fotos-col">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        iconLeft="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8"
+                        onClick={() => fileRefs.current[fila.id]?.click()}
+                      >Cámara</Button>
+                      <input
+                        ref={(el) => { fileRefs.current[fila.id] = el; }}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        multiple
+                        className="vi-file-input"
+                        onChange={(e) => onSelectFotos(seccion.id, fila.id, e)}
+                      />
+                      <p className="vi-fotos-count">{fila.fotos.length} foto(s)</p>
+                      {fieldErrors[`${baseKey}.Fotos`] && (
+                        <span className="error-text-small">{fieldErrors[`${baseKey}.Fotos`][0]}</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </section>
           );
         })}
 
-        <TextAreaField
-          label="Observaciones generales"
-          rows={3}
-          placeholder="Observaciones finales de la verificación..."
-          value={observacionesGenerales}
-          onChange={(e) => setObservacionesGenerales(e.target.value)}
-        />
+        {/* --- PASO FINAL --- */}
+        {currentStep === secciones.length + 1 && (
+          <div className="vi-section">
+            <h2 className="nr-step-title">Finalizar Verificación</h2>
+            <TextAreaField
+              label="Observaciones generales"
+              rows={4}
+              placeholder="Observaciones finales de la verificación..."
+              value={observacionesGenerales}
+              onChange={(e) => setObservacionesGenerales(e.target.value)}
+              error={fieldErrors.ObservacionesGenerales?.[0]}
+            />
+            <div className="vi-total" style={{ marginTop: '2rem' }}>
+              <p className="nr-step-title">Cumplimiento Total de la Planta</p>
+              <p className="vi-total-value">{cumplimientoTotal}%</p>
+            </div>
+          </div>
+        )}
 
-        <div className="vi-total">
-          <p className="nr-step-title">Cumplimiento total</p>
-          <p className="vi-total-value">{cumplimientoTotal}%</p>
-        </div>
+        {/* --- NAVEGACIÓN --- */}
+        <div className="nr-step-nav" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between' }}>
+          <button 
+            className="nr-back-step-btn" 
+            onClick={() => currentStep === 0 ? navigate(ROUTES.GESTION_CALIDAD) : setCurrentStep(prev => prev - 1)}
+          >
+            ← {currentStep === 0 ? "Salir" : "Anterior"}
+          </button>
 
-        <div className="nr-step-nav">
-          <button className="nr-back-step-btn" onClick={() => navigate(ROUTES.GESTION_CALIDAD)}>← Atrás</button>
-          <Button variant="primary" size="md" loading={submitting} onClick={onGuardar}>
-            Guardar
-          </Button>
+          {currentStep < secciones.length + 1 ? (
+            <Button 
+              variant="primary" 
+              onClick={() => setCurrentStep(prev => prev + 1)}
+              disabled={currentStep === 0 && !zona}
+            >Siguiente →</Button>
+          ) : (
+            <Button variant="primary" size="md" loading={submitting} onClick={onGuardar}>
+              Guardar Verificación
+            </Button>
+          )}
         </div>
       </div>
     </div>
