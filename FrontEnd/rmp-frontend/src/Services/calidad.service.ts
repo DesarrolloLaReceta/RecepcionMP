@@ -30,6 +30,19 @@ export interface RegistrarLavadoBotasManosPayload {
   observaciones?: string;
 }
 
+export interface RegistrarLiberacionCocinaPayload {
+  turno: string;
+  cocina: string;
+  observacionesInspeccion: string;
+  nombreResponsable: string;
+  cargoResponsable: string;
+  observacionesGenerales: string;
+  inspeccion: {
+    item: string;
+    estado: string;
+  }[];
+}
+
 export const calidadService = {
   async guardarVerificacionInstalaciones(
     payload: GuardarVerificacionPayload,
@@ -72,6 +85,14 @@ export const calidadService = {
     const { data } = await apiClient.post("/api/Calidad/lavado-botas-manos", form, {
       headers: { "Content-Type": "multipart/form-data" },
     });
+    return data;
+  },
+
+  async registrarLiberacionCocina(
+    payload: RegistrarLiberacionCocinaPayload
+  ): Promise<{ id: string }> {
+    // Al enviar el objeto directo, axios lo manda como application/json por defecto
+    const { data } = await apiClient.post("/api/Calidad/RegistrarLiberacionCocina", payload);
     return data;
   },
 };

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarLavadoBotasManos;
 using SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarVerificacionInstalacion;
+using SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarLiberacionCocina;
 using SistemaRecepcionMP.API.Models;
 using System.Text.Json;
 
@@ -106,6 +107,25 @@ public sealed class CalidadController : BaseController
         }
 
         var id = await Mediator.Send(command, ct);
+        return Created(string.Empty, new { id });
+    }
+
+    [HttpPost("liberacion-cocinas")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RegistrarLiberacionCocina(
+        [FromBody] RegistrarLiberacionCocinaCommand command,
+        CancellationToken ct = default)
+    {
+        // Al ser un JSON directo ([FromBody]), no necesitamos deserializar manualmente
+        if (command is null)
+            return BadRequest("El payload de liberación es obligatorio.");
+
+        if (string.IsNullOrWhiteSpace(command.Cocina) || string.IsNullOrWhiteSpace(command.Turno))
+            return BadRequest("La cocina y el turno son campos obligatorios.");
+
+        var id = await Mediator.Send(command, ct);
+
         return Created(string.Empty, new { id });
     }
 }

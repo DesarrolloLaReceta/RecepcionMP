@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../Constants/routes';
 import './StylesCalidad/CalidadDashboard.css';
 
 const CalidadDashboard = () => {
@@ -21,6 +22,16 @@ const CalidadDashboard = () => {
       path: '/calidad/lavado-botas-manos',
       color: '#3498db'
     },
+
+    {
+      title: 'Liberación de Cocina', // <--- NUEVA TARJETA
+      subtitle: 'CAL-FORMU-145-01',
+      description: 'Inspección diaria de áreas de preparación, equipos y personal.',
+      icon: '🍳',
+      path: ROUTES.LIBERACION_COCINA || '/calidad/liberacion-cocina',
+      color: '#27ae60' // Un verde profesional
+    },
+
     {
       title: 'Próximos Formularios',
       subtitle: 'Calidad La Receta',

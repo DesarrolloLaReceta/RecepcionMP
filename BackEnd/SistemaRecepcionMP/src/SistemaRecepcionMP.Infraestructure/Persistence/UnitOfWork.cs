@@ -1,6 +1,7 @@
 using SistemaRecepcionMP.Domain.Interfaces;
 using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 using SistemaRecepcionMP.Infraestructure.Persistence.Repositories;
+using SistemaRecepcionMP.Domain.Entities;
 
 namespace SistemaRecepcionMP.Infraestructure.Persistence;
 
@@ -20,6 +21,7 @@ public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     private IUsuarioRepository? _usuarios;
     private IBitacoraAuditoriaRepository? _bitacora;
     private IVerificacionInstalacionRepository? _verificacionesInstalaciones;
+    private IRepository<LiberacionCocina>? _liberacionesCocinas;
 
     public UnitOfWork(ApplicationDbContext context)
     {
@@ -61,6 +63,9 @@ public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
     public IVerificacionInstalacionRepository VerificacionesInstalaciones
         => _verificacionesInstalaciones ??= new VerificacionInstalacionRepository(_context);
+
+    public IRepository<LiberacionCocina> LiberacionesCocinas 
+        => _liberacionesCocinas ??= new LiberacionCocinaRepository(_context);
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => await _context.SaveChangesAsync(cancellationToken);

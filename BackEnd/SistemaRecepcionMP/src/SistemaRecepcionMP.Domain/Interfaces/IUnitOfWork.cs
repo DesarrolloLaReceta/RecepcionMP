@@ -1,5 +1,6 @@
 using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 
+
 namespace SistemaRecepcionMP.Domain.Interfaces;
 
 public interface IUnitOfWork : IDisposable
@@ -16,6 +17,7 @@ public interface IUnitOfWork : IDisposable
     ILavadoBotasManosRepository LavadosBotasManos { get; }
     IBitacoraAuditoriaRepository Bitacora { get; }
     IVerificacionInstalacionRepository VerificacionesInstalaciones { get; }
+    IRepository<SistemaRecepcionMP.Domain.Entities.LiberacionCocina> LiberacionesCocinas { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
