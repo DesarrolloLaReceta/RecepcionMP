@@ -5,27 +5,41 @@ import { SelectField, TextAreaField, TextField } from "../../Components/Forms/In
 import { ROUTES } from "../../Constants/routes";
 import { calidadService } from "../../Services/calidad.service";
 import "../Recepciones/StylesRecepciones/NuevaRecepcionPage.css";
+// IMPORTANTE: Asegúrate de que el archivo CSS nuevo esté en esta ruta
+import "./StylesCalidad/LiberacionCocina.css"; 
 
 const TURNOS = ["Mañana", "Tarde", "Noche"] as const;
-const COCINAS = ["Caliente", "Wajaca", "Panatti", "Salsa","Ravioli","Panaderia","Hornos Piso 1","Preliminar","Postres","Helados","Proceso Pollo","Proceso Res","Proceso Cerdo","Tombler","Hornos 2","Tajado y Empaque"] as const;
+const COCINAS = [
+  "Caliente", "Wajaca", "Panatti", "Salsa", "Ravioli", "Panaderia", 
+  "Hornos Piso 1", "Preliminar", "Postres", "Helados", "Proceso Pollo", 
+  "Proceso Res", "Proceso Cerdo", "Tombler", "Hornos 2", "Tajado y Empaque"
+] as const;
+
+// Lista actualizada a 11 ítems para mayor detalle
 const ITEMS_INSPECCION = [
-  "Pisos, paredes y techos limpios",
-  "Equipos y utensilios desinfectados",
-  "Personal con dotación completa",
-  "Ausencia de plagas",
-  "Materias primas rotuladas"
+  "La cocina cuenta con los utensilios necesarios para realizar los procesos:",
+  "Las paredes, techos, mesones y pisos se encuentran limpios y en buen estado:",
+  "Los atomizadores para desinfectante se encunetran en buen estado y marcados:",
+  "Los equipos y utensilios que seran utilizados para los procesos se encuentran limpias:",
+  "Las uniones entre paredes se encuentran limpias y en buen estado:",
+  "Las puertas y cortinas se encuentran limpias y en buen estado:",
+  "La cocina cuenta con dispensador de jabon y toallas adecuado:",
+  "Los contenedores de residuos se encuentran limpios, con su tapa y bolsa de color:",
+  "Los manipuladores cuentan con EPP adecuado para realizar los procesos:",
+  "Se hizo desinfeccion en las areas, superficies, utensilios, equipos y ambientes en la cocina:",
+  "Las rejillas de los desagues se encuentran limpias y en su respectivo lugar:"
 ];
 
 export default function LiberacionCocinaPage() {
   const navigate = useNavigate();
+  
+  const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10));
   const [turno, setTurno] = useState("");
   const [cocina, setCocina] = useState("");
   const [nombreResponsable, setNombreResponsable] = useState("");
   const [cargoResponsable, setCargoResponsable] = useState("");
-  const [obsInspeccion, setObsInspeccion] = useState("");
   const [obsGenerales, setObsGenerales] = useState("");
   
-  // Estado para la tabla de inspección
   const [inspeccion, setInspeccion] = useState(
     ITEMS_INSPECCION.map(item => ({ item, estado: "Cumple" }))
   );
@@ -40,8 +54,19 @@ export default function LiberacionCocinaPage() {
   };
 
   const onGuardar = async () => {
-    if (!turno || !cocina || !nombreResponsable) {
-      setFieldErrors({ General: ["Completa Turno, Cocina y Responsable."] });
+    const newErrors: Record<string, string[]> = {};
+    
+    if (!fecha) newErrors.Fecha = ["La fecha es obligatoria."];
+    if (!turno) newErrors.Turno = ["El turno es obligatorio."];
+    if (!cocina) newErrors.Cocina = ["La cocina es obligatoria."];
+    if (!nombreResponsable.trim()) newErrors.NombreResponsable = ["El nombre del responsable es obligatorio."];
+    if (!cargoResponsable.trim()) newErrors.CargoResponsable = ["El cargo del responsable es obligatorio."];
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors({ 
+        ...newErrors,
+        General: ["Por favor, completa todos los campos obligatorios."] 
+      });
       return;
     }
 
@@ -50,13 +75,14 @@ export default function LiberacionCocinaPage() {
 
     try {
       await calidadService.registrarLiberacionCocina({
+        fecha,
         turno,
         cocina,
         nombreResponsable,
         cargoResponsable,
-        observacionesInspeccion: obsInspeccion,
+        observacionesInspeccion: "", // Campo requerido por la interfaz pero opcional en lógica
         observacionesGenerales: obsGenerales,
-        inspeccion // Enviamos el array de objetos {item, estado}
+        inspeccion 
       });
       navigate(ROUTES.GESTION_CALIDAD);
     } catch (e: any) {
@@ -77,7 +103,7 @@ export default function LiberacionCocinaPage() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
         </button>
         <div>
-          <p className="nr-header-label">Calidad</p>
+          <p className="nr-header-label">Gestión de Calidad</p>
           <h1 className="nr-header-title">Liberación de Cocina Diaria</h1>
         </div>
       </div>
@@ -86,6 +112,21 @@ export default function LiberacionCocinaPage() {
         {fieldErrors.General && <div className="nr-error"><p className="nr-error-text">{fieldErrors.General[0]}</p></div>}
 
         <div className="nr-form-grid-2">
+          <div className="field-group">
+            <label className="field-label">Fecha de Inspección <span style={{color: '#df6129'}}>*</span></label>
+            <input
+                className="nr-search-input"
+                type="date"
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+                style={{ 
+                  borderColor: fieldErrors.Fecha ? '#ef4444' : '#3d2b24',
+                  width: '100%'
+                }}
+              />
+            {fieldErrors.Fecha && <span className="nr-error-text" style={{fontSize: '12px'}}>{fieldErrors.Fecha[0]}</span>}
+          </div>
+
           <SelectField
             label="Turno"
             required
@@ -94,6 +135,9 @@ export default function LiberacionCocinaPage() {
             options={TURNOS.map(t => ({ value: t, label: t }))}
             error={fieldErrors.Turno?.[0]}
           />
+        </div>
+
+        <div className="nr-form-grid-2" style={{ marginTop: '15px' }}>
           <SelectField
             label="Cocina"
             required
@@ -102,52 +146,50 @@ export default function LiberacionCocinaPage() {
             options={COCINAS.map(c => ({ value: c, label: c }))}
             error={fieldErrors.Cocina?.[0]}
           />
+          <div /> 
         </div>
 
-        {/* TABLA DE INSPECCIÓN */}
-        <div style={{ marginTop: '20px' }}>
-          <label className="field-label">Lista de Inspección</label>
-          <div className="nr-card" style={{ padding: '0', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-              <thead style={{ backgroundColor: '#f8fafc' }}>
-                <tr>
-                  <th style={{ textAlign: 'left', padding: '12px' }}>Ítem</th>
-                  <th style={{ textAlign: 'center', padding: '12px' }}>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inspeccion.map((row, idx) => (
-                  <tr key={idx} style={{ borderTop: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: '12px' }}>{row.item}</td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
-                      <select 
-                        className="nr-search-input" 
-                        style={{ padding: '4px', height: 'auto' }}
-                        value={row.estado}
-                        onChange={(e) => handleEstadoChange(idx, e.target.value)}
-                      >
-                        <option value="Cumple">Cumple</option>
-                        <option value="No cumple">No cumple</option>
-                        <option value="No aplica">N/A</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* SECCIÓN DE LA TABLA CON LAS NUEVAS CLASES CSS */}
+        <div className="lc-section">
+          <div className="lc-grid-head">
+            <div>Ítem de Inspección</div>
+            <div style={{ textAlign: 'center' }}>Estado</div>
           </div>
+
+          {inspeccion.map((row, idx) => (
+            <div key={idx} className="lc-grid-row">
+              <div className="lc-item-text">
+                {row.item}
+              </div>
+              <div>
+                <select 
+                  className="lc-select"
+                  value={row.estado}
+                  onChange={(e) => handleEstadoChange(idx, e.target.value)}
+                >
+                  <option value="Cumple">Cumple</option>
+                  <option value="No cumple">No cumple</option>
+                  <option value="No aplica">N/A</option>
+                </select>
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="nr-form-grid-2" style={{ marginTop: '20px' }}>
           <TextField
             label="Nombre Responsable"
+            required
             value={nombreResponsable}
             onChange={(e) => setNombreResponsable(e.target.value)}
+            error={fieldErrors.NombreResponsable?.[0]}
           />
           <TextField
             label="Cargo Responsable"
+            required
             value={cargoResponsable}
             onChange={(e) => setCargoResponsable(e.target.value)}
+            error={fieldErrors.CargoResponsable?.[0]}
           />
         </div>
 
@@ -160,7 +202,14 @@ export default function LiberacionCocinaPage() {
 
         <div className="nr-step-nav">
           <button className="nr-back-step-btn" onClick={() => navigate(ROUTES.GESTION_CALIDAD)}>← Atrás</button>
-          <Button variant="primary" loading={submitting} onClick={onGuardar}>Guardar Liberación</Button>
+          <Button 
+            variant="primary" 
+            loading={submitting} 
+            onClick={onGuardar}
+            disabled={!nombreResponsable.trim() || !cargoResponsable.trim()}
+          >
+            Guardar Liberación
+          </Button>
         </div>
       </div>
     </div>

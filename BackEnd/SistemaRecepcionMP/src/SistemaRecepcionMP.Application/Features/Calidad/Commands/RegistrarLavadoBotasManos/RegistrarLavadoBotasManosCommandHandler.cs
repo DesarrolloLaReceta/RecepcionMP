@@ -43,7 +43,10 @@ public sealed class RegistrarLavadoBotasManosCommandHandler : IRequestHandler<Re
             request.Novedades,
             request.Observaciones,
             rutaFoto,
-            _currentUserService.UserId);
+            _currentUserService.UserId,
+            request.NombreResponsable.Trim(), // Ahora sí está dentro del constructor
+            request.CargoResponsable.Trim()    // Sin coma aquí porque es el último parámetro
+        ); // <--- El paréntesis y el punto y coma van AQUÍ    
 
         await _unitOfWork.LavadosBotasManos.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

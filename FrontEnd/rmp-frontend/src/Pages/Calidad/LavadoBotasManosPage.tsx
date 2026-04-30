@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../Components/UI/Index";
-import { NumberField, SelectField, TextAreaField } from "../../Components/Forms/Index";
+import { NumberField, SelectField, TextAreaField, TextField } from "../../Components/Forms/Index";
 import { ROUTES } from "../../Constants/routes";
 import { calidadService } from "../../Services/calidad.service";
 import "../Recepciones/StylesRecepciones/NuevaRecepcionPage.css";
@@ -14,6 +14,8 @@ const today = new Date().toISOString().slice(0, 10);
 
 export default function LavadoBotasManosPage() {
   const navigate = useNavigate();
+  
+  // Estados básicos
   const [fecha, setFecha] = useState(today);
   const [turno, setTurno] = useState("");
   const [piso, setPiso] = useState("");
@@ -21,22 +23,28 @@ export default function LavadoBotasManosPage() {
   const [personasRevisadas, setPersonasRevisadas] = useState("0");
   const [novedades, setNovedades] = useState("");
   const [observaciones, setObservaciones] = useState("");
+  
+  // Estados del Responsable (Nuevos campos para La Receta Y CIA S.A.S.)
+  const [nombreResponsable, setNombreResponsable] = useState("");
+  const [cargoResponsable, setCargoResponsable] = useState("");
+  
+  // Estados de control y archivos
   const [fotoEvidencia, setFotoEvidencia] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onGuardar = async () => {
-    // Validaciones locales (opcional, ya que el backend ahora es potente)
-    if (!turno || !piso || !entrada) {
+    // Validación local: Aseguramos que los nuevos campos no estén vacíos
+    if (!turno || !piso || !entrada || !nombreResponsable || !cargoResponsable) {
         setFieldErrors({
-            General: ["Completa Turno, Piso y Entrada."]
+            General: ["Por favor, completa todos los campos obligatorios, incluyendo los datos del responsable."]
         });
         return;
     }
 
     setSubmitting(true);
-    setFieldErrors({}); // Limpiar errores previos
+    setFieldErrors({});
 
     try {
         await calidadService.registrarLavadoBotasManos(
@@ -48,20 +56,22 @@ export default function LavadoBotasManosPage() {
                 personasRevisadas: Number(personasRevisadas || "0"),
                 novedades,
                 observaciones,
+                nombreResponsable, // Enviado al Command del Backend
+                cargoResponsable   // Enviado al Command del Backend
             },
             fotoEvidencia
         );
-        navigate(ROUTES.LIBERACION);
+        
+        // Redirección tras éxito (puedes ajustarla según tu flujo)
+        navigate(ROUTES.GESTION_CALIDAD); 
     } catch (e: any) {
         console.error(e);
         
-        // SI EL BACKEND DEVUELVE EL ERROR ESTRUCTURADO (400)
         if (e.response && e.response.status === 400) {
             const erroresServidor = e.response.data.errors;
             setFieldErrors(erroresServidor);
         } else {
-            // Error genérico si se cae el servidor o algo falla
-            setFieldErrors({ General: ["No fue posible guardar la revisión."] });
+            setFieldErrors({ General: ["No fue posible guardar la revisión. Verifica la conexión con la API."] });
         }
     } finally {
         setSubmitting(false);
@@ -89,11 +99,12 @@ export default function LavadoBotasManosPage() {
       )}
 
       <div className="nr-card">
+        {/* Sección de Ubicación y Tiempo */}
         <div className="nr-form-grid-2">
           <div className="field-group">
             <label className="field-label">Fecha de Revisión</label>
             <input
-              className="nr-search-input" // Usa la clase que ya tienes para los inputs
+              className="nr-search-input"
               type="date"
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
@@ -109,6 +120,9 @@ export default function LavadoBotasManosPage() {
             options={TURNOS.map((t) => ({ value: t, label: t }))}
             error={fieldErrors.Turno?.[0]}
           />
+        </div>
+
+        <div className="nr-form-grid-2">
           <SelectField
             label="Piso"
             required
@@ -118,9 +132,6 @@ export default function LavadoBotasManosPage() {
             options={PISOS.map((p) => ({ value: p, label: p }))}
             error={fieldErrors.Piso?.[0]}
           />
-        </div>
-
-        <div className="nr-form-grid-2">
           <SelectField
             label="Entrada"
             required
@@ -130,8 +141,31 @@ export default function LavadoBotasManosPage() {
             options={ENTRADAS.map((ent) => ({ value: ent, label: ent }))}
             error={fieldErrors.Entrada?.[0]}
           />
+        </div>
+
+        {/* Nueva Sección: Responsable de la revisión */}
+        <div className="nr-form-grid-2" style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
+          <TextField
+            label="Nombre del Responsable"
+            required
+            placeholder="Quién realiza la inspección"
+            value={nombreResponsable}
+            onChange={(e) => setNombreResponsable(e.target.value)}
+            error={fieldErrors.NombreResponsable?.[0]}
+          />
+          <TextField
+            label="Cargo del Responsable"
+            required
+            placeholder="Ej. Analista de Calidad"
+            value={cargoResponsable}
+            onChange={(e) => setCargoResponsable(e.target.value)}
+            error={fieldErrors.CargoResponsable?.[0]}
+          />
+        </div>
+
+        <div className="nr-form-grid-1">
           <NumberField
-            label="Personas revisadas"
+            label="Total Personas Revisadas"
             required
             min={0}
             value={personasRevisadas}
@@ -141,61 +175,71 @@ export default function LavadoBotasManosPage() {
         </div>
 
         <TextAreaField
-          label="Novedades"
+          label="Novedades Encontradas"
           rows={3}
-          placeholder="Novedades durante la revisión..."
+          placeholder="Describe si hubo incumplimientos..."
           value={novedades}
           onChange={(e) => setNovedades(e.target.value)}
+          error={fieldErrors.Novedades?.[0]}
         />
 
         <TextAreaField
-          label="Observaciones"
+          label="Observaciones Adicionales"
           rows={3}
-          placeholder="Observaciones generales..."
+          placeholder="Notas generales de la jornada..."
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
+          error={fieldErrors.Observaciones?.[0]}
         />
 
+        {/* Sección de Evidencia Fotográfica */}
         <div className="nr-form-grid-1">
-          <label className="field-label">Foto evidencia</label>
-  
+          <label className="field-label">Foto de Evidencia</label>
           <div className="vi-fotos-col" style={{ alignItems: 'flex-start' }}>
             <Button
               type="button"
               variant="secondary"
               size="sm"
-              /* El SVG de la cámara que ya usas */
               iconLeft="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8"
               onClick={() => fileInputRef.current?.click()}
-          >
-            Cámara
-          </Button>
+            >
+              Capturar Foto
+            </Button>
 
-           <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            style={{ display: 'none' }} /* Esto lo oculta igual que vi-file-input */
-            onChange={(e) => setFotoEvidencia(e.target.files?.[0] ?? null)}
-          />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              style={{ display: 'none' }}
+              onChange={(e) => setFotoEvidencia(e.target.files?.[0] ?? null)}
+            />
 
-          <p className="vi-fotos-count">
-            {fotoEvidencia ? "1 foto(s) cargada(s)" : "0 foto(s)"}
-          </p>
-    
+            <p className="vi-fotos-count" style={{ marginTop: '8px' }}>
+              {fotoEvidencia ? "✅ Imagen lista para subir" : "⚠️ Sin evidencia fotográfica"}
+            </p>
+            
             {fotoEvidencia && (
-              <p className="nr-step-sub" style={{ marginTop: '4px', fontSize: '10px' }}>
-                {fotoEvidencia.name}
-              </p>
+              <span style={{ fontSize: '11px', color: '#888' }}>{fotoEvidencia.name}</span>
             )}
           </div>
         </div>
 
-        <div className="nr-step-nav">
-          <button className="nr-back-step-btn" onClick={() => navigate(ROUTES.GESTION_CALIDAD)}>← Atrás</button>
-          <Button variant="primary" size="md" loading={submitting} onClick={onGuardar}>
-            Guardar
+        <div className="nr-step-nav" style={{ marginTop: '30px' }}>
+          <button 
+            type="button"
+            className="nr-back-step-btn" 
+            onClick={() => navigate(ROUTES.GESTION_CALIDAD)}
+          >
+            ← Cancelar
+          </button>
+          <Button 
+            variant="primary" 
+            size="md" 
+            loading={submitting} 
+            onClick={onGuardar}
+          >
+            Finalizar Registro
           </Button>
         </div>
       </div>

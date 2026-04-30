@@ -14,7 +14,9 @@ public sealed class RegistrarLavadoBotasManosCommand : IRequest<Guid>, IAuditabl
     public string? Observaciones { get; set; }
     public string? FotoNombreArchivo { get; set; }
     public byte[]? FotoContenido { get; set; }
-
+    public string NombreResponsable { get; set; } = string.Empty;
+    public string CargoResponsable { get; set; } = string.Empty;
+    
     public string EntidadAfectada => "LavadoBotasManos";
     public string RegistroId => Turno;
 }

@@ -18,6 +18,8 @@ export interface GuardarVerificacionPayload {
   cumplimientoTotal: number;
   secciones: VerificacionSeccionPayload[];
   observacionesGenerales?: string;
+  nombreResponsable: string;
+  cargoResponsable: string;
 }
 
 export interface RegistrarLavadoBotasManosPayload {
@@ -28,9 +30,12 @@ export interface RegistrarLavadoBotasManosPayload {
   personasRevisadas: number;
   novedades?: string;
   observaciones?: string;
+  nombreResponsable: string;
+  cargoResponsable: string;
 }
 
 export interface RegistrarLiberacionCocinaPayload {
+  fecha: string;
   turno: string;
   cocina: string;
   observacionesInspeccion: string;
@@ -77,6 +82,8 @@ export const calidadService = {
     form.append("Turno", payload.turno);
     form.append("Piso", payload.piso);
     form.append("Entrada", payload.entrada);
+    form.append("NombreResponsable", payload.nombreResponsable);
+    form.append("CargoResponsable", payload.cargoResponsable);
     form.append("PersonasRevisadas", String(payload.personasRevisadas));
     if (payload.novedades?.trim()) form.append("Novedades", payload.novedades.trim());
     if (payload.observaciones?.trim()) form.append("Observaciones", payload.observaciones.trim());

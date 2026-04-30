@@ -11,6 +11,10 @@ public sealed class LavadoBotasManos : BaseEntity
     public string? Observaciones { get; private set; }
     public string? FotoEvidenciaPath { get; private set; }
     public Guid UsuarioId { get; private set; }
+    
+    // Propiedades nuevas
+    public string NombreResponsable { get; private set; } = string.Empty;
+    public string CargoResponsable { get; private set; } = string.Empty;
 
     public Usuario Usuario { get; private set; } = null!;
 
@@ -25,7 +29,9 @@ public sealed class LavadoBotasManos : BaseEntity
         string? novedades,
         string? observaciones,
         string? fotoEvidenciaPath,
-        Guid usuarioId)
+        Guid usuarioId,
+        string nombreResponsable, // Argumento 10
+        string cargoResponsable)  // Argumento 11
     {
         Fecha = fecha;
         Turno = turno;
@@ -36,6 +42,9 @@ public sealed class LavadoBotasManos : BaseEntity
         Observaciones = observaciones;
         FotoEvidenciaPath = fotoEvidenciaPath;
         UsuarioId = usuarioId;
+        
+        // Asignación de los nuevos campos
+        NombreResponsable = nombreResponsable;
+        CargoResponsable = cargoResponsable;
     }
 }
-

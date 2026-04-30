@@ -11,7 +11,8 @@ namespace SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarLibe
     }
 
     public class RegistrarLiberacionCocinaCommand : IRequest<int>
-    {
+    {   
+        public DateTime Fecha { get; set; }
         public string Turno { get; set; } = string.Empty;
         public string Cocina { get; set; } = string.Empty;
         public List<ItemInspeccionDto> Inspeccion { get; set; } = new();

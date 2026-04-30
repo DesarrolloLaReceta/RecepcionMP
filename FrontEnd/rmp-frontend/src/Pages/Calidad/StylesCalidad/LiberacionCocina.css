@@ -1,0 +1,66 @@
+/* LiberacionCocina.css */
+
+.lc-section {
+  border: 1px solid #3d2b24;
+  border-radius: var(--radius-lg);
+  background: #21140f; /* Fondo oscuro consistente con la app */
+  padding: 1rem;
+  margin-top: 20px;
+}
+
+.lc-grid-head,
+.lc-grid-row {
+  display: grid;
+  /* Ajustado a 2 columnas: Item y Estado */
+  grid-template-columns: 2fr 0.8fr; 
+  gap: 1rem;
+  align-items: center;
+}
+
+.lc-grid-head {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a3938d;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #3d2b24;
+}
+
+.lc-grid-row {
+  padding: 0.75rem 0;
+  border-bottom: 1px dashed #3d2b24;
+}
+
+.lc-grid-row:last-child {
+  border-bottom: none;
+}
+
+/* AQUÍ ESTÁ EL CAMBIO CLAVE PARA LA LEGIBILIDAD */
+.lc-item-text {
+  color: #fdfbf7; /* Texto claro para resaltar sobre el café oscuro */
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+
+.lc-select {
+  background-color: #3d302b;
+  color: #ffffff;
+  border: 1px solid #5a4a42;
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+  width: 100%;
+  font-size: var(--text-sm);
+}
+
+/* Responsivo para móviles */
+@media (max-width: 768px) {
+  .lc-grid-head {
+    display: none;
+  }
+  .lc-grid-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}

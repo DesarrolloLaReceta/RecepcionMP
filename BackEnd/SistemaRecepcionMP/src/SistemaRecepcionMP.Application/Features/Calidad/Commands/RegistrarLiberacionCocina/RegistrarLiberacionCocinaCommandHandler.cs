@@ -20,14 +20,14 @@ namespace SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarLibe
         public async Task<int> Handle(RegistrarLiberacionCocinaCommand request, CancellationToken cancellationToken)
         {
             var entidad = new LiberacionCocina
-            {
+            {   
+                Fecha = request.Fecha,
                 Turno = request.Turno.Trim(),
                 Cocina = request.Cocina.Trim(),
                 ObservacionesInspeccion = request.ObservacionesInspeccion,
                 NombreResponsable = request.NombreResponsable,
                 CargoResponsable = request.CargoResponsable,
                 ObservacionesGenerales = request.ObservacionesGenerales,
-                Fecha = DateTime.Now,
                 Detalles = request.Inspeccion.Select(x => new DetalleInspeccionCocina
                 {
                     Item = x.Item,
