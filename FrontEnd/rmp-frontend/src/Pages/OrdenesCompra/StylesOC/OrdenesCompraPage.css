@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  gap: 1.25rem;
+  gap: 1.5rem;
   animation: fadeSlideUp 0.35s ease-out both;
 }
 
@@ -30,19 +30,19 @@
 }
 
 .oc-breadcrumb {
-  font-size: 10px; 
-  font-family: var(--font-mono);
-  letter-spacing: 0.25em; 
+  font-size: 11px; 
+  font-family: var(--font-sans);
+  letter-spacing: 0.12em; 
   text-transform: uppercase; 
-  color: #a3938d; /* Color Trigo corporativo */
+  color: var(--brand-orange);
   margin-bottom: 0.5rem;
 }
 
 .oc-title { 
-  font-size: 1.75rem; 
+  font-size: 1.85rem; 
   font-weight: 800; 
-  font-family: 'Dosis', sans-serif; /* Identidad de La Receta */
-  color: #3d2b24; 
+  font-family: var(--font-display);
+  color: var(--text-primary); 
   letter-spacing: -0.01em;
 }
 
@@ -68,8 +68,8 @@
   border-radius: var(--radius-xl);
   text-align: center;
   /* Fondo café oscuro que destaca sobre el fondo de la página */
-  background: #2a1a14;
-  border: 1px solid #3d2b24;
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
   transition: transform var(--transition-fast);
   min-width: 80px;
 }
@@ -85,12 +85,12 @@
   font-family: var(--font-mono); 
   line-height: 1;
   /* Por defecto en Crema, pero puede cambiar según el estado */
-  color: #fdfbf7;
+  color: var(--text-primary);
 }
 
 .oc-kpi-pill-label {
   font-size: 9px; 
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-secondary);
   margin-top: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -99,6 +99,7 @@
 
 /* Variaciones de color para estados específicos si los necesitas */
 .oc-kpi-pill[data-type="pending"] .oc-kpi-pill-val { color: #df6129; } /* Naranja */
+.oc-kpi-pill[data-type="pending"] .oc-kpi-pill-val { color: var(--brand-orange); }
 .oc-kpi-pill[data-type="success"] .oc-kpi-pill-val { color: #86efac; } /* Verde */
 
 /* ── FILTROS (EDICIÓN LA RECETA) ── */
@@ -134,21 +135,20 @@
   font-family: var(--font-sans); 
   outline: none;
   /* Fondo chocolate integrado */
-  background: #2a1a14; 
-  border: 1px solid #3d2b24;
-  color: #fdfbf7; 
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default);
+  color: var(--text-primary); 
   transition: all var(--transition-fast);
 }
 
 .oc-input::placeholder {
-  color: #7d6b63;
+  color: var(--text-muted);
 }
 
 /* Enfoque en Naranja Marca */
 .oc-input:focus { 
-  border-color: #df6129; 
-  background: #311f18;
-  box-shadow: 0 0 0 3px rgba(223, 97, 41, 0.1);
+  border-color: var(--brand-orange); 
+  box-shadow: 0 0 0 3px var(--primary-15);
 }
 
 .oc-input-search { padding-left: 2.5rem; }
@@ -159,9 +159,9 @@
   font-size: var(--text-sm); 
   font-family: var(--font-sans); 
   outline: none;
-  background: #2a1a14; 
-  border: 1px solid #3d2b24;
-  color: #fdfbf7; 
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default);
+  color: var(--text-primary); 
   cursor: pointer; 
   min-width: 160px;
   transition: all var(--transition-fast);
@@ -169,15 +169,12 @@
 }
 
 .oc-select:focus { 
-  border-color: #df6129; 
-  box-shadow: 0 0 0 3px rgba(223, 97, 41, 0.1);
+  border-color: var(--brand-orange); 
+  box-shadow: 0 0 0 3px var(--primary-15);
 }
 
 /* Estilo de las opciones del Select */
-.oc-select option { 
-  background: #21140f; 
-  color: #fdfbf7; 
-}
+.oc-select option { background: var(--bg-app); color: var(--text-primary); }
 
 .oc-select[data-empty="true"] { color: #7d6b63; }
 
@@ -218,11 +215,11 @@
   border-radius: var(--radius-xl); 
   overflow: hidden;
   /* Fondo Chocolate Profundo de la marca */
-  background: #21140f; 
-  border: 1px solid #3d2b24;
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default);
   flex-shrink: 0;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .oc-list[data-panel="false"] { width: 100%; }
@@ -272,18 +269,18 @@
   border: none;
   padding: 1.125rem 1.25rem; /* Un poco más de aire para el tacto */
   cursor: pointer;
-  border-bottom: 1px solid #2a1a14;
+  border-bottom: 1px solid var(--primary-10);
   transition: all var(--transition-fast);
   position: relative;
 }
 
 .oc-row:hover { 
-  background: rgba(223, 97, 41, 0.02); 
+  background: var(--primary-8); 
 }
 
 /* Estado Activo: Naranja suave con indicador lateral */
 .oc-row[data-active="true"] { 
-  background: rgba(223, 97, 41, 0.06); 
+  background: var(--primary-10); 
 }
 
 .oc-row[data-active="true"]::before {
@@ -293,7 +290,7 @@
   top: 15%;
   height: 70%;
   width: 3px;
-  background: #df6129; /* Barra de estado activa */
+  background: var(--brand-orange);
   border-radius: 0 4px 4px 0;
 }
 
@@ -308,7 +305,7 @@
   font-size: var(--text-sm); 
   font-weight: 800; 
   font-family: var(--font-mono);
-  color: #fdfbf7; /* Blanco Crema */
+  color: var(--text-primary);
   flex: 1; 
   min-width: 0; 
   white-space: nowrap; 
@@ -321,12 +318,12 @@
 /* El número de OC se tiñe de naranja al interactuar */
 .oc-row:hover .oc-row-num,
 .oc-row[data-active="true"] .oc-row-num { 
-  color: #df6129; 
+  color: var(--brand-orange); 
 }
 
 .oc-row-prov {
   font-size: var(--text-sm); 
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-secondary);
   font-weight: 600;
   white-space: nowrap; 
   overflow: hidden; 
@@ -434,12 +431,12 @@
   overflow: hidden; 
   min-width: 0;
   /* Fondo chocolate sólido para máxima concentración */
-  background: #21140f; 
-  border: 1px solid #3d2b24;
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default);
   animation: panelIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
   display: flex; 
   flex-direction: column;
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 @keyframes panelIn {

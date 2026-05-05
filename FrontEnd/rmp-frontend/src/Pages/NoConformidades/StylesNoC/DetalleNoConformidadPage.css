@@ -10,7 +10,7 @@
   gap: 1.5rem; /* Aumentamos un poco el aire entre bloques */
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.5rem 0;
   /* Animación suave característica de la app */
   animation: fadeSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -34,9 +34,9 @@
 .nc-hero {
   border-radius: var(--radius-xl);
   padding: 1.75rem;
-  background: #21140f; /* Chocolate base */
-  border: 1px solid #3d2b24;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
 }
@@ -66,17 +66,17 @@
   display: flex; 
   align-items: center; 
   justify-content: center;
-  background: #2a1a14;
-  border: 1px solid #3d2b24;
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
   cursor: pointer; 
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-secondary);
   transition: all var(--transition-fast);
 }
 
 .nc-back-btn:hover { 
-  background: #df6129; 
-  color: #fff; 
-  border-color: #df6129;
+  background: var(--primary-8); 
+  color: var(--brand-orange); 
+  border-color: var(--brand-orange);
   transform: translateX(-3px);
 }
 
@@ -90,7 +90,7 @@
 .nc-numero-hero {
   font-size: 10px; 
   font-family: var(--font-mono);
-  color: #df6129; /* Naranja Marca */
+  color: var(--brand-orange);
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -100,7 +100,7 @@
 .nc-titulo-hero {
   font-size: 1.625rem; 
   font-weight: 800;
-  color: #fdfbf7; /* Blanco Crema */
+  color: var(--text-primary);
   line-height: 1.2; 
   margin-bottom: 0.5rem;
   font-family: 'Dosis', sans-serif;
@@ -108,7 +108,7 @@
 
 .nc-meta-hero { 
   font-size: var(--text-sm); 
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-secondary);
   margin-bottom: 1.5rem; 
   font-weight: 500;
 }
@@ -122,8 +122,8 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: rgba(42, 26, 20, 0.6);
-  border: 1px solid #3d2b24;
+  background: var(--bg-card-dim);
+  border: 1px solid var(--border-subtle);
 }
 
 /* Variaciones de prioridad con colores de alerta suaves */
@@ -141,11 +141,11 @@
   border-radius: 4px;
   font-size: 10px; 
   font-weight: 700; 
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   white-space: nowrap;
-  background: #2a1a14; /* Fondo café oscuro para resaltar el texto */
-  border: 1px solid #3d2b24;
-  color: #fdfbf7; /* Blanco crema */
+  background: var(--bg-card-dim);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
   text-transform: uppercase;
 }
 
@@ -165,7 +165,7 @@
   align-items: center;
   gap: 0;
   padding: 1rem 0;
-  background: rgba(42, 26, 20, 0.3); /* Fondo sutil para agrupar el flujo */
+  background: var(--primary-8);
   border-radius: var(--radius-lg);
   margin-top: 0.5rem;
 }
@@ -190,15 +190,15 @@
   font-weight: 800;
   font-family: var(--font-mono);
   transition: all var(--transition-normal);
-  border: 2px solid #3d2b24; /* Borde base chocolate */
-  background: #21140f;
+  border: 2px solid var(--border-default);
+  background: var(--bg-app);
   z-index: 2;
 }
 
 /* Estado activo/completado */
 .nc-tl-step[data-status="completed"] .nc-tl-circle {
-  background: #df6129;
-  border-color: #df6129;
+  background: var(--brand-orange);
+  border-color: var(--brand-orange);
   color: #fff;
   box-shadow: 0 0 12px rgba(223, 97, 41, 0.3);
 }
@@ -209,12 +209,12 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-secondary);
   transition: color var(--transition-normal);
 }
 
 .nc-tl-step[data-status="active"] .nc-tl-label {
-  color: #fdfbf7; /* Resalte para el paso actual */
+  color: var(--text-primary);
 }
 
 .nc-tl-line { 
@@ -222,11 +222,11 @@
   flex: 1; 
   margin-bottom: 1.5rem; /* Ajustado al nuevo tamaño del círculo */
   transition: all var(--transition-normal);
-  background: #3d2b24; /* Línea base apagada */
+  background: var(--border-default);
 }
 
 .nc-tl-line[data-status="completed"] {
-  background: #df6129;
+  background: var(--brand-orange);
 }
 
 /* Estado aparte (Anulada) */
@@ -337,9 +337,9 @@
 .nc-section {
   border-radius: var(--radius-xl);
   overflow: hidden;
-  background: #21140f; /* Chocolate base sólido */
-  border: 1px solid #3d2b24;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
   height: fit-content;
 }
 
@@ -348,8 +348,8 @@
   align-items: center; 
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  background: #2a1a14; /* Tono ligeramente más claro para el encabezado */
-  border-bottom: 1px solid #3d2b24;
+  background: var(--primary-8);
+  border-bottom: 1px solid var(--primary-15);
 }
 
 .nc-section-title {
@@ -358,12 +358,12 @@
   letter-spacing: 0.15em; 
   text-transform: uppercase;
   font-family: var(--font-mono); 
-  color: #a3938d; /* Color Trigo corporativo */
+  color: var(--text-secondary);
 }
 
 .nc-section-body { 
   padding: 1.5rem; 
-  color: #fdfbf7; /* Blanco crema para el contenido */
+  color: var(--text-primary);
 }
 
 /* Toque para cuando la sección está vacía o es informativa */
@@ -386,14 +386,14 @@
   gap: 0.375rem;
   padding: 0.875rem; 
   border-radius: var(--radius-md);
-  background: #2a1a14; /* Tono café más claro para que la celda destaque del fondo */
-  border: 1px solid #3d2b24;
+  background: var(--bg-card-dim);
+  border: 1px solid var(--border-subtle);
   transition: all var(--transition-fast);
 }
 
 .nc-datacell:hover {
-  border-color: rgba(223, 97, 41, 0.3); /* Brillo naranja sutil al pasar el mouse */
-  background: rgba(61, 43, 36, 0.6);
+  border-color: var(--primary-25);
+  background: var(--primary-8);
 }
 
 .nc-datacell-label {
@@ -402,12 +402,12 @@
   font-weight: 700;
   text-transform: uppercase; 
   letter-spacing: 0.08em; 
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-secondary);
 }
 
 .nc-datacell-val { 
   font-size: 13px; 
-  color: #fdfbf7; /* Blanco Crema para máxima legibilidad */
+  color: var(--text-primary);
   font-weight: 600;
   line-height: 1.4;
 }
@@ -415,7 +415,7 @@
 /* Variante para valores numéricos o IDs */
 .nc-datacell-val-mono {
   font-family: var(--font-mono);
-  color: #df6129; /* Naranja para resaltar códigos o folios */
+  color: var(--brand-orange);
 }
 
 /* ── REFERENCIAS (ESTÉTICA LA RECETA) ── */

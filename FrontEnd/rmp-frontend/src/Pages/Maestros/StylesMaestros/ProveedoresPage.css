@@ -1,14 +1,15 @@
 /* ============================================================
-   PROVEEDORES PAGE — ESTÉTICA INDUSTRIAL "LA RECETA"
+   PROVEEDORES PAGE — prefix .pv-* y .ms-*
+   Homologado al sistema visual de Recepciones
    ============================================================ */
 
 .ms-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0;
   animation: fadeSlideUp 0.35s ease both;
 }
 
@@ -21,7 +22,7 @@
   flex-direction: column;
   gap: 1rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #3d2b24; /* Borde Óxido */
+  border-bottom: 1px solid var(--primary-15);
 }
 
 @media (min-width: 640px) {
@@ -33,11 +34,11 @@
 }
 
 .ms-breadcrumb {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  letter-spacing: 0.25em;
+  font-size: 11px;
+  font-family: var(--font-sans);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #df6129; /* Naranja Marca para ubicación */
+  color: var(--brand-orange);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -46,17 +47,16 @@
 
 /* El título usa la fuente de marca Dosis */
 .ms-title {
-  font-size: 1.75rem;
+  font-size: 1.85rem;
   font-weight: 800;
-  color: #3d2b24; /* Blanco Crema */
-  font-family: 'Dosis', sans-serif;
-  text-transform: uppercase;
-  line-height: 1;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  line-height: 1.2;
 }
 
 .ms-subtitle {
-  font-size: 13px;
-  color: #a3938d; /* Color Trigo */
+  font-size: 15px;
+  color: var(--text-secondary);
   margin-top: 0.35rem;
   font-weight: 500;
 }
@@ -92,9 +92,9 @@
 .ms-kpi-card {
   padding: 1.25rem 1.5rem;
   border-radius: var(--radius-lg);
-  background: #2a1a14; /* Chocolate Base */
-  border: 1px solid #3d2b24; /* Borde Óxido */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
@@ -109,7 +109,7 @@
   font-family: var(--font-mono);
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
   display: block;
 }
@@ -120,7 +120,7 @@
   font-family: var(--font-mono);
   line-height: 1;
   letter-spacing: -0.02em;
-  color: #fdfbf7; /* Blanco Crema por defecto, se pisa con inline */
+  color: var(--text-primary);
 }
 
 /* Decoración técnica opcional: pequeño detalle de esquina */
@@ -136,7 +136,7 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: #3d2b24; /* Línea lateral discreta */
+  background: var(--primary-15);
   opacity: 0.5;
 }
 
@@ -164,7 +164,7 @@
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: #7d6b63; /* Café Ceniza */
+  color: var(--text-muted);
 }
 
 /* INPUT Y SELECT UNIFICADOS */
@@ -175,9 +175,9 @@
   border-radius: var(--radius-md) !important;
   font-size: 13px;
   outline: none;
-  background-color: #1a110d !important; /* Chocolate casi negro */
-  border: 1px solid #3d2b24 !important;
-  color: #7d6b63 !important; /* Blanco Crema */
+  background-color: var(--bg-app) !important;
+  border: 1px solid var(--border-default) !important;
+  color: var(--text-primary) !important;
   transition: all var(--transition-fast);
 }
 
@@ -210,21 +210,20 @@
 /* Estados de Interacción */
 .ms-input:focus, 
 .ms-select:focus {
-  border-color: #df6129 !important; /* Naranja Marca */
-  background-color: #21140f !important;
-  box-shadow: 0 0 0 3px rgba(223, 97, 41, 0.1) !important;
+  border-color: var(--brand-orange) !important;
+  box-shadow: 0 0 0 3px var(--primary-15) !important;
 }
 
 .ms-input::placeholder {
-  color: #7d6b63;
+  color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 11px;
   text-transform: uppercase;
 }
 
 .ms-select option {
-  background-color: #1a110d;
-  color: #fdfbf7;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
 }
 
 /* ============================================================

@@ -635,16 +635,17 @@ table.ncp-table thead th {
 .ncp-accion-card {
   padding: 1rem;
   border-radius: var(--radius-lg);
-  background: #2a1a14; /* Tono café para diferenciar de la base del panel */
-  border: 1px solid #3d2b24;
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
   display: flex; 
   flex-direction: column; 
   gap: 0.75rem;
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .ncp-accion-card:hover {
-  border-color: rgba(223, 97, 41, 0.3); /* Resalte sutil al revisar la acción */
+  border-color: var(--primary-25);
+  background: var(--primary-8);
 }
 
 .ncp-accion-header { 
@@ -664,7 +665,7 @@ table.ncp-table thead th {
   font-size: 10px; 
   font-weight: 800; 
   font-family: var(--font-mono);
-  background: #df6129; /* Naranja Marca */
+  background: var(--brand-orange);
   color: #fff; 
   flex-shrink: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -672,7 +673,7 @@ table.ncp-table thead th {
 
 .ncp-accion-desc { 
   font-size: 13px; 
-  color: #fdfbf7; /* Blanco Crema */
+  color: var(--text-primary);
   flex: 1; 
   line-height: 1.6;
   font-weight: 500;
@@ -685,12 +686,12 @@ table.ncp-table thead th {
   flex-wrap: wrap;
   margin-top: 0.25rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-top: 1px solid var(--primary-15);
 }
 
 .ncp-accion-meta-item { 
   font-size: 11px; 
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-secondary);
   font-family: var(--font-mono);
   display: flex;
   align-items: center;
@@ -700,7 +701,7 @@ table.ncp-table thead th {
 /* Iconos de meta (si usas SVGs o iconos de fuente) */
 .ncp-accion-meta-item::before {
   content: "•";
-  color: #df6129;
+  color: var(--brand-orange);
   font-weight: bold;
 }
 
@@ -709,20 +710,20 @@ table.ncp-table thead th {
 .ncp-comment {
   padding: 1rem;
   border-radius: var(--radius-lg);
-  background: rgba(42, 26, 20, 0.4); /* Chocolate translúcido */
-  border: 1px solid #3d2b24;
+  background: var(--bg-card-dim);
+  border: 1px solid var(--border-subtle);
   margin-bottom: 0.5rem;
   transition: background var(--transition-fast);
 }
 
 .ncp-comment:hover {
-  background: rgba(42, 26, 20, 0.8);
+  background: var(--primary-8);
 }
 
 .ncp-comment-autor { 
   font-size: 11px; 
   font-weight: 700; 
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.375rem; 
@@ -736,20 +737,20 @@ table.ncp-table thead th {
   content: "";
   width: 4px;
   height: 4px;
-  background: #df6129; /* Naranja Marca */
+  background: var(--brand-orange);
   border-radius: 50%;
 }
 
 .ncp-comment-texto { 
   font-size: 13px; 
-  color: #fdfbf7; /* Blanco Crema */
+  color: var(--text-primary);
   line-height: 1.6;
   font-weight: 400;
 }
 
 .ncp-comment-fecha { 
   font-size: 10px; 
-  color: #7d6b63; /* Café Ceniza */
+  color: var(--text-muted);
   font-family: var(--font-mono); 
   margin-top: 0.625rem;
   display: block;
@@ -760,8 +761,8 @@ table.ncp-table thead th {
 
 .ncp-panel-footer {
   padding: 1rem 1.25rem;
-  background: #21140f; /* Chocolate base */
-  border-top: 1px solid #3d2b24; /* Separador técnico café */
+  background: var(--primary-8);
+  border-top: 1px solid var(--primary-15);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -772,14 +773,14 @@ table.ncp-table thead th {
   text-align: center;
   font-size: 10px;
   font-family: var(--font-mono);
-  color: #7d6b63; /* Café Ceniza para datos de sistema */
+  color: var(--text-muted);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 /* Si incluyes botones de acción rápida en el footer del panel */
 .ncp-panel-footer .btn-primary {
-  background: #df6129;
+  background: var(--brand-orange);
   border-radius: var(--radius-md);
   padding: 0.625rem;
   font-weight: 700;
@@ -788,7 +789,7 @@ table.ncp-table thead th {
 }
 
 .ncp-panel-footer .btn-primary:hover {
-  background: #f1713a;
+  background: var(--brand-orange-hover);
   box-shadow: 0 4px 12px rgba(223, 97, 41, 0.2);
 }
 
@@ -797,19 +798,14 @@ table.ncp-table thead th {
 
 .ncp-skeleton-row td { 
   padding: 1rem 1.25rem; 
-  border-bottom: 1px solid #2a1a14; 
+  border-bottom: 1px solid var(--primary-10); 
 }
 
 .ncp-skeleton-line {
   border-radius: var(--radius-sm);
   animation: pulse 1.5s ease-in-out infinite;
   /* Usamos el color Trigo con muy baja opacidad para el brillo de carga */
-  background: linear-gradient(
-    90deg, 
-    rgba(163, 147, 141, 0.05) 25%, 
-    rgba(163, 147, 141, 0.1) 50%, 
-    rgba(163, 147, 141, 0.05) 75%
-  );
+  background: linear-gradient(90deg, var(--primary-8) 25%, var(--primary-15) 50%, var(--primary-8) 75%);
   background-size: 200% 100%;
 }
 
@@ -831,8 +827,8 @@ table.ncp-table thead th {
 
 .ncp-empty-text { 
   font-size: 1.125rem; 
-  color: #7d6b63; /* Café Ceniza */
-  font-family: 'Dosis', sans-serif;
+  color: var(--text-muted);
+  font-family: var(--font-display);
   font-weight: 500;
   max-width: 300px;
   line-height: 1.4;
@@ -852,9 +848,8 @@ table.ncp-table thead th {
   padding: 1.25rem;
   border-radius: var(--radius-lg);
   /* Usamos el Naranja Marca con una opacidad muy baja para el fondo */
-  background: rgba(223, 97, 41, 0.05); 
-  /* Borde naranja un poco más visible para denotar importancia */
-  border: 1px solid rgba(223, 97, 41, 0.2); 
+  background: var(--primary-8); 
+  border: 1px solid var(--primary-15); 
   display: flex; 
   flex-direction: column; 
   gap: 0.875rem;
@@ -870,7 +865,7 @@ table.ncp-table thead th {
   top: 0;
   bottom: 0;
   width: 4px;
-  background: #df6129;
+  background: var(--brand-orange);
 }
 
 /* ── RESPONSIVE REFINADO ── */
