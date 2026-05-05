@@ -1,65 +1,73 @@
 /* ============================================================
-   LOTES PAGE — ESTÉTICA INDUSTRIAL "LA RECETA"
+   LOTES PAGE — prefix .lt-* (il forno / La Receta)
+   Visualización de Trazabilidad y KPIs
    ============================================================ */
 
 .lt-page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Aumentamos un poco el espacio para que respire */
-  max-width: 1400px; /* Un poco más ancho para visualización de datos */
+  gap: 1.5rem;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1rem;
-  animation: fadeSlideUp 0.35s ease both;
+  animation: fadeSlideUp var(--transition-base) ease both;
 }
 
 /* HEADER DEL MÓDULO */
 .lt-header {
   display: flex;
-  align-items: flex-end; /* Alineamos a la base para un look más moderno */
+  align-items: flex-end; 
   justify-content: space-between;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid #3d2b24; /* Línea divisoria sutil */
+  /* CAMBIO: Línea divisoria melocotón sutil */
+  border-bottom: 2px solid var(--primary-15);
 }
 
 .lt-title {
-  font-size: 1.75rem; /* Un poco más grande para jerarquía */
+  /* Aumento de tamaño para jerarquía clara */
+  font-size: 2rem; 
   font-weight: 800;
-  color: #3d2b24; 
-  font-family: 'Dosis', sans-serif;
+  /* Color principal oscuro profesional */
+  color: var(--text-primary); 
+  font-family: var(--font-display); /* Dosis */
   text-transform: uppercase;
   letter-spacing: -0.01em;
   line-height: 1;
 }
 
 .lt-subtitle {
-  font-size: 11px;
-  font-family: var(--font-mono);
+  /* Aumento de 11px a 13px */
+  font-size: 13px;
+  font-family: var(--font-sans); /* Adiós al mono para etiquetas */
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #a3938d; /* Color Trigo */
-  margin-top: 0.35rem;
+  letter-spacing: 0.1em;
+  /* Verde marca oscuro para contraste suave */
+  color: var(--text-secondary); 
+  margin-top: 0.5rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
+  font-weight: 700;
 }
 
-/* Indicador visual de "Sección Activa" */
+/* Indicador visual de "Sección Activa" con Naranja il forno */
 .lt-subtitle::before {
   content: "";
-  width: 8px;
-  height: 2px;
-  background-color: #df6129; /* Naranja Marca */
+  width: 12px;
+  height: 3px;
+  background-color: var(--brand-orange); 
   display: inline-block;
+  border-radius: var(--radius-full);
 }
 
 /* ============================================================
-   LOTES KPI GRID — ESTÉTICA INDUSTRIAL
+   LOTES KPI GRID — ESTÉTICA PROFESIONAL
    ============================================================ */
 
 .lt-kpi-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem; /* Un poco más de aire */
+  gap: 1.25rem; 
 }
 
 @media (min-width: 1024px) {
@@ -67,167 +75,183 @@
 }
 
 .lt-kpi-card {
-  padding: 1.25rem 1.5rem;
-  border-radius: var(--radius-lg);
-  background: #2a1a14; /* Chocolate marca */
-  border: 1px solid #3d2b24;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  /* CAMBIO: De chocolate a fondo melocotón suave / blanco */
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast) ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .lt-kpi-card:hover {
-  transform: translateY(-3px);
-  border-color: #df6129; /* Brillo Naranja al pasar el mouse */
+  transform: translateY(-4px);
+  border-color: var(--brand-orange); 
+  box-shadow: var(--shadow-md);
 }
 
 .lt-kpi-label {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  letter-spacing: 0.15em;
+  /* Aumento de 10px a 12px */
+  font-size: 12px;
+  font-family: var(--font-sans);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #a3938d; /* Color Trigo */
-  margin-bottom: 0.5rem;
+  /* Color secundario legible */
+  color: var(--text-secondary); 
+  margin-bottom: 0.75rem;
   display: block;
+  font-weight: 700;
+  opacity: 0.8;
 }
 
 .lt-kpi-value {
-  font-size: 1.75rem; 
+  /* Aumento significativo para lectura rápida */
+  font-size: 2.25rem; 
   font-weight: 800;
-  font-family: var(--font-mono);
-  color: #fdfbf7; /* Blanco Crema */
+  font-family: var(--font-mono); /* Números en mono para look técnico */
+  color: var(--text-primary); 
   margin-top: 0.25rem;
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
-/* Opcional: una pequeña línea decorativa debajo del valor */
+/* Línea decorativa en naranja para resaltar el KPI */
 .lt-kpi-card::after {
   content: "";
   display: block;
-  width: 20px;
-  height: 2px;
-  background: #3d2b24;
-  margin-top: 0.75rem;
+  width: 30px;
+  height: 4px;
+  background: var(--brand-orange);
+  margin-top: 1rem;
+  border-radius: var(--radius-full);
+  opacity: 0.6;
 }
 
 /* ============================================================
-   LOTES FILTERS — ESTÉTICA INDUSTRIAL
+   LOTES FILTERS — (il forno / La Receta)
+   Alineación: Buscador + Filtros en línea
    ============================================================ */
 
 .lt-filters {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem; /* Un poco más de aire */
+  align-items: center; 
+  gap: 1rem;       
+  width: 100%;
+  margin-bottom: 1.5rem;
   padding: 0.5rem 0;
 }
 
+/* 2. El buscador crece para ocupar el espacio disponible */
 .lt-search-wrap {
   position: relative;
-  flex: 1;
-  min-width: 280px; /* Un poco más ancho para comodidad */
+  flex: 1; 
+  min-width: 280px;
 }
 
 .lt-search-icon {
   position: absolute;
-  left: 0.85rem;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: #7d6b63; /* Café Ceniza */
-  opacity: 0.7;
+  /* Color secundario suave para el icono */
+  color: var(--text-secondary); 
+  opacity: 0.6;
+  font-size: 1.1rem;
 }
 
-/* ============================================================
-   AJUSTE DE ALINEACIÓN: BUSCADOR + FILTROS EN LÍNEA
-   ============================================================ */
-
-/* 1. El contenedor padre debe usar Flex para poner todo en una fila */
-.lt-filters {
-  display: flex;
-  align-items: center; /* Alinea verticalmente al centro */
-  gap: 0.75rem;       /* Espacio entre buscador y selectores */
-  width: 100%;
-  margin-bottom: 1.25rem;
-}
-
-/* 2. El buscador crece para ocupar el espacio sobrante */
-.lt-search-wrap {
-  position: relative;
-  flex: 1; /* Esto hace que el buscador se estire */
-  min-width: 200px;
-}
-
-/* 3. Ajuste de los inputs y selectores (Sin width 100% forzado) */
+/* 3. Ajuste de los inputs y selectores (Estética il forno) */
 .lt-input, 
 .lt-select {
-  height: 40px; /* Altura uniforme */
-  padding: 0 1rem;
-  border-radius: var(--radius-md);
-  font-size: 13px;
+  height: 48px; /* Altura aumentada para mejor usabilidad táctil */
+  padding: 0 1.25rem;
+  border-radius: var(--radius-lg);
+  /* Aumento de 13px a 15px para legibilidad */
+  font-size: 15px; 
   font-family: var(--font-sans);
-  background-color: #1a110d !important; 
-  border: 1px solid #3d2b24 !important;
-  color: #7d6b63 !important;
+  /* Fondo claro con borde suave */
+  background-color: var(--bg-app) !important; 
+  border: 1px solid var(--border-default) !important;
+  color: var(--text-primary) !important;
   outline: none;
   transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
-/* 4. Los selectores NO deben ocupar el 100%, deben tener un ancho fijo o mínimo */
+/* 4. Selectores con ancho adaptable y estética limpia */
 .lt-select {
-  width: auto;         /* Deja que el contenido mande */
-  min-width: 180px;    /* Pero dales un tamaño base para que no se vean pequeños */
+  width: auto;         
+  min-width: 200px;    
   cursor: pointer;
-  padding-right: 2.5rem !important; /* Espacio para la flecha */
+  padding-right: 3rem !important; 
+  font-weight: 600;
   
-  /* Flecha personalizada */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a3938d'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+  /* Flecha personalizada en color naranja marca */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23df6129'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
-  background-position: right 0.75rem center !important;
-  background-size: 1rem !important;
+  background-position: right 1rem center !important;
+  background-size: 1.25rem !important;
   appearance: none;
   -webkit-appearance: none;
 }
 
-/* 5. Especial para el input de búsqueda (Sans y sin uppercase) */
+/* 5. Especial para el input de búsqueda */
 .lt-search-input {
-  width: 100%; /* El input dentro del wrap sí ocupa todo el wrap */
-  padding-left: 2.5rem !important;
+  width: 100%; 
+  padding-left: 3rem !important;
   text-transform: none;
+  font-weight: 500;
 }
 
-/* Hover y Focus */
-.lt-input:hover, .lt-select:hover { border-color: #7d6b63 !important; }
+.lt-search-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+/* Hover y Focus (Naranja il forno) */
+.lt-input:hover, .lt-select:hover { 
+  border-color: var(--primary-25) !important; 
+  background-color: #ffffff !important;
+}
+
 .lt-input:focus, .lt-select:focus {
-  border-color: #df6129 !important;
-  box-shadow: 0 0 0 3px rgba(223, 97, 41, 0.1) !important;
+  border-color: var(--brand-orange) !important;
+  box-shadow: 0 0 0 4px var(--primary-15) !important;
+  background-color: #ffffff !important;
 }
 
 /* ============================================================
-   TABLA DE LOTES — ESTÉTICA "LIBRO DE REGISTRO"
+   TABLA DE LOTES — (il forno / La Receta)
+   Estética Limpia y Profesional de Alta Visibilidad
    ============================================================ */
 
 .lt-table {
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  background: #2a1a14; /* Chocolate Marca */
-  border: 1px solid #3d2b24;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  /* CAMBIO: De Chocolate a Blanco Puro con borde melocotón */
+  background: #ffffff; 
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-md);
 }
 
 /* Cabecera de la Tabla */
 .lt-table-head {
   display: grid;
-  padding: 0.875rem 1.25rem;
-  font-size: 10px; /* Un poco más legible */
-  font-family: var(--font-mono);
+  padding: 1.15rem 1.5rem;
+  /* Aumento de 10px a 12px para legibilidad */
+  font-size: 12px; 
+  font-family: var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #a3938d; /* Color Trigo */
-  border-bottom: 2px solid #3d2b24; /* Línea más gruesa para separar */
-  background: #1a110d; /* Café casi negro */
-  grid-template-columns: 1.8fr 1.2fr 1fr 110px 100px 110px 90px 36px;
-  font-weight: 700;
+  letter-spacing: 0.1em;
+  /* Texto secundario profesional */
+  color: var(--text-secondary); 
+  border-bottom: 2px solid var(--primary-15); 
+  background: var(--primary-8); /* Fondo melocotón muy sutil */
+  grid-template-columns: 1.8fr 1.2fr 1fr 110px 100px 110px 90px 40px;
+  font-weight: 800;
 }
 
 .lt-table-head-right  { text-align: right;  }
@@ -236,22 +260,22 @@
 /* Fila de Datos */
 .lt-row {
   display: grid;
-  grid-template-columns: 1.8fr 1.2fr 1fr 110px 100px 110px 90px 36px;
+  grid-template-columns: 1.8fr 1.2fr 1fr 110px 100px 110px 90px 40px;
   align-items: center;
-  padding: 0.75rem 1.25rem;
+  padding: 1rem 1.5rem;
   cursor: pointer;
   transition: all var(--transition-fast);
-  border-bottom: 1px solid rgba(61, 43, 36, 0.5); /* Borde café sutil */
+  border-bottom: 1px solid var(--border-subtle);
   background: transparent;
 }
 
 .lt-row:last-child { border-bottom: none; }
 
-/* Efecto al pasar el mouse por la fila */
+/* Efecto al pasar el mouse por la fila (Acento il forno) */
 .lt-row:hover { 
-  background: rgba(223, 97, 41, 0.04); /* Un toque de naranja muy sutil */
-  border-left: 3px solid #df6129; /* Indicador de selección lateral */
-  padding-left: calc(1.25rem - 3px); /* Ajuste para que no "baile" por el borde */
+  background: var(--primary-10); 
+  border-left: 4px solid var(--brand-orange); 
+  padding-left: calc(1.5rem - 4px); 
 }
 
 .lt-cell-right  { text-align: right;  }
@@ -259,106 +283,109 @@
 
 /* CONTENIDO DE LAS CELDAS */
 
-/* Número de Lote (El protagonista) */
+/* Número de Lote (Identificador clave) */
 .lt-lote-num {
-  font-size: 14px;
+  /* Aumento a 15px */
+  font-size: 15px;
   font-family: var(--font-mono);
-  font-weight: 700;
-  color: #df6129; /* Naranja Marca */
+  font-weight: 800;
+  color: var(--brand-orange); 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Nombre del Ítem */
+/* Nombre del Ítem (Dosis para marca) */
 .lt-lote-item {
-  font-size: 14px;
-  font-weight: 600;
-  color: #fdfbf7; /* Blanco Crema */
+  /* Aumento a 16px */
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary); 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: 'Dosis', sans-serif; /* Consistencia de marca */
+  font-family: var(--font-display); /* Dosis */
 }
 
 /* Proveedor */
 .lt-lote-prov {
-  font-size: 12px;
-  font-family: var(--font-mono);
-  color: #a3938d; /* Color Trigo */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Aumento de 12px a 14px */
+  font-size: 14px;
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
-/* Categoría */
+/* Categoría (Badge sutil) */
 .lt-lote-cat {
-  font-size: 10px;
-  color: #7d6b63; /* Café Ceniza */
-  margin-top: 0.125rem;
-  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted); 
+  margin-top: 0.25rem;
+  font-family: var(--font-sans);
   text-transform: uppercase;
+  font-weight: 700;
 }
 
-/* ── TABLA DE LOTES: RECEPCIÓN Y RESPONSIVIDAD ── */
-
+/* Recepción y Responsividad */
 .lt-lote-rec {
-  font-size: 13px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  color: #fdfbf7; /* Blanco Crema */
+  /* Aumento a 15px */
+  font-size: 15px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .lt-lote-rec-fecha {
-  font-size: 11px;
-  color: #7d6b63; /* Café Ceniza */
-  margin-top: 0.125rem;
-  font-family: var(--font-mono);
+  /* Aumento a 13px */
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+  font-family: var(--font-sans);
 }
 
 .lt-lote-qty {
-  font-size: 14px;
+  /* Aumento a 16px para control de inventario claro */
+  font-size: 16px;
   font-family: var(--font-mono);
-  font-weight: 700;
-  color: #a3938d; /* Color Trigo para diferenciar cantidades de nombres */
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
-/* Scroll horizontal con estilo "La Receta" */
+/* Scrollbar moderno il forno */
 .lt-table {
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: #3d2b24 #1a110d;
+  scrollbar-color: var(--primary-25) var(--bg-app);
 }
 
-/* Personalización del scrollbar para navegadores Webkit (Chrome/Edge) */
 .lt-table::-webkit-scrollbar {
-  height: 6px;
+  height: 8px;
 }
 
 .lt-table::-webkit-scrollbar-track {
-  background: #1a110d;
+  background: var(--bg-app);
 }
 
 .lt-table::-webkit-scrollbar-thumb {
-  background-color: #3d2b24;
+  background-color: var(--primary-25);
   border-radius: 10px;
+  border: 2px solid var(--bg-app);
 }
 
-/* Ancho mínimo para mantener la integridad de los datos */
+/* Ancho mínimo */
 .lt-table-head,
 .lt-row {
-  min-width: 850px; /* Subimos un poco para dar aire a las fechas */
+  min-width: 950px; 
 }
 
-/* 📱 AJUSTES PARA TABLET (OPORTUNIDAD DE LIMPIEZA VISUAL) */
+/* 📱 AJUSTES PARA TABLET */
 @media (max-width: 1024px) {
   .lt-table-head,
   .lt-row {
-    grid-template-columns: 1.8fr 1.2fr 110px 110px 90px 36px;
-    min-width: 700px;
+    grid-template-columns: 1.8fr 1.2fr 120px 120px 100px 40px;
+    min-width: 800px;
   }
   
-  /* Ocultar columnas menos críticas para Aníbal en movilidad */
   .lt-table-head > *:nth-child(3),
   .lt-table-head > *:nth-child(4),
   .lt-row > *:nth-child(3),
@@ -367,77 +394,81 @@
   }
 }
 
-/* ── INDICADORES DE ESTADO Y FOOTER ── */
+/* ── INDICADORES DE ESTADO Y FOOTER (il forno / La Receta) ── */
 
 /* Badge de temperatura (Lectura Crítica) */
 .lt-temp-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 13px;
+  /* Aumento a 14px para asegurar lectura rápida */
+  font-size: 14px;
   font-family: var(--font-mono);
-  font-weight: 700;
-  padding: 0.25rem 0.625rem;
-  border-radius: 4px;
+  font-weight: 800;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-md);
   justify-content: center;
   border: 1px solid transparent;
 }
 
-/* Estado OK: Verde Esmeralda Industrial */
+/* Estado OK: Verde il forno / Limpio */
 .lt-temp-badge[data-ok="true"] { 
-  color: #10b981; 
-  background: rgba(16, 185, 129, 0.08);
-  border-color: rgba(16, 185, 129, 0.2);
+  color: #15803d; 
+  background: #f0fdf4;
+  border-color: #bbf7d0;
 }
 
-/* Estado Alerta: Rojo Crítico */
+/* Estado Alerta: Rojo Crítico il forno */
 .lt-temp-badge[data-ok="false"] { 
-  color: #ef4444; 
-  background: rgba(239, 68, 68, 0.08); 
-  border-color: rgba(239, 68, 68, 0.2);
+  color: var(--danger); 
+  background: var(--danger-10); 
+  border-color: var(--danger-20);
 }
 
 .lt-temp-na {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  color: #7d6b63; /* Café Ceniza */
-  letter-spacing: 0.05em;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  color: var(--text-muted); 
+  letter-spacing: 0.02em;
+  font-weight: 600;
 }
 
 /* Vencimiento (Semáforo de trazabilidad) */
 .lt-venc-wrap {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
   justify-content: flex-end;
 }
 
 .lt-venc-dot {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.625rem;
+  height: 0.625rem;
   border-radius: var(--radius-full);
   flex-shrink: 0;
-  box-shadow: 0 0 6px currentColor; /* Brillo tipo LED */
+  /* Eliminamos el brillo LED por un color sólido y profesional */
+  box-shadow: none; 
 }
 
 .lt-venc-label {
-  font-size: 13px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  color: #fdfbf7; /* Blanco Crema */
+  font-size: 14px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  /* Cambio: De blanco crema a gris oscuro legible */
+  color: var(--text-primary); 
 }
 
 /* Chevron de navegación */
 .lt-row-chevron {
   display: flex;
   justify-content: flex-end;
-  color: #3d2b24; /* Borde Oxido */
+  color: var(--primary-25); 
   transition: all var(--transition-fast);
 }
 
 .lt-row:hover .lt-row-chevron { 
-  color: #df6129; /* Cambia a Naranja Marca al pasar el mouse */
-  transform: translateX(3px);
+  color: var(--brand-orange); 
+  transform: translateX(4px);
 }
 
 /* Mensaje de Error / Sin Resultados */
@@ -445,24 +476,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 2.5rem;
-  font-size: 14px;
-  color: #ef4444;
-  font-family: var(--font-mono);
-  background: rgba(239, 68, 68, 0.02);
-  border-radius: var(--radius-lg);
-  margin: 1rem;
-  border: 1px dashed rgba(239, 68, 68, 0.2);
+  gap: 0.875rem;
+  padding: 3rem;
+  font-size: 15px;
+  color: var(--danger);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  background: var(--danger-10);
+  border-radius: var(--radius-xl);
+  margin: 1.5rem;
+  border: 2px dashed var(--danger-20);
 }
 
 /* Footer de la página */
 .lt-footer-info {
-  font-size: 10px;
-  font-family: var(--font-mono);
+  /* Aumento de 10px a 12px */
+  font-size: 12px;
+  font-family: var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #3d2b24; /* Color muy discreto */
+  letter-spacing: 0.05em;
+  color: var(--text-muted); 
   text-align: center;
-  padding: 2rem 0;
+  padding: 3rem 0;
+  font-weight: 600;
+  opacity: 0.7;
 }

@@ -1,5 +1,5 @@
 /* ============================================================
-   DETALLE RECEPCION PAGE — prefix .dr-* (EDICIÓN LA RECETA)
+   DETALLE RECEPCION PAGE — prefix .dr-* (il forno / La Receta)
    Layout: encabezado + 2-col datos generales + tabs
    ============================================================ */
 
@@ -10,28 +10,28 @@
   gap: 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
-  animation: fadeSlideUp 0.35s ease-out both;
+  animation: fadeSlideUp var(--transition-base) ease-out both;
 }
 
 /* ── ENCABEZADO ── */
 .dr-header { 
   display: flex; 
-  align-items: flex-start; 
+  align-items: center; /* Alineación centrada para look más limpio */
   gap: 1.25rem; 
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--primary-15); /* Línea divisoria sutil */
 }
 
 .dr-back-btn {
-  width: 2.25rem; 
-  height: 2.25rem; 
-  margin-top: 0.25rem; 
+  width: 2.75rem; /* Aumentado para mejor accesibilidad */
+  height: 2.75rem; 
   flex-shrink: 0;
-  border-radius: var(--radius-lg); 
-  /* Fondo café integrado */
-  background: #2a1a14; 
-  border: 1px solid #3d2b24; 
+  border-radius: var(--radius-md); 
+  /* CAMBIO: De fondo oscuro a melocotón suave */
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default); 
   cursor: pointer; 
-  color: #a3938d;
+  color: var(--text-secondary);
   display: flex; 
   align-items: center; 
   justify-content: center;
@@ -39,10 +39,10 @@
 }
 
 .dr-back-btn:hover { 
-  background: #3d2b24; 
-  color: #df6129; 
-  border-color: #df6129;
-  transform: translateX(-3px);
+  background: var(--primary-8); 
+  color: var(--brand-orange); 
+  border-color: var(--brand-orange);
+  transform: translateX(-4px);
 }
 
 .dr-header-meta { flex: 1; min-width: 0; }
@@ -52,68 +52,75 @@
   align-items: center; 
   gap: 0.75rem; 
   flex-wrap: wrap;
-  font-size: 10px; 
-  font-family: var(--font-mono);
-  letter-spacing: 0.25em; 
+  font-size: 11px; /* Aumentado de 10px */
+  font-family: var(--font-sans); /* Adiós al mono */
+  letter-spacing: 0.12em; 
   text-transform: uppercase; 
-  color: #a3938d; /* Color Trigo */
-  margin-bottom: 0.5rem;
+  color: var(--brand-orange); /* Naranja de la marca */
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+  opacity: 0.8;
 }
 
-/* Estado badge (Sincronizado con el look de la tabla) */
+/* Estado badge */
 .dr-estado-badge {
   display: inline-flex; 
   align-items: center; 
-  gap: 0.375rem;
-  padding: 0.25rem 0.75rem; 
-  border-radius: var(--radius-md);
-  font-size: 11px; 
-  font-weight: 700;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem; 
+  border-radius: 50px; /* Estilo píldora */
+  font-size: 12px; /* Aumentado */
+  font-weight: 800;
   text-transform: uppercase;
-  /* El color de fondo vendrá por estilo en línea desde React */
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
 }
 
 .dr-badge-dot { 
-  width: 0.4rem; 
-  height: 0.4rem; 
-  border-radius: var(--radius-full); 
+  width: 7px; 
+  height: 7px; 
+  border-radius: 50%; 
   flex-shrink: 0; 
 }
 
 .dr-title { 
-  font-size: 1.5rem; 
+  font-size: 1.85rem; /* Aumentado para impacto visual */
   font-weight: 800; 
-  font-family: 'Dosis', sans-serif;
-  color: #fdfbf7; 
+  font-family: var(--font-display); /* Dosis */
+  color: var(--text-primary); /* Texto oscuro legible */
   letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
 .dr-subtitle { 
-  font-size: var(--text-sm); 
-  color: #a3938d; 
-  margin-top: 0.25rem; 
+  font-size: 15px; /* Aumentado de var-sm */
+  color: var(--text-secondary); 
+  margin-top: 0.125rem;
+  font-weight: 500;
 }
 
 /* ── GRID 2 COL DATOS GENERALES ── */
 .dr-data-grid { 
   display: grid; 
   grid-template-columns: 1fr; 
-  gap: 1.25rem; 
+  gap: 1.5rem; 
+  margin-top: 0.5rem;
 }
 
 @media (min-width: 768px) { 
   .dr-data-grid { grid-template-columns: 1fr 1fr; } 
 }
 
-/* ── SECTION CARD (EDICIÓN LA RECETA) ── */
+/* ── SECTION CARD (il forno / La Receta) ── */
 .dr-section {
   /* Radio amigable coherente con el resto de la app */
   border-radius: var(--radius-xl); 
   overflow: hidden;
-  /* Fondo Chocolate Profundo */
-  background: #21140f; 
-  border: 1px solid #3d2b24;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  /* CAMBIO: De fondo chocolate a blanco puro para máxima limpieza */
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
 }
 
 .dr-section-header {
@@ -121,234 +128,254 @@
   align-items: center; 
   justify-content: space-between;
   padding: 1rem 1.25rem; 
-  /* Separador sutil en tono tierra */
-  border-bottom: 1px solid #2a1a14;
-  background: rgba(255, 255, 255, 0.02); /* Un brillo casi imperceptible para el header */
+  /* Separador sutil en tono melocotón */
+  border-bottom: 1px solid var(--primary-15);
+  background: var(--primary-8); /* Fondo melocotón suave para el encabezado */
 }
 
 .dr-section-title {
-  font-size: 10px; 
-  font-weight: 700;
-  letter-spacing: 0.15em; 
+  /* Aumento de 10px a 12px para mayor legibilidad */
+  font-size: 12px; 
+  font-weight: 800;
+  letter-spacing: 0.1em; 
   text-transform: uppercase;
-  font-family: var(--font-mono); 
-  /* Color Trigo/Café suave en lugar de gris azulado */
-  color: #a3938d; 
+  /* Cambio a Dosis para mantener el estilo de marca il forno */
+  font-family: var(--font-display); 
+  /* Color verde oscuro de la marca para el título */
+  color: var(--text-secondary); 
 }
 
 .dr-section-action {
-  font-size: var(--text-xs); 
-  font-family: var(--font-mono);
-  color: #7d6b63; 
+  /* Aumento de xs a 13px */
+  font-size: 13px; 
+  font-family: var(--font-sans);
+  /* Color naranja marca para llamar a la acción de forma elegante */
+  color: var(--brand-orange); 
   background: none; 
   border: none; 
   cursor: pointer;
   transition: all var(--transition-fast);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .dr-section-action:hover { 
-  /* El botón de acción (ej: 'Ver más') resalta en Naranja Marca */
-  color: #df6129; 
+  /* Hover con subrayado para indicar interactividad */
+  text-decoration: underline;
+  opacity: 0.8;
 }
 
-/* ── DATA ROW (EDICIÓN LA RECETA) ── */
+/* ── DATA ROW (il forno / La Receta) ── */
 .dr-datarow {
   display: flex; 
   align-items: flex-start; 
   justify-content: space-between; 
   gap: 1.5rem;
-  padding: 0.75rem 1.25rem; /* Un poco más de altura para legibilidad */
-  border-bottom: 1px solid #2a1a14;
+  padding: 1rem 1.25rem; /* Aumento de padding para que la letra respire */
+  /* CAMBIO: Línea divisoria melocotón muy sutil */
+  border-bottom: 1px solid var(--primary-15);
 }
 
 .dr-datarow:last-of-type { border-bottom: none; }
 
 .dr-datarow-label { 
-  font-size: var(--text-sm); 
-  color: #a3938d; /* Color Trigo */
+  /* Aumento de tamaño para legibilidad en planta */
+  font-size: 14px; 
+  color: var(--text-secondary); /* Verde marca oscuro y legible */
   flex-shrink: 0; 
+  font-weight: 500;
 }
 
 .dr-datarow-val { 
-  font-size: var(--text-sm); 
-  color: #fdfbf7; /* Blanco Crema para resaltar el dato */
+  /* Aumento a 15px para resaltar el dato real */
+  font-size: 15px; 
+  color: var(--text-primary); /* Texto oscuro profesional */
   text-align: right; 
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .dr-datarow-val[data-mono="true"] { 
   font-family: var(--font-mono); 
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
+  color: var(--brand-orange); /* Los códigos técnicos resaltan en naranja */
 }
 
-/* Observaciones dentro de section */
+/* Observaciones (Look de reporte de calidad) */
 .dr-obs-box { 
-  padding: 1rem 1.25rem; 
-  background: rgba(0, 0, 0, 0.1); /* Sutil fondo para diferenciar del grid */
+  padding: 1.25rem; 
+  background: var(--primary-8); /* Fondo melocotón suave */
+  border-radius: var(--radius-lg);
+  margin: 0.75rem 1.25rem;
 }
 
 .dr-obs-label { 
-  font-size: 10px; 
-  font-family: var(--font-mono); 
+  font-size: 11px; 
+  font-family: var(--font-sans); /* Adiós al mono para etiquetas */
   text-transform: uppercase; 
-  color: #7d6b63; 
+  color: var(--brand-orange); 
   margin-bottom: 0.5rem; 
   letter-spacing: 0.1em;
+  font-weight: 800;
 }
 
 .dr-obs-text { 
-  font-size: var(--text-sm); 
-  color: #c9bcaf; /* Un gris cálido mucho más legible */
+  font-size: 15px; /* Aumento significativo para leer notas rápido */
+  color: var(--text-primary); 
   line-height: 1.6; 
   font-style: italic;
 }
 
-/* Barra lotes (resumen de estados) */
+/* Barra lotes (il forno / La Receta) */
 .dr-lotes-bar-wrap { padding: 1.25rem; }
 
 .dr-lotes-bar-track {
   display: flex; 
-  height: 10px; /* Un poco más gruesa para que se vea mejor */
+  height: 12px; /* Un poco más gruesa para un look moderno */
   border-radius: var(--radius-full); 
   overflow: hidden; 
   gap: 2px;
-  background: #3d2b24; /* Fondo café oscuro de la pista */
+  background: var(--border-subtle); /* Fondo gris neutro claro */
 }
 
-/* Verde Esmeralda La Receta */
+/* Colores de Calidad Limpios */
 .dr-lotes-liberados { 
   height: 100%; 
-  background: #3d8c40; 
+  background: #2D6A4F; /* Verde corporativo más vivo */
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
 }
 
-/* Rojo Arcilla La Receta */
 .dr-lotes-rechazados { 
   height: 100%; 
-  background: #b93d3d; 
+  background: var(--danger); /* Rojo de la paleta compartida */
 }
 
-/* ── TABS (EDICIÓN LA RECETA) ── */
+/* ── TABS (il forno / La Receta) ── */
 .dr-tabs {
   display: flex; 
-  gap: 0.5rem; 
+  gap: 0.75rem; /* Más espacio entre pestañas */
   overflow-x: auto; 
-  padding-bottom: 0.5rem; 
+  padding: 0.25rem 0.25rem 0.75rem 0.25rem; 
   flex-shrink: 0;
-  /* Scrollbar sutil para que no ensucie el diseño chocolate */
+  /* Scrollbar sutil adaptada a la nueva paleta */
   scrollbar-width: thin;
-  scrollbar-color: #3d2b24 transparent;
+  scrollbar-color: var(--primary-20) transparent;
 }
 
 .dr-tab {
-  padding: 0.625rem 1.25rem; 
-  border-radius: var(--radius-lg); /* Radio amigable coherente */
-  font-size: var(--text-sm); 
-  font-weight: 600; 
+  padding: 0.75rem 1.5rem; 
+  border-radius: var(--radius-lg);
+  /* Aumento de tamaño para legibilidad rápida */
+  font-size: 15px; 
+  font-weight: 700; 
+  font-family: var(--font-display); /* Dosis */
   white-space: nowrap; 
   cursor: pointer;
-  /* Fondo café oscuro integrado */
-  border: 1px solid #3d2b24; 
-  background: #21140f; 
-  color: #7d6b63; /* Color Trigo oscuro para el estado inactivo */
+  /* CAMBIO: De fondo chocolate a blanco puro o transparente */
+  border: 1px solid var(--border-default); 
+  background: var(--bg-app); 
+  color: var(--text-secondary); 
   transition: all var(--transition-fast);
 }
 
 .dr-tab:hover { 
-  color: #fdfbf7; 
-  background: #2a1a14;
-  border-color: #4a372f;
+  color: var(--brand-orange); 
+  background: var(--primary-8);
+  border-color: var(--primary-20);
 }
 
 .dr-tab[data-active="true"] {
-  /* Naranja Marca con fondo sutil */
-  background: rgba(223, 97, 41, 0.1); 
-  border-color: #df6129; 
-  color: #df6129;
-  box-shadow: 0 4px 12px rgba(223, 97, 41, 0.05);
+  /* Estilo il forno: Fondo melocotón suave y borde naranja vibrante */
+  background: var(--primary-15); 
+  border-color: var(--brand-orange); 
+  color: var(--brand-orange);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 /* ── CONTENIDO DE TABS ── */
 .dr-tab-content {
-  animation: fadeIn 0.3s ease-out;
-  padding-top: 0.5rem;
+  /* Animación suave que ya definimos en el layout global */
+  animation: fadeSlideUp var(--transition-base) ease-out;
+  padding-top: 1rem;
 }
 
-/* ── LOTE CARD (EDICIÓN LA RECETA) ── */
+/* ── LOTE CARD (il forno / La Receta) ── */
 .dr-lote-card {
-  border-radius: var(--radius-lg);
-  /* Fondo chocolate sólido para máxima legibilidad de datos técnicos */
-  background: #21140f; 
-  border: 1px solid #3d2b24;
+  border-radius: var(--radius-xl);
+  /* CAMBIO: De chocolate sólido a blanco puro con sombra suave */
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default);
   overflow: hidden;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .dr-lote-header {
   display: flex; 
   align-items: center; 
-  gap: 1rem; 
-  padding: 1rem 1.25rem; 
+  gap: 1.25rem; 
+  padding: 1.15rem 1.25rem; 
   cursor: pointer;
   transition: all var(--transition-fast);
+  background: var(--bg-app);
 }
 
 .dr-lote-header:hover { 
-  background: rgba(223, 97, 41, 0.03); /* Un sutil tinte naranja al pasar el mouse */
+  background: var(--primary-8); /* Tinte melocotón al pasar el mouse */
 }
 
 .dr-lote-num { 
-  font-size: var(--text-sm); 
+  font-size: 15px; /* Aumentado para identificar el lote rápido */
   font-family: var(--font-mono); 
   font-weight: 800; 
-  /* Resaltamos el lote con Naranja Marca */
-  color: #df6129; 
+  /* Naranja Marca para el código del lote */
+  color: var(--brand-orange); 
 }
 
 .dr-lote-item { 
-  font-size: var(--text-sm); 
-  color: #fdfbf7; /* Blanco Crema */
+  font-size: 15px; /* Aumentado de var-sm */
+  color: var(--text-primary); /* Texto oscuro profesional */
   flex: 1; 
   min-width: 0; 
   white-space: nowrap; 
   overflow: hidden; 
   text-overflow: ellipsis; 
-  font-weight: 600;
+  font-weight: 700;
+  font-family: var(--font-display); /* Dosis para el nombre del producto */
 }
 
 .dr-lote-venc { 
-  font-size: var(--text-xs); 
-  font-family: var(--font-mono); 
-  color: #a3938d; /* Color Trigo */
+  font-size: 13px; /* Aumentado de xs */
+  font-family: var(--font-sans); /* Adiós al mono para fechas */
+  color: var(--text-secondary); 
+  font-weight: 600;
 }
 
 .dr-lote-chevron {
-  color: #7d6b63; 
+  color: var(--text-tertiary); 
   flex-shrink: 0;
   transition: all var(--transition-fast);
 }
 
 .dr-lote-chevron[data-open="true"] { 
   transform: rotate(90deg); 
-  color: #df6129; 
+  color: var(--brand-orange); 
 }
 
 /* Cuerpo del detalle (Acordeón abierto) */
 .dr-lote-body {
-  border-top: 1px solid #2a1a14;
+  border-top: 1px solid var(--primary-15);
   display: flex; 
   gap: 0;
-  background: rgba(0, 0, 0, 0.15); /* Fondo un poco más oscuro para dar profundidad */
+  background: var(--primary-8); /* Fondo melocotón suave para el área de datos */
 }
 
 .dr-lote-detail-col {
   flex: 1; 
-  padding: 1rem 1.25rem; 
-  border-right: 1px solid #2a1a14;
+  padding: 1.25rem; 
+  border-right: 1px solid var(--primary-15);
   display: flex; 
   flex-direction: column; 
-  gap: 0;
+  gap: 0.25rem;
 }
 
 .dr-lote-detail-col:last-child { border-right: none; }
@@ -356,47 +383,55 @@
 .dr-lote-kv {
   display: flex; 
   justify-content: space-between; 
-  padding: 0.5rem 0;
-  border-bottom: 1px dashed rgba(163, 147, 141, 0.1); /* Estilo ticket técnico */
+  padding: 0.625rem 0;
+  border-bottom: 1px dashed var(--primary-25); /* Estilo ticket de calidad */
 }
 
 .dr-lote-kv:last-child { border-bottom: none; }
 
 .dr-lote-k { 
-  font-size: 10px; 
+  font-size: 11px; /* Aumentado de 10px */
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #7d6b63; 
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  font-weight: 700;
 }
 
 .dr-lote-v { 
-  font-size: var(--text-xs); 
+  font-size: 14px; /* Aumentado de xs (12px) para datos de pesaje/cantidad */
   font-family: var(--font-mono); 
-  color: #c9bcaf; /* Gris cálido/arena */
-  font-weight: 600;
+  color: var(--text-primary); 
+  font-weight: 700;
 }
 
-/* ── DOCUMENTOS DENTRO DE LOTE (EDICIÓN LA RECETA) ── */
+/* ── DOCUMENTOS DENTRO DE LOTE (il forno / La Receta) ── */
 .dr-lote-docs { 
-  padding: 1rem 1.25rem; 
-  background: rgba(0, 0, 0, 0.05); /* Un fondo apenas más oscuro para agrupar los docs */
+  padding: 1.25rem; 
+  /* CAMBIO: Fondo melocotón muy sutil para agrupar visualmente */
+  background: var(--primary-10); 
+  border-radius: var(--radius-lg);
+  margin: 0.5rem 1rem 1rem 1rem;
 }
 
 .dr-lote-docs-title { 
-  font-size: 10px; 
-  font-family: var(--font-mono); 
+  /* Aumento de 10px a 11px */
+  font-size: 11px; 
+  font-family: var(--font-sans); /* Adiós al mono para etiquetas */
   text-transform: uppercase; 
-  color: #7d6b63; /* Café suave */
+  color: var(--text-secondary); 
   margin-bottom: 0.75rem; 
   letter-spacing: 0.1em;
+  font-weight: 800;
+  opacity: 0.7;
 }
 
 .dr-doc-link {
   display: flex; 
   align-items: center; 
   gap: 0.75rem; 
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #2a1a14; 
+  padding: 0.625rem 0;
+  /* Línea divisoria acorde a la nueva paleta */
+  border-bottom: 1px solid var(--primary-20); 
   text-decoration: none;
   transition: all var(--transition-fast);
 }
@@ -404,338 +439,341 @@
 .dr-doc-link:last-child { border-bottom: none; }
 
 .dr-doc-link-text { 
-  font-size: var(--text-xs); 
-  color: #a3938d; /* Color Trigo para los nombres de archivos */
+  /* Aumento de xs a 14px para facilitar la lectura de archivos */
+  font-size: 14px; 
+  color: var(--text-primary); 
   transition: color var(--transition-fast); 
-  font-weight: 500;
+  font-weight: 600;
+}
+
+/* Icono de adjunto con el naranja de la marca */
+.dr-doc-link::before {
+  content: "📎";
+  font-size: 1rem;
+  opacity: 0.8;
+  filter: grayscale(1) sepia(1) saturate(5) hue-rotate(340deg); /* Tinte naranja marca */
 }
 
 /* Efecto de activación al pasar el mouse */
-.dr-doc-link:hover .dr-doc-link-text { 
-  color: #df6129; /* Cambio a Naranja Marca */
-}
-
-/* Sugerencia: Añadir un icono de clip o documento sutil */
-.dr-doc-link::before {
-  content: "📎";
-  font-size: 0.8rem;
-  opacity: 0.6;
-  filter: sepia(1) saturate(2);
-}
-
 .dr-doc-link:hover {
-  transform: translateX(4px); /* Feedback visual de movimiento */
+  transform: translateX(6px); /* Feedback visual más claro */
 }
 
-/* ── CHECK ITEM (INSPECCIÓN BPM - EDICIÓN LA RECETA) ── */
+.dr-doc-link:hover .dr-doc-link-text { 
+  color: var(--brand-orange); 
+}
+
+/* ── CHECK ITEM (INSPECCIÓN BPM - il forno / La Receta) ── */
 .dr-checkitem {
   display: flex; 
   align-items: center; 
   justify-content: space-between;
-  padding: 0.75rem 1.25rem; 
-  border-bottom: 1px solid #2a1a14;
+  padding: 1rem 1.25rem; /* Más altura para legibilidad */
+  border-bottom: 1px solid var(--primary-15);
   transition: background var(--transition-fast);
 }
 
 .dr-checkitem:hover {
-  background: rgba(255, 255, 255, 0.01); /* Feedback sutil al pasar el cursor */
+  background: var(--primary-8); 
 }
 
 .dr-checkitem-label { 
-  font-size: var(--text-sm); 
-  color: #c9bcaf; /* Gris arena/cálido para mejor lectura */
-  font-weight: 500;
+  /* Aumento a 15px para lectura rápida */
+  font-size: 15px; 
+  color: var(--text-primary); 
+  font-weight: 600;
 }
 
-/* El icono de ítem crítico (ej: Temperatura o Higiene) */
+/* Icono de ítem crítico */
 .dr-checkitem-crit-icon { 
-  color: #df6129; /* Naranja il Forno para advertir criticidad */
-  margin-right: 0.375rem; 
+  color: var(--brand-orange); 
+  margin-right: 0.5rem; 
   filter: drop-shadow(0 0 5px rgba(223, 97, 41, 0.2));
 }
 
 .dr-checkitem-badge {
-  font-size: 10px; 
+  font-size: 11px; /* Aumentado */
   font-weight: 800; 
-  font-family: var(--font-mono);
-  padding: 0.25rem 0.625rem; 
-  border-radius: var(--radius-sm);
+  font-family: var(--font-sans); /* Más moderno que mono */
+  padding: 0.35rem 0.75rem; 
+  border-radius: var(--radius-md);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
-/* Badge CUMPLE: Verde Esmeralda La Receta */
+/* Badge CUMPLE: Verde Corporativo Limpio */
 .dr-checkitem-badge[data-ok="true"] { 
-  background: rgba(61, 140, 64, 0.15); 
-  color: #86efac; 
-  border: 1px solid rgba(61, 140, 64, 0.2);
+  background: rgba(45, 106, 79, 0.1); 
+  color: #2D6A4F; 
+  border: 1px solid rgba(45, 106, 79, 0.2);
 }
 
-/* Badge NO CUMPLE: Rojo Arcilla La Receta */
+/* Badge NO CUMPLE: Rojo Alerta Limpio */
 .dr-checkitem-badge[data-ok="false"] { 
-  background: rgba(185, 61, 61, 0.15); 
-  color: #fca5a5; 
-  border: 1px solid rgba(185, 61, 61, 0.2);
+  background: var(--danger-10); 
+  color: var(--danger); 
+  border: 1px solid var(--danger-20);
 }
 
-/* ── TEMPERATURA INICIAL (EDICIÓN LA RECETA) ── */
+/* ── TEMPERATURA INICIAL (il forno / La Receta) ── */
 .dr-temp-inicial {
   display: flex; 
   align-items: center; 
   gap: 1rem;
-  padding: 1rem 1.25rem; 
-  border-bottom: 1px solid #2a1a14;
-  /* Un fondo sutilmente diferente para indicar que es un dato de sensor */
-  background: rgba(147, 197, 253, 0.02);
+  padding: 1.25rem; 
+  border-bottom: 1px solid var(--primary-15);
+  /* Melocotón muy suave para indicar área de datos importantes */
+  background: var(--primary-8);
 }
 
 .dr-temp-inicial-label {
-  font-size: var(--text-sm);
-  color: #a3938d; /* Color Trigo */
-  font-weight: 500;
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 700;
 }
 
 .dr-temp-inicial-val {
   margin-left: auto; 
-  font-size: 1rem; /* Un poco más grande para destacar el dato */
+  font-size: 1.15rem; /* Destacado visual */
   font-weight: 800;
   font-family: var(--font-mono); 
-  /* Azul gélido claro para legibilidad técnica */
-  color: #93c5fd;
+  /* Azul marca pero integrado al diseño */
+  color: #2563eb; 
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.35rem;
 }
 
-/* Opcional: Un pequeño indicador visual de termómetro */
 .dr-temp-inicial-val::before {
-  content: "❄️";
-  font-size: 0.8rem;
-  opacity: 0.7;
+  content: "🌡️"; /* Termómetro más universal */
+  font-size: 1rem;
 }
 
-/* ── BADGE TEMPERATURA (EDICIÓN LA RECETA) ── */
+/* ── BADGE TEMPERATURA (il forno / La Receta) ── */
 .dr-temp-badge { 
-  font-size: var(--text-sm); 
+  font-size: 14px; 
   font-weight: 800; 
   font-family: var(--font-mono); 
   display: inline-flex;
   align-items: center;
 }
 
-/* Temperatura fuera de rango: Rojo Arcilla suave */
 .dr-temp-badge[data-fuera="true"] { 
-  color: #fca5a5; 
-  text-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
+  color: var(--danger); 
 }
 
-/* Temperatura correcta: Verde Esmeralda sutil */
 .dr-temp-badge[data-fuera="false"] { 
-  color: #86efac; 
+  color: #2D6A4F; 
 }
 
 .dr-temp-warn { 
-  font-size: 10px; 
-  font-weight: 600;
-  margin-left: 0.5rem; 
+  font-size: 11px; 
+  font-weight: 800;
+  margin-left: 0.6rem; 
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.9;
+  letter-spacing: 0.08em;
+  color: var(--danger);
 }
 
-/* Si está fuera de rango, le damos un estilo de alerta más claro al texto de advertencia */
-.dr-temp-badge[data-fuera="true"] + .dr-temp-warn {
-  color: #fca5a5;
-  animation: pulse-soft 2s infinite;
-}
-
-@keyframes pulse-soft {
-  0% { opacity: 1; }
-  50% { opacity: 0.6; }
-  100% { opacity: 1; }
-}
-
-/* ── DOCUMENTOS LISTA (EDICIÓN LA RECETA) ── */
+/* ── DOCUMENTOS LISTA (il forno / La Receta) ── */
 .dr-doc-list { 
   display: flex; 
   flex-direction: column; 
-  gap: 0.75rem; 
+  gap: 1rem; /* Más aire entre tarjetas */
 }
 
 .dr-doc-card {
   display: flex; 
   align-items: center; 
-  gap: 1rem; 
-  padding: 1rem;
-  border-radius: var(--radius-lg);
-  /* Fondo café oscuro con borde definido */
-  background: #21140f; 
-  border: 1px solid #3d2b24;
-  transition: transform var(--transition-fast);
+  gap: 1.25rem; 
+  padding: 1.15rem;
+  border-radius: var(--radius-xl);
+  /* CAMBIO: De fondo chocolate a blanco puro con sombra suave */
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default);
+  transition: all var(--transition-fast);
 }
 
 .dr-doc-card:hover {
-  transform: translateY(-2px);
-  border-color: #4a372f;
+  transform: translateY(-3px);
+  border-color: var(--primary-25);
+  box-shadow: var(--shadow-md);
 }
 
 .dr-doc-icon { 
-  width: 2.5rem; 
-  height: 2.5rem; 
-  border-radius: var(--radius-md); 
+  width: 3rem; 
+  height: 3rem; 
+  border-radius: var(--radius-lg); 
   display: flex; 
   align-items: center; 
   justify-content: center; 
   flex-shrink: 0; 
-  /* Estilo técnico: fondo oscuro con icono naranja */
-  background: #2a1a14;
-  color: #df6129;
-  border: 1px solid #3d2b24;
+  /* Estilo il forno: Fondo melocotón con icono naranja vibrante */
+  background: var(--primary-10);
+  color: var(--brand-orange);
+  border: 1px solid var(--primary-15);
 }
 
 .dr-doc-info { flex: 1; min-width: 0; }
 
 .dr-doc-tipo { 
-  font-size: var(--text-sm); 
-  color: #fdfbf7; /* Blanco Crema */
-  font-weight: 600; 
+  /* Aumento a 15px para identificación rápida del tipo de documento */
+  font-size: 15px; 
+  color: var(--text-primary); 
+  font-weight: 700; 
+  font-family: var(--font-display); /* Dosis */
 }
 
 .dr-doc-meta { 
-  font-size: var(--text-xs); 
-  font-family: var(--font-mono); 
-  color: #a3938d; /* Color Trigo */
-  margin-top: 0.25rem; 
+  /* Aumento de xs a 13px */
+  font-size: 13px; 
+  font-family: var(--font-sans); /* Adiós al mono para metadatos */
+  color: var(--text-secondary); 
+  margin-top: 0.25rem;
+  opacity: 0.8;
 }
 
 .dr-doc-dl-btn {
   display: flex; 
   align-items: center; 
-  gap: 0.5rem;
-  padding: 0.5rem 0.875rem; 
+  gap: 0.625rem;
+  padding: 0.625rem 1rem; 
   border-radius: var(--radius-md);
-  font-size: var(--text-xs); 
-  font-weight: 700;
+  /* Aumento de xs a 12px para el botón de descarga */
+  font-size: 12px; 
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  /* Botón discreto en café madera */
-  background: #3d2b24; 
-  border: 1px solid #4a372f; 
-  color: #c9bcaf;
+  letter-spacing: 0.08em;
+  /* Botón con estilo melocotón/naranja coherente */
+  background: var(--primary-8); 
+  border: 1px solid var(--primary-20); 
+  color: var(--brand-orange);
   text-decoration: none; 
   flex-shrink: 0;
   transition: all var(--transition-fast);
 }
 
 .dr-doc-dl-btn:hover { 
-  /* Al hover, el botón se vuelve Naranja il Forno */
-  background: #df6129; 
-  border-color: #df6129;
-  color: #fdfbf7; 
+  /* Al hover, el botón toma el color sólido de la marca */
+  background: var(--brand-orange); 
+  border-color: var(--brand-orange);
+  color: #ffffff; 
 }
 
-/* ── TEMPERATURAS LISTA (EDICIÓN LA RECETA) ── */
+/* ── TEMPERATURAS LISTA (il forno / La Receta) ── */
 .dr-temp-list { 
   display: flex; 
   flex-direction: column; 
-  gap: 0.75rem; 
+  gap: 1rem; 
 }
 
 .dr-temp-card {
   display: flex; 
   align-items: center; 
   gap: 1.25rem; 
-  padding: 1rem;
-  border-radius: var(--radius-lg);
-  /* Fondo café oscuro base */
-  background: #21140f; 
-  border: 1px solid #3d2b24;
+  padding: 1.15rem;
+  border-radius: var(--radius-xl);
+  /* CAMBIO: De fondo chocolate a blanco puro profesional */
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default);
   transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Estado Alerta: Temperatura fuera de rango con Rojo Arcilla */
+/* Estado Alerta: Temperatura fuera de rango con Rojo Limpio */
 .dr-temp-card[data-fuera="true"] { 
-  border-color: rgba(185, 61, 61, 0.4); 
-  background: rgba(185, 61, 61, 0.04); 
-  box-shadow: inset 0 0 15px rgba(185, 61, 61, 0.05);
+  border-color: var(--danger-40); 
+  background: var(--danger-10); 
+  box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.05);
 }
 
 .dr-temp-card-val {
-  font-size: 1.35rem; 
+  /* Aumento para impacto visual inmediato */
+  font-size: 1.5rem; 
   font-weight: 800; 
   font-family: var(--font-mono); 
   flex-shrink: 0; 
-  min-width: 5.5rem;
+  min-width: 6rem;
   text-align: center;
   letter-spacing: -0.02em;
 }
 
-/* Rojo Arcilla para falla */
-.dr-temp-card-val[data-fuera="true"] { color: #fca5a5; }
+/* Rojo il forno para alerta */
+.dr-temp-card-val[data-fuera="true"] { color: var(--danger); }
 
-/* Verde Esmeralda para cumplimiento */
-.dr-temp-card-val[data-fuera="false"] { color: #86efac; }
+/* Verde Corporativo para cumplimiento */
+.dr-temp-card-val[data-fuera="false"] { color: #2D6A4F; }
 
 .dr-temp-card-info { flex: 1; min-width: 0; }
 
 .dr-temp-item-name { 
-  font-size: var(--text-sm); 
-  color: #fdfbf7; /* Blanco Crema */
-  font-weight: 600; 
+  /* Aumento a 15px y cambio a tipografía de marca */
+  font-size: 15px; 
+  color: var(--text-primary); 
+  font-weight: 700;
+  font-family: var(--font-display); /* Dosis */
 }
 
 .dr-temp-meta { 
-  font-size: var(--text-xs); 
-  font-family: var(--font-mono); 
-  color: #a3938d; /* Color Trigo */
+  /* Aumento de xs a 13px */
+  font-size: 13px; 
+  font-family: var(--font-sans); 
+  color: var(--text-secondary); 
   margin-top: 0.25rem; 
 }
 
 .dr-temp-rango { 
-  font-size: 10px; 
+  /* Aumento de 10px a 11px */
+  font-size: 11px; 
   font-family: var(--font-mono); 
   flex-shrink: 0; 
-  color: #7d6b63; 
-  background: rgba(0, 0, 0, 0.2);
-  padding: 0.25rem 0.5rem;
+  color: var(--text-secondary); 
+  background: var(--primary-15);
+  padding: 0.35rem 0.625rem;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(163, 147, 141, 0.1);
+  border: 1px solid var(--primary-25);
+  font-weight: 600;
 }
 
-/* ── ESTADOS: LOADING / ERROR / EMPTY (EDICIÓN LA RECETA) ── */
+/* ── ESTADOS: LOADING / ERROR / EMPTY (il forno / La Receta) ── */
 .dr-state-center {
   display: flex; 
   flex-direction: column; 
   align-items: center; 
   justify-content: center;
   min-height: 400px; 
-  gap: 1rem;
-  /* Fondo chocolate con un degradado radial muy sutil */
-  background: radial-gradient(circle at center, rgba(42, 26, 20, 0.4) 0%, transparent 70%);
+  gap: 1.25rem;
+  /* Cambio: Fondo limpio con un resplandor melocotón muy sutil */
+  background: radial-gradient(circle at center, var(--primary-8) 0%, transparent 80%);
 }
 
 .dr-loading-text { 
-  font-size: 10px; 
-  font-family: var(--font-mono); 
-  color: #a3938d; /* Color Trigo */
+  /* Aumento a 12px para mayor legibilidad */
+  font-size: 12px; 
+  font-family: var(--font-sans); /* Adiós al mono para mensajes de sistema */
+  color: var(--text-secondary); 
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
+  font-weight: 700;
   margin-top: 0.5rem;
 }
 
 .dr-error-text { 
-  font-size: var(--text-sm); 
-  color: #fca5a5; /* Rojo Arcilla suave */
-  font-weight: 600;
-  max-width: 300px;
+  /* Aumento a 15px para que el error sea claro */
+  font-size: 15px; 
+  color: var(--danger); /* Rojo de la paleta compartida */
+  font-weight: 700;
+  max-width: 350px;
   text-align: center;
+  line-height: 1.5;
 }
 
 .dr-back-link { 
-  font-size: var(--text-sm); 
-  color: #df6129; /* Naranja Marca */
+  /* Aumento a 15px para mejorar la zona de clic */
+  font-size: 15px; 
+  color: var(--brand-orange); 
   text-decoration: none; 
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer; 
   background: none; 
   border-bottom: 2px solid transparent;
@@ -744,8 +782,8 @@
 }
 
 .dr-back-link:hover { 
-  border-color: #df6129;
-  filter: brightness(1.2);
+  border-color: var(--brand-orange);
+  transform: translateY(-1px);
 }
 
 .dr-tab-empty {
@@ -753,20 +791,22 @@
   flex-direction: column;
   align-items: center; 
   justify-content: center;
-  padding: 4rem 1.5rem; 
-  font-size: var(--text-sm); 
-  color: #7d6b63; /* Café ceniza */
-  background: rgba(33, 20, 15, 0.3);
+  padding: 5rem 2rem; 
+  /* Aumento a 16px para el mensaje principal */
+  font-size: 16px; 
+  color: var(--text-muted); 
+  background: var(--bg-app);
   border-radius: var(--radius-xl);
-  border: 1px dashed #3d2b24;
+  /* Línea punteada en melocotón */
+  border: 2px dashed var(--primary-20);
   margin-top: 1rem;
+  font-family: var(--font-display); /* Dosis */
 }
 
-/* Spinner personalizado para que parezca un elemento de precisión */
+/* Spinner con el color vibrante de la marca */
 .dr-spin { 
   animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite; 
-  color: #df6129;
-  opacity: 0.8;
+  color: var(--brand-orange);
 }
 
 @keyframes spin { 

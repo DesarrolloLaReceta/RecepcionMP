@@ -1,9 +1,9 @@
 /* LiberacionCocina.css */
 
 .lc-section {
-  border: 1px solid #3d2b24;
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
-  background: #21140f; /* Fondo oscuro consistente con la app */
+  background: var(--bg-card);
   padding: 1rem;
   margin-top: 20px;
 }
@@ -11,50 +11,49 @@
 .lc-grid-head,
 .lc-grid-row {
   display: grid;
-  /* Ajustado a 2 columnas: Item y Estado */
-  grid-template-columns: 2fr 0.8fr; 
+  grid-template-columns: 2fr 0.8fr;
   gap: 1rem;
   align-items: center;
 }
 
 .lc-grid-head {
   font-size: 10px;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #a3938d;
+  color: var(--table-header-muted);
   margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #3d2b24;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: var(--table-header-bg);
 }
 
 .lc-grid-row {
   padding: 0.75rem 0;
-  border-bottom: 1px dashed #3d2b24;
+  border-bottom: 1px dashed var(--border-default);
 }
 
 .lc-grid-row:last-child {
   border-bottom: none;
 }
 
-/* AQUÍ ESTÁ EL CAMBIO CLAVE PARA LA LEGIBILIDAD */
 .lc-item-text {
-  color: #fdfbf7; /* Texto claro para resaltar sobre el café oscuro */
+  color: var(--text-primary);
   font-size: var(--text-sm);
   line-height: 1.35;
 }
 
 .lc-select {
-  background-color: #3d302b;
-  color: #ffffff;
-  border: 1px solid #5a4a42;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   padding: 0.5rem;
   width: 100%;
   font-size: var(--text-sm);
+  font-family: var(--font-sans);
 }
 
-/* Responsivo para móviles */
 @media (max-width: 768px) {
   .lc-grid-head {
     display: none;
@@ -62,5 +61,10 @@
   .lc-grid-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-card-dim);
   }
 }

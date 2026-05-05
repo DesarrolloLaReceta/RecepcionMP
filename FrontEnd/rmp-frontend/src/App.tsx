@@ -42,8 +42,12 @@ function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[300px]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-[#F59E0B] border-t-transparent rounded-full animate-spin" />
-        <p className="text-[#475569] text-xs font-mono">Cargando módulo…</p>
+        {/* Usamos la variable --brand-orange directamente */}
+        <div className="w-8 h-8 border-2 border-[var(--brand-orange)] border-t-transparent rounded-full animate-spin" />
+        {/* Cambiamos el verde #5c6652 por el naranja sutil o texto muted */}
+        <p className="text-[var(--brand-orange)] opacity-80 text-xs font-medium" style={{ fontFamily: "var(--font-sans)" }}>
+          Cargando módulo…
+        </p>
       </div>
     </div>
   );

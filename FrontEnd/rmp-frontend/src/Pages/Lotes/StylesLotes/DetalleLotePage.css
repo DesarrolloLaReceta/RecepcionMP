@@ -1,5 +1,6 @@
 /* ============================================================
-   DETALLE DE LOTE — ENCABEZADO Y ESTRUCTURA
+   DETALLE DE LOTE — (il forno / La Receta)
+   Encabezado y Estructura de Trazabilidad
    ============================================================ */
 
 .dl-page { 
@@ -8,18 +9,19 @@
     gap: 1.5rem; 
     max-width: 1200px; 
     margin: 0 auto; 
-    padding: 1rem;
-    animation: fadeSlideUp 0.35s ease both; 
+    padding: 1.5rem 1rem;
+    animation: fadeSlideUp var(--transition-base) ease both; 
 }
 
 .dl-header { 
     display: flex; 
-    align-items: center; /* Alineación centrada para que breadcrumb e info fluyan bien */
+    align-items: center; 
     justify-content: space-between;
-    gap: 1rem;
+    gap: 1.25rem;
     flex-wrap: wrap; 
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid #3d2b24; /* Línea divisoria industrial */
+    padding-bottom: 1.5rem;
+    /* Cambio a línea melocotón sutil */
+    border-bottom: 2px solid var(--primary-15); 
 }
 
 .dl-header-info { 
@@ -27,45 +29,65 @@
     min-width: 0; 
 }
 
-/* Navegación tipo miga de pan */
+/* Navegación tipo miga de pan — Alta visibilidad */
 .dl-breadcrumb { 
-    font-size: 10px; 
-    font-family: var(--font-mono); 
-    letter-spacing: 0.15em; 
+    /* Aumento de 10px a 12px */
+    font-size: 12px; 
+    font-family: var(--font-sans); 
+    letter-spacing: 0.05em; 
     text-transform: uppercase; 
-    color: #df6129; /* Naranja Marca para indicar el camino */
-    margin-bottom: 0.5rem; 
+    /* Naranja il forno para navegación */
+    color: var(--brand-orange); 
+    margin-bottom: 0.75rem; 
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-weight: 700;
 }
 
-/* El número de Lote es el título principal aquí */
+/* El número de Lote es el título principal */
 .dl-lote-num { 
-    font-size: 1.75rem; 
+    /* Aumento de 1.75rem a 2.25rem */
+    font-size: 2.25rem; 
     font-weight: 800; 
-    color: #fdfbf7; /* Blanco Crema */
-    font-family: 'Dosis', sans-serif; 
+    /* Color principal oscuro profesional */
+    color: var(--text-primary); 
+    font-family: var(--font-display); /* Dosis */
     text-transform: uppercase;
     line-height: 1;
+    letter-spacing: -0.02em;
 }
 
 /* Descripción del producto/item */
 .dl-lote-item { 
-    font-size: 14px; 
-    color: #a3938d; /* Color Trigo */
-    margin-top: 0.375rem; 
-    font-weight: 500;
+    /* Aumento de 14px a 16px */
+    font-size: 16px; 
+    color: var(--text-secondary); 
+    margin-top: 0.5rem; 
+    font-weight: 600;
+    font-family: var(--font-sans);
+}
+
+/* Indicador de estado rápido en el header (Opcional) */
+.dl-header-badge {
+    padding: 0.5rem 1rem;
+    background: var(--primary-10);
+    border: 1px solid var(--primary-20);
+    border-radius: var(--radius-full);
+    color: var(--brand-orange);
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
 }
 
 /* ============================================================
-   DETALLE LOTE — GRID DE INFORMACIÓN TÉCNICA
+   DETALLE LOTE — GRID DE INFORMACIÓN TÉCNICA (il forno)
    ============================================================ */
 
 .dl-grid { 
     display: grid; 
     grid-template-columns: 1fr; 
-    gap: 1.25rem; 
+    gap: 1.5rem; 
 }
 
 @media (min-width: 1024px) { 
@@ -77,81 +99,94 @@
 .dl-col { 
     display: flex; 
     flex-direction: column; 
-    gap: 1.25rem; 
+    gap: 1.5rem; 
 }
 
-/* Contenedor de campos tipo formulario de lectura */
+/* Contenedor de campos tipo formulario de lectura clara */
 .dl-field-grid { 
     display: grid; 
     grid-template-columns: repeat(2, 1fr); 
-    gap: 1.25rem 2rem; 
-    padding: 1.25rem;
-    background: #1a110d; /* Fondo Chocolate profundo */
-    border-radius: var(--radius-lg);
-    border: 1px solid #3d2b24;
+    gap: 1.5rem 2.5rem; 
+    padding: 1.5rem;
+    /* Cambio: De Chocolate profundo a Blanco con sombra suave */
+    background: #ffffff; 
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-default);
+    box-shadow: var(--shadow-sm);
 }
 
 .dl-field-full { 
     grid-column: 1 / -1; 
 }
 
-/* Etiquetas de campo (Labels) */
+/* Etiquetas de campo (Labels) — Alta visibilidad */
 .dl-field-label { 
-    font-size: 10px; 
-    font-family: var(--font-mono); 
+    /* Aumento a 11px */
+    font-size: 11px; 
+    font-family: var(--font-sans); 
     text-transform: uppercase; 
-    letter-spacing: 0.15em; 
-    color: #7d6b63; /* Café Ceniza */
-    margin-bottom: 0.35rem; 
-    font-weight: 700;
+    letter-spacing: 0.08em; 
+    /* Cambio: Color secundario profesional de la marca */
+    color: var(--text-secondary); 
+    margin-bottom: 0.5rem; 
+    font-weight: 800;
 }
 
 /* Valores de campo */
 .dl-field-value { 
-    font-size: 14px; 
-    color: #fdfbf7; /* Blanco Crema */
-    font-weight: 500;
-    line-height: 1.4;
+    /* Aumento a 15px para lectura rápida */
+    font-size: 15px; 
+    /* Cambio: Texto principal oscuro */
+    color: var(--text-primary); 
+    font-weight: 600;
+    line-height: 1.5;
+    font-family: var(--font-sans);
 }
 
 /* Valores técnicos (IDs, Fechas, Lotes) */
 .dl-field-value--mono { 
     font-family: var(--font-mono); 
-    color: #a3938d; /* Color Trigo para datos técnicos */
-    letter-spacing: -0.02em;
+    /* Color de acento para diferenciar datos de sistema */
+    color: var(--brand-orange); 
+    letter-spacing: -0.01em;
+    font-weight: 700;
 }
 
 .dl-venc-row { 
     display: flex; 
     align-items: center; 
-    gap: 0.75rem; 
+    gap: 1rem; 
     flex-wrap: wrap; 
 }
+
 /* ============================================================
    DETALLE LOTE — INSPECCIÓN, TEMPERATURA Y ALERTAS
+   Estética de Alta Visibilidad (il forno / La Receta)
    ============================================================ */
 
-/* Punto de vencimiento con efecto LED */
+/* Punto de vencimiento — Indicador Sólido Profesional */
 .dl-venc-dot { 
-    width: 0.5rem; 
-    height: 0.5rem; 
+    width: 0.625rem; 
+    height: 0.625rem; 
     border-radius: var(--radius-full); 
     flex-shrink: 0; 
-    box-shadow: 0 0 8px currentColor; /* Brillo dinámico según el color del estado */
+    /* Eliminamos brillo LED para evitar fatiga visual */
+    box-shadow: none; 
 }
 
 .dl-venc-dias { 
-    font-size: 13px; 
-    font-family: var(--font-mono);
-    font-weight: 600;
-    color: #fdfbf7; /* Blanco Crema */
+    font-size: 14px; 
+    font-family: var(--font-sans);
+    font-weight: 700;
+    /* Cambio: Texto principal oscuro para contraste */
+    color: var(--text-primary); 
 }
 
 /* Grid de Inspección Visual/Técnica */
 .dl-inspeccion-grid { 
     display: grid; 
     grid-template-columns: repeat(2, 1fr); 
-    gap: 1.25rem; 
+    gap: 1.5rem; 
 }
 
 @media (min-width: 768px) { 
@@ -160,95 +195,105 @@
     } 
 }
 
-/* Bloque de Temperatura (Display Digital) */
+/* Bloque de Temperatura (Display Limpio) */
 .dl-temp-bloc { 
     grid-column: 1 / -1; 
-    padding: 1rem 1.25rem; 
-    border-radius: var(--radius-lg); 
-    background: #1a110d; /* Fondo Chocolate Profundo */
-    border: 1px solid #3d2b24;
+    padding: 1.25rem 1.5rem; 
+    border-radius: var(--radius-xl); 
+    /* Cambio: De chocolate profundo a melocotón muy suave */
+    background: var(--primary-8); 
+    border: 1px solid var(--primary-15);
 }
 
 .dl-temp-header { 
     display: flex; 
     align-items: center; 
     gap: 0.75rem; 
-    margin-bottom: 0.5rem; 
+    margin-bottom: 0.75rem; 
 }
 
 .dl-temp-label { 
-    font-size: 12px; 
-    font-family: var(--font-mono);
+    /* Aumento a 13px */
+    font-size: 13px; 
+    font-family: var(--font-sans);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #a3938d; /* Color Trigo */
+    letter-spacing: 0.05em;
+    color: var(--text-secondary); 
+    font-weight: 800;
 }
 
 .dl-temp-value { 
-    font-size: 1.5rem; 
+    /* Tamaño masivo para evitar errores de lectura */
+    font-size: 1.75rem; 
     font-family: var(--font-mono); 
     font-weight: 800; 
     margin-left: auto;
-    color: #fdfbf7; /* Blanco Crema */
-    letter-spacing: -0.05em;
+    /* Color de marca para el dato más importante */
+    color: var(--brand-orange); 
+    letter-spacing: -0.02em;
 }
 
 .dl-temp-range { 
-    font-size: 11px; 
-    font-family: var(--font-mono); 
-    color: #7d6b63; /* Café Ceniza */
-    border-top: 1px solid #3d2b24;
-    padding-top: 0.5rem;
+    font-size: 12px; 
+    font-family: var(--font-sans); 
+    color: var(--text-muted); 
+    /* Línea divisoria suave */
+    border-top: 1px solid var(--primary-15);
+    padding-top: 0.75rem;
     margin-top: 0.5rem;
     display: block;
+    font-weight: 600;
 }
 
 /* Alerta de Documentos Faltantes */
 .dl-docs-alert { 
     display: flex; 
-    align-items: flex-start; 
-    gap: 0.75rem; 
-    padding: 1rem; 
-    border-radius: var(--radius-md); 
-    background: rgba(223, 97, 41, 0.05); /* Naranja Marca muy tenue */
-    border: 1px solid rgba(223, 97, 41, 0.2); 
+    align-items: center; 
+    gap: 1rem; 
+    padding: 1.25rem; 
+    border-radius: var(--radius-lg); 
+    /* Fondo melocotón con borde naranja marca */
+    background: var(--primary-10); 
+    border: 1px solid var(--primary-20); 
 }
 
-/* Icono o texto dentro de la alerta */
 .dl-docs-alert span {
-    color: #df6129; /* Naranja Marca */
-    font-size: 13px;
-    font-weight: 600;
+    color: var(--brand-orange); 
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--font-sans);
 }
 
 /* ============================================================
-   DETALLE LOTE — CHECKS DE CALIDAD Y ENLACES
+   DETALLE LOTE — CHECKS DE CALIDAD Y ENLACES (il forno)
    ============================================================ */
 
 /* Alerta de Documentos (Títulos e Ítems) */
 .dl-docs-alert-title { 
-    font-size: 13px; 
-    font-weight: 700; 
-    color: #df6129; /* Naranja Marca */
-    font-family: 'Dosis', sans-serif;
+    font-size: 14px; 
+    font-weight: 800; 
+    color: var(--brand-orange); 
+    font-family: var(--font-display); /* Dosis */
     text-transform: uppercase;
-    margin-bottom: 0.25rem; 
+    margin-bottom: 0.35rem; 
 }
 
 .dl-docs-alert-item { 
-    font-size: 11px; 
-    color: #f1713a; /* Un naranja más suave para los ítems */
-    font-family: var(--font-mono);
+    font-size: 12px; 
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-weight: 600;
 }
 
-/* Filas de Verificación (Checks) */
+/* Filas de Verificación (Checks de Calidad) */
 .dl-check-row { 
     display: flex; 
     align-items: center; 
     justify-content: space-between; 
-    padding: 0.65rem 0; 
-    border-bottom: 1px solid #3d2b24; /* Borde Oxido sutil */
-    gap: 0.75rem; 
+    padding: 0.85rem 0; 
+    /* Cambio: Borde melocotón sutil en lugar de óxido */
+    border-bottom: 1px solid var(--primary-15); 
+    gap: 1rem; 
 }
 
 .dl-check-row:last-child { 
@@ -256,85 +301,101 @@
 }
 
 .dl-check-label { 
-    font-size: 14px; 
-    color: #a3938d; /* Color Trigo */
+    font-size: 15px; 
+    color: var(--text-primary); 
+    font-weight: 600;
     flex: 1; 
 }
 
-/* Indicadores de Check (Estilo LED) */
+/* Indicadores de Check (Sólidos y Profesionales) */
 .dl-check-dot { 
-    width: 0.5rem; 
-    height: 0.5rem; 
+    width: 0.75rem; 
+    height: 0.75rem; 
     border-radius: var(--radius-full); 
     flex-shrink: 0; 
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.4); /* Sombra base */
+    /* Eliminamos sombras de brillo para mayor claridad visual */
+    box-shadow: none; 
 }
 
-/* Color según estado con brillo */
+/* Colores de estado il forno */
 .dl-check-dot[data-ok="true"] { 
-    background: #10b981; 
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    background: #15803d; /* Verde éxito sólido */
 }
 
 .dl-check-dot[data-ok="false"] { 
-    background: #ef4444; 
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+    background: var(--danger); /* Rojo crítico sólido */
 }
 
-/* Enlaces a Recepción/SIESA */
+/* Enlaces a Recepción/SIESA (Integración ERP) */
 .dl-link-rec { 
     font-family: var(--font-mono); 
-    font-weight: 600;
-    color: #df6129; /* Naranja Marca en lugar de azul */
+    font-weight: 700;
+    color: var(--brand-orange); 
     transition: all var(--transition-fast); 
     text-decoration: none; 
-    border-bottom: 1px dashed transparent;
+    padding: 0.25rem 0.5rem;
+    background: var(--primary-10);
+    border-radius: var(--radius-sm);
 }
 
 .dl-link-rec:hover { 
-    color: #f1713a; 
-    border-bottom-color: #f1713a;
+    background: var(--brand-orange);
+    color: #ffffff; 
 }
 
-/* Un toque extra: si es un código de referencia, que use un fondo sutil */
+/* Identificador de referencia SIESA */
 .dl-link-rec::before {
-    content: "#";
-    opacity: 0.5;
-    margin-right: 2px;
+    content: "REF: ";
+    font-size: 10px;
+    opacity: 0.7;
+    margin-right: 4px;
+    font-family: var(--font-sans);
 }
 
 /* ============================================================
-   BOTÓN REGRESAR — ESTILO TERMINAL
+   BOTÓN REGRESAR — (il forno / La Receta)
+   Estética de Navegación Fluida
    ============================================================ */
 
 .dl-back-btn { 
     display: inline-flex; 
     align-items: center; 
-    gap: 0.5rem; 
-    font-size: 11px; /* Tamaño técnico */
-    font-family: var(--font-mono); 
+    gap: 0.65rem; 
+    /* Aumento de 11px a 13px para mejor usabilidad */
+    font-size: 13px; 
+    font-family: var(--font-sans); 
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #a3938d; /* Color Trigo */
-    background: none; 
-    border: none; 
+    letter-spacing: 0.05em;
+    /* Cambio: Texto secundario profesional */
+    color: var(--text-secondary); 
+    background: var(--primary-10); 
+    border: 1px solid var(--primary-20); 
     cursor: pointer; 
-    padding: 0.5rem 0; 
+    padding: 0.6rem 1.25rem; 
+    border-radius: var(--radius-full);
     transition: all var(--transition-fast); 
 }
 
 .dl-back-btn:hover { 
-    color: #df6129; /* Naranja Marca al hacer hover */
-    transform: translateX(-4px); /* Pequeño desplazamiento hacia la izquierda */
+    /* Naranja Marca il forno */
+    color: #ffffff; 
+    background: var(--brand-orange);
+    border-color: var(--brand-orange);
+    /* Desplazamiento sutil que indica dirección */
+    transform: translateX(-5px); 
+    box-shadow: var(--shadow-md);
 }
 
-/* Si usas un icono (flecha) dentro del botón */
+/* Icono (flecha) dentro del botón */
 .dl-back-btn svg {
-    width: 1rem;
-    height: 1rem;
+    width: 1.15rem;
+    height: 1.15rem;
     transition: transform var(--transition-fast);
 }
 
 .dl-back-btn:hover svg {
     transform: scale(1.1);
+    /* Asegura que el icono cambie a blanco con el texto */
+    stroke: #ffffff; 
 }

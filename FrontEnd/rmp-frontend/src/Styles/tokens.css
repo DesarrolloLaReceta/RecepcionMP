@@ -1,14 +1,14 @@
 /* ============================================================
-   TOKENS DE DISEÑO — Tema Claro Corporativo
-   ============================================================
-   Modifica aquí para cambiar el aspecto de toda la aplicación.
+   TOKENS — il forno / La Receta (tema claro, marca centralizada)
+   Modificar aquí propaga el aspecto en toda la aplicación.
    ============================================================ */
 
 :root {
 
   /* ── TIPOGRAFÍA ───────────────────────────────────────────── */
-  --font-mono:  'DM Mono', 'Courier New', monospace;
-  --font-sans:  'DM Sans', system-ui, sans-serif;
+  --font-sans:    "Dosis", sans-serif;
+  --font-mono:    "Dosis", sans-serif;
+  --font-display: "Superclarendon", "Super Clarendon", "Bookman Old Style", Georgia, serif;
 
   --text-xs:    10px;
   --text-sm:    11px;
@@ -18,94 +18,118 @@
   --text-xl:    22px;
 
 
-  /* ── FONDOS ────────────────────────────────────────────────
-     Capas del sistema claro: app → sidebar/header → card      */
-  --bg-app:          #F1F5F9;            /* fondo general (slate-100)   */
-  --bg-surface:      #ffffff;            /* sidebar, header, cards      */
-  --bg-card:         #FFFFFF;            /* tarjetas principales        */
-  --bg-card-dim:     #F8FAFC;            /* tarjetas vacías / fondo alt */
-  --bg-modal:        #FFFFFF;            /* modales                     */
-  --bg-overlay:      rgba(15,23,42,0.5); /* overlay de modales          */
-  --bg-input:        #F8FAFC;            /* inputs en reposo            */
-  --bg-input-focus:  #FFFFFF;            /* input con foco              */
-  --bg-row-hover:    rgba(0,0,0,0.025);  /* hover filas de tabla        */
-  --bg-item:         #F8FAFC;            /* DataCell, items menores     */
-  --bg-item-hover:   #F1F5F9;            /* hover de items              */
+  /* ── MARCA il forno ───────────────────────────────────────── */
+  --brand-orange:       #df6129;
+  --brand-orange-hover: #c54e20;
+  --brand-orange-dark:  #a63d1c;
+  --brand-nav:          #273719; /* Verde oscuro */
+  --brand-nav-hover:    #1f2a14;
+  
+  /* Eliminamos las variables brand-earth (café) para evitar que se usen por error */
 
 
-  /* ── BORDES ────────────────────────────────────────────────
-     Escala oscura sobre fondo claro                           */
-  --border-faint:    rgba(0,0,0,0.04);
-  --border-subtle:   rgba(0,0,0,0.06);
-  --border-default:  rgba(0,0,0,0.08);
-  --border-medium:   rgba(0,0,0,0.10);
-  --border-strong:   rgba(0,0,0,0.14);
-  --border-focus-primary:   rgba(37,99,235,0.40);
-  --border-focus-secondary: rgba(139,92,246,0.40);
+  /* ── FONDOS — dominancia blanca (#FFFFFF) ─────────────────── */
+  --bg-app:          #ffffff;
+  --bg-surface:      #ffffff;
+  --bg-card:         #ffffff;
+  
+  /* Cambiamos el matiz café/hueso por un blanco con pizca de naranja (melocotón) */
+  --bg-card-dim:      #fffaf8; 
+  
+  /* Cambiamos el amarillo (225, 213, 175) por un naranja marca casi invisible */
+  --bg-card-secondary: rgba(223, 97, 41, 0.05); 
+  
+  --bg-modal:         #ffffff;
+  --bg-overlay:       rgba(39, 55, 25, 0.45);
+  --bg-input:         #ffffff;
+  --bg-input-focus:   #ffffff;
+  --bg-row-hover:     rgba(223, 97, 41, 0.04);
+  --bg-item:          #ffffff;
+  
+  /* Hover de ítems ahora es un naranja muy sutil para dar vida */
+  --bg-item-hover:    rgba(223, 97, 41, 0.08);
+
+ /* ── BORDES (Eliminado el café sucio) ────────────────────── */
+  /* Sustituimos el matiz marrón por grises neutros muy sutiles */
+  --border-faint:     rgba(0, 0, 0, 0.04);
+  --border-subtle:    rgba(0, 0, 0, 0.08);
+  --border-default:   rgba(0, 0, 0, 0.12);
+  --border-medium:    rgba(0, 0, 0, 0.18);
+  --border-strong:    rgba(0, 0, 0, 0.25);
+  
+  /* Enfoque con el naranja de la marca y el verde corporativo */
+  --border-focus-primary:    rgba(223, 97, 41, 0.45);
+  --border-focus-secondary:  rgba(39, 55, 25, 0.35);
 
 
-  /* ── TEXTO ─────────────────────────────────────────────────
-     Jerarquía oscura sobre fondo claro                        */
-  --text-primary:    #0F172A;
-  --text-secondary:  #1E293B;
-  --text-tertiary:   #334155;
-  --text-muted:      #64748B;
-  --text-ghost:      #94A3B8;
-  --text-faintest:   #CBD5E1;
-  --text-white:      #FFFFFF;
+  /* ── TEXTO (Paleta limpia de verdes y grises oscuros) ────── */
+  /* Eliminamos los tonos tierra para usar una escala profesional */
+  --text-primary:    #1a1a1a;
+  --text-secondary:  #273719; /* Verde marca il forno */
+  --text-tertiary:   #4b5563;
+  --text-muted:      #6b7280;
+  --text-ghost:      #9ca3af;
+  --text-faintest:   #cbd5e1;
+  --text-white:      #ffffff;
 
 
-  /* ── COLOR PRIMARIO — AZUL CORPORATIVO ─────────────────────
-     Modifica este bloque para cambiar el acento del sistema   */
-  --primary:           #2563EB;
-  --primary-hover:     #1D4ED8;
-  --primary-dark:      #1E40AF;
-  --primary-text:      #FFFFFF;
-  --primary-label:     #2563EB;
-  --primary-label-dim: #BFDBFE;
+  /* ── PRIMARIO (Acciones y acentos — Naranja puro) ────────── */
+  --primary:           var(--brand-orange);
+  --primary-hover:     var(--brand-orange-hover);
+  --primary-dark:      var(--brand-orange-dark);
+  --primary-text:      #ffffff;
+  --primary-label:     var(--brand-orange);
+  --primary-label-dim: rgba(223, 97, 41, 0.35);
 
-  --primary-4:   rgba(37,99,235,0.04);
-  --primary-6:   rgba(37,99,235,0.06);
-  --primary-8:   rgba(37,99,235,0.08);
-  --primary-10:  rgba(37,99,235,0.10);
-  --primary-12:  rgba(37,99,235,0.12);
-  --primary-15:  rgba(37,99,235,0.15);
-  --primary-20:  rgba(37,99,235,0.20);
-  --primary-25:  rgba(37,99,235,0.25);
-  --primary-30:  rgba(37,99,235,0.30);
+  /* Escala de opacidad naranja para fondos y sutiles */
+  --primary-4:   rgba(223, 97, 41, 0.04);
+  --primary-6:   rgba(223, 97, 41, 0.06);
+  --primary-8:   rgba(223, 97, 41, 0.08);
+  --primary-10:  rgba(223, 97, 41, 0.10);
+  --primary-12:  rgba(223, 97, 41, 0.12);
+  --primary-15:  rgba(223, 97, 41, 0.15);
+  --primary-20:  rgba(223, 97, 41, 0.20);
+  --primary-25:  rgba(223, 97, 41, 0.25);
+  --primary-30:  rgba(223, 97, 41, 0.30);
+
+/* ── SEMÁNTICOS (Colores nítidos, sin matices sucios) ─────── */
+  --success:         #2d7a32;
+  --success-text:    #1e5421;
+  --success-bg:      rgba(45, 122, 50, 0.08);
+  --success-border:  rgba(45, 122, 50, 0.22);
+
+  --danger:          #c62828;
+  --danger-text:     #8e1a1a;
+  --danger-bg:       rgba(198, 40, 40, 0.08);
+  --danger-border:   rgba(198, 40, 40, 0.22);
+
+  --warning:         #c2410c;
+  --warning-text:    #9a3412;
+  --warning-bg:      rgba(194, 65, 12, 0.08);
+  --warning-border:  rgba(194, 65, 12, 0.22);
+
+  --info:            var(--brand-nav);
+  --info-text:       var(--brand-nav);
+  --info-bg:         rgba(39, 55, 25, 0.06);
+  --info-border:     rgba(39, 55, 25, 0.18);
+
+  --purple:          #6b4f7a;
+  --purple-text:     #4f3a5c;
+  --purple-bg:       rgba(107, 79, 122, 0.08);
+  --purple-border:   rgba(107, 79, 122, 0.20);
+
+  /* Sustituimos el café de 'slate' por un gris azulado/neutro profesional */
+  --slate:           #64748b;
+  --slate-text:      #1e293b;
+  --slate-bg:        rgba(100, 116, 139, 0.12);
+  --slate-border:    rgba(100, 116, 139, 0.28);
 
 
-  /* ── SEMÁNTICOS ────────────────────────────────────────────  */
-
-  --success:        #16A34A;
-  --success-text:   #15803D;
-  --success-bg:     rgba(22,163,74,0.08);
-  --success-border: rgba(22,163,74,0.20);
-
-  --danger:         #DC2626;
-  --danger-text:    #B91C1C;
-  --danger-bg:      rgba(220,38,38,0.08);
-  --danger-border:  rgba(220,38,38,0.20);
-
-  --warning:        #D97706;
-  --warning-text:   #B45309;
-  --warning-bg:     rgba(217,119,6,0.08);
-  --warning-border: rgba(217,119,6,0.20);
-
-  --info:           #2563EB;
-  --info-text:      #1D4ED8;
-  --info-bg:        rgba(37,99,235,0.08);
-  --info-border:    rgba(37,99,235,0.20);
-
-  --purple:         #7C3AED;
-  --purple-text:    #6D28D9;
-  --purple-bg:      rgba(124,58,237,0.08);
-  --purple-border:  rgba(124,58,237,0.20);
-
-  --slate:          #64748B;
-  --slate-text:     #475569;
-  --slate-bg:       rgba(100,116,139,0.08);
-  --slate-border:   rgba(100,116,139,0.20);
+  /* ── TABLAS (Limpiamos el amarillo del encabezado) ────────── */
+  --table-header-bg:     var(--brand-nav);
+  --table-header-text:   #ffffff;
+  /* El texto secundario del header ahora es blanco traslúcido, no amarillento */
+  --table-header-muted:  rgba(255, 255, 255, 0.7);
 
 
   /* ── LAYOUT ─────────────────────────────────────────────── */
@@ -114,7 +138,7 @@
   --header-height:           60px;
 
 
-  /* ── RADIO DE BORDE ────────────────────────────────────────  */
+  /* ── RADIO ───────────────────────────────────────────────── */
   --radius-sm:   0.375rem;
   --radius-md:   0.5rem;
   --radius-lg:   0.75rem;
@@ -122,13 +146,14 @@
   --radius-full: 9999px;
 
 
-  /* ── SOMBRAS — más visibles en tema claro ───────────────── */
-  --shadow-xs:       0 1px 2px rgba(0,0,0,0.05);
-  --shadow-sm:       0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-card:     0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
-  --shadow-modal:    0 20px 60px rgba(15,23,42,0.15), 0 4px 16px rgba(0,0,0,0.08);
-  --shadow-dropdown: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
-  --shadow-sidebar:  2px 0 12px rgba(0,0,0,0.06);
+  /* ── SOMBRAS (Limpiamos el rastro café/verde de las sombras) ── */
+  /* Usamos negro puro con muy baja opacidad para mayor limpieza visual */
+  --shadow-xs:       0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm:       0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-card:     0 4px 14px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-modal:    0 20px 50px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-sidebar:  2px 0 14px rgba(0, 0, 0, 0.08);
 
 
   /* ── TRANSICIONES ───────────────────────────────────────── */
@@ -136,23 +161,26 @@
   --transition-base: 200ms ease;
   --transition-slow: 350ms ease;
 
-  /* ── SIDEBAR INVERTIDO ─────────────────────────────────────── */
-  --sidebar-bg:            #0F172A;   /* slate-900 — fondo principal   */
-  --sidebar-bg-item:       rgba(255,255,255,0.06);
-  --sidebar-bg-row-hover:  rgba(255,255,255,0.05);
-  --sidebar-border:        rgba(255,255,255,0.08);
-  --sidebar-border-subtle: rgba(255,255,255,0.05);
+/* ── NAVEGACIÓN / SIDEBAR (Verde oscuro marca il forno) ───── */
+  --sidebar-bg:            var(--brand-nav);
+  --sidebar-bg-item:       rgba(255, 255, 255, 0.08);
+  --sidebar-bg-row-hover:  rgba(255, 255, 255, 0.06);
+  
+  /* Sustituimos el amarillo (225, 213, 175) por blanco traslúcido */
+  --sidebar-border:        rgba(255, 255, 255, 0.12);
+  --sidebar-border-subtle: rgba(255, 255, 255, 0.06);
 
-  --sidebar-text-primary:  #F1F5F9;
-  --sidebar-text-muted:    #94A3B8;
-  --sidebar-text-ghost:    #475569;
+  --sidebar-text-primary:  #ffffff;
+  /* El texto secundario ahora es blanco puro con opacidad, no amarillento */
+  --sidebar-text-muted:    rgba(255, 255, 255, 0.75);
+  --sidebar-text-ghost:    rgba(255, 255, 255, 0.45);
 
-  --sidebar-primary:       #60A5FA;   /* blue-400 — acento claro       */
-  --sidebar-primary-8:     rgba(96,165,250,0.10);
-  --sidebar-primary-15:    rgba(96,165,250,0.18);
+  --sidebar-primary:       var(--brand-orange);
+  --sidebar-primary-8:     rgba(223, 97, 41, 0.12);
+  --sidebar-primary-15:    rgba(223, 97, 41, 0.22);
 
-  /* ── SUPERFICIE INVERTIDA (dark cards / sidebar) ── */
-  --dark-bg:         var(--sidebar-bg);
+  /* ── SUPERFICIE OSCURA (Headers / Piezas legacy) ─────────── */
+  --dark-bg:         var(--brand-nav);
   --dark-border:     var(--sidebar-border);
   --dark-border-sub: var(--sidebar-border-subtle);
   --dark-hover:      var(--sidebar-bg-row-hover);
@@ -173,5 +201,5 @@
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+  50%      { opacity: 0.4; }
 }

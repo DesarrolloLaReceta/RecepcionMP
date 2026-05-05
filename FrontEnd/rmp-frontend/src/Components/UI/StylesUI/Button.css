@@ -73,34 +73,34 @@
 
 /* ===== VARIANTE: PRIMARY ===== */
 .btn-primary {
-  background:   #F59E0B;
-  color:        #000000;
-  border-color: #F59E0B;
+  background:   var(--primary);
+  color:        var(--primary-text);
+  border-color: var(--primary);
 }
 .btn-primary:hover:not(:disabled) {
-  background:   #D97706;
-  border-color: #D97706;
+  background:   var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 .btn-primary:disabled {
-  background:   rgba(245, 158, 11, 0.30);
-  color:        rgba(0, 0, 0, 0.40);
+  background:   var(--primary-25);
+  color:        rgba(255, 255, 255, 0.65);
   border-color: transparent;
 }
 
 
 /* ===== VARIANTE: SECONDARY ===== */
 .btn-secondary {
-  background:   rgba(245, 158, 11, 0.08);
-  color:        #F59E0B;
-  border-color: rgba(245, 158, 11, 0.20);
+  background:   var(--primary-8);
+  color:        var(--primary-dark);
+  border-color: var(--primary-20);
 }
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(245, 158, 11, 0.15);
+  background: var(--primary-15);
 }
 .btn-secondary:disabled {
-  background:   rgba(245, 158, 11, 0.03);
-  color:        rgba(245, 158, 11, 0.30);
-  border-color: rgba(245, 158, 11, 0.08);
+  background:   var(--primary-4);
+  color:        var(--primary-30);
+  border-color: var(--primary-8);
 }
 
 
@@ -111,8 +111,8 @@
   border-color: transparent;
 }
 .btn-ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.04);
-  color:      var(--text-ghost);
+  background: var(--bg-row-hover);
+  color:      var(--text-secondary);
 }
 .btn-ghost:disabled {
   color: rgba(100, 116, 139, 0.40);

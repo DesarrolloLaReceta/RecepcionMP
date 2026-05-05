@@ -7,8 +7,8 @@
 .rp-page {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  animation: fadeSlideUp 0.35s ease both;
+  gap: 1.25rem; /* Un poco más de aire */
+  animation: fadeSlideUp var(--transition-base) ease both;
 }
 
 /* ── HEADER ── */
@@ -19,157 +19,51 @@
   flex-shrink: 0;
 }
 @media (min-width: 640px) {
-  .rp-header { flex-direction: row; align-items: flex-start; justify-content: space-between; }
+  .rp-header { flex-direction: row; align-items: flex-end; justify-content: space-between; }
 }
-.rp-breadcrumb {
-  font-size: var(--text-xs); font-family: var(--font-mono);
-  letter-spacing: 0.3em; text-transform: uppercase;
-  color: var(--text-muted); margin-bottom: 0.25rem;
-}
-.rp-title { font-size: var(--text-xl); font-weight: 700; color: var(--text-primary); }
-.rp-header-actions { display: flex; align-items: center; gap: 0.625rem; flex-shrink: 0; }
 
-/* ── ERROR BANNER ── */
-.rp-error {
-  padding: 0.75rem 1.25rem; border-radius: var(--radius-lg);
-  background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.15);
-  display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0;
+.rp-breadcrumb {
+  font-size: 11px; /* Aumentado de 10px */
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: 0.12em; 
+  text-transform: uppercase;
+  color: var(--brand-orange); 
+  margin-bottom: 0.25rem;
+  opacity: 0.85;
 }
-.rp-error-text { font-size: var(--text-sm); color: #FCA5A5; flex: 1; }
+
+.rp-title {
+  font-size: 1.85rem; /* Aumentado para mayor impacto visual */
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-display); 
+  line-height: 1.2;
+}
+
+.rp-header-actions { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+
+/* ── ERROR BANNER (Limpieza de rojos industriales) ── */
+.rp-error {
+  padding: 0.75rem 1.25rem; 
+  border-radius: var(--radius-md);
+  background: var(--danger-bg); /* Usando tu variable de peligro sutil */
+  border: 1px solid var(--danger-border);
+  display: flex; 
+  align-items: center; 
+  gap: 0.75rem; 
+  flex-shrink: 0;
+}
+.rp-error-text { font-size: var(--text-sm); color: var(--danger); font-weight: 500; flex: 1; }
 .rp-error-retry {
-  font-size: var(--text-xs); color: #F87171;
+  font-size: var(--text-xs); 
+  color: var(--danger);
+  font-weight: 700;
   background: none; border: none; cursor: pointer; text-decoration: underline; flex-shrink: 0;
 }
 
-/* ── BARRA DE FILTROS (EDICIÓN LA RECETA) ── */
+/* ── BARRA DE FILTROS (Estilo il forno) ── */
 .rp-filters {
-  display: flex; 
-  align-items: center; 
-  gap: 0.625rem; 
-  flex-wrap: wrap; 
-  flex-shrink: 0;
-}
-
-.rp-search-wrap { 
-  position: relative; 
-  flex: 1; 
-  min-width: 200px; 
-}
-
-.rp-search-icon {
-  position: absolute; 
-  left: 0.75rem; 
-  top: 50%;
-  transform: translateY(-50%); 
-  pointer-events: none;
-  stroke: #a3938d; /* Café suave */
-}
-
-.rp-search-clear {
-  position: absolute; 
-  right: 0.75rem; 
-  top: 50%; 
-  transform: translateY(-50%);
-  background: none; 
-  border: none; 
-  cursor: pointer;
-  color: var(--text-muted); 
-  display: flex; 
-  align-items: center;
-  transition: color var(--transition-fast);
-}
-
-.rp-search-clear:hover { 
-  color: #df6129; /* Naranja al pasar el mouse */
-}
-
-/* Input de búsqueda principal */
-.rp-input {
-  width: 100%; 
-  padding: 0.625rem 2.25rem;
-  border-radius: var(--radius-lg); 
-  font-size: var(--text-sm); 
-  outline: none;
-  /* Fondo café muy oscuro para que resalte el texto crema */
-  background: #2a1a14; 
-  border: 1px solid #3d2b24; 
-  color: #fdfbf7; 
-  transition: all var(--transition-fast);
-}
-
-.rp-input:focus { 
-  border-color: #df6129; /* Brillo naranja de la marca */
-  box-shadow: 0 0 0 3px rgba(223, 97, 41, 0.15);
-}
-
-/* Selectores de categoría */
-.rp-select {
-  padding: 0.625rem 0.875rem; 
-  border-radius: var(--radius-lg);
-  font-size: var(--text-sm); 
-  font-family: var(--font-mono); 
-  outline: none;
-  background: #21140f; 
-  border: 1px solid #3d2b24; 
-  color: #fdfbf7;
-  cursor: pointer; 
-  transition: all var(--transition-fast);
-}
-
-.rp-select:focus { 
-  border-color: #df6129; 
-}
-
-.rp-select[data-empty="true"] { 
-  color: #a3938d; 
-}
-
-.rp-select option { 
-  background: #2a1a14; 
-  color: #fdfbf7; 
-}
-
-/* Botón de actualizar */
-.rp-refresh-btn {
-  width: 2.5rem; 
-  height: 2.5rem; 
-  border-radius: var(--radius-lg); 
-  flex-shrink: 0;
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-  background: #3d2b24; /* Café medio */
-  border: 1px solid #4a372f; 
-  color: #fdfbf7;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.rp-refresh-btn:hover:not(:disabled) { 
-  background: #df6129; /* Se vuelve naranja al hover */
-  border-color: #df6129;
-}
-
-.rp-refresh-btn:disabled { 
-  opacity: 0.3; 
-  cursor: not-allowed; 
-}
-
-.rp-refresh-icon { 
-  transition: transform 0.4s; 
-  stroke: currentColor;
-}
-
-.rp-refresh-icon[data-spinning="true"] { 
-  animation: spin 0.7s linear infinite; 
-}
-
-@keyframes spin { 
-  to { transform: rotate(360deg); } 
-}
-
-/* ── CHIPS DE ESTADO (EDICIÓN LA RECETA) ── */
-.rp-chips-row {
   display: flex; 
   align-items: center; 
   gap: 0.75rem; 
@@ -178,35 +72,116 @@
   padding: 0.25rem 0;
 }
 
+.rp-search-wrap { 
+  position: relative; 
+  flex: 1; 
+  min-width: 250px; 
+}
+
+.rp-search-icon {
+  position: absolute; 
+  left: 0.875rem; 
+  top: 50%;
+  transform: translateY(-50%); 
+  pointer-events: none;
+  stroke: var(--text-muted); /* Color neutro para el icono */
+  width: 18px;
+  height: 18px;
+}
+
+.rp-search-clear:hover { 
+  color: var(--brand-orange); 
+}
+
+/* Input de búsqueda principal */
+.rp-input {
+  width: 100%; 
+  padding: 0.625rem 1rem 0.625rem 2.5rem; /* Ajustado para el icono */
+  border-radius: var(--radius-lg); 
+  font-size: var(--text-sm); 
+  font-family: var(--font-sans);
+  outline: none;
+  background: var(--bg-app); /* Blanco puro */
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.rp-input:focus { 
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 0 3px var(--primary-15);
+}
+
+/* Selectores de categoría */
+.rp-select {
+  padding: 0.625rem 2rem 0.625rem 0.875rem; 
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm); 
+  font-family: var(--font-sans); /* Cambiado de mono a sans */
+  outline: none;
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  cursor: pointer; 
+  transition: all var(--transition-fast);
+  appearance: none; /* Para usar un icono personalizado si quieres */
+}
+
+/* Botón de actualizar (Más sutil) */
+.rp-refresh-btn {
+  width: 2.25rem; 
+  height: 2.25rem; 
+  border-radius: var(--radius-md); 
+  background: var(--bg-app);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+}
+
+.rp-refresh-btn:hover:not(:disabled) { 
+  background: var(--primary-8);
+  border-color: var(--brand-orange);
+  color: var(--brand-orange);
+}
+
+/* ── CHIPS DE ESTADO (il forno / La Receta) ── */
+.rp-chips-row {
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; /* Más aire entre elementos */
+  flex-wrap: wrap; 
+  flex-shrink: 0;
+  padding: 0.5rem 0;
+}
+
 .rp-count {
-  font-size: var(--text-xs); 
-  font-family: var(--font-mono); 
-  /* Color café suave para que no compita con los datos */
-  color: #a3938d; 
+  /* Aumentamos de xs a un tamaño más legible */
+  font-size: 13px; 
+  font-family: var(--font-sans); /* Adiós al estilo consola */
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 .rp-clear-btn {
-  font-size: var(--text-xs); 
-  font-family: var(--font-mono); 
-  /* Naranja de la marca para la acción de limpiar */
-  color: #df6129; 
+  font-size: 12px; 
+  font-family: var(--font-sans); 
+  color: var(--brand-orange); 
   background: none; 
   border: none; 
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   transition: all var(--transition-fast);
 }
 
 .rp-clear-btn:hover { 
-  color: #fdfbf7;
-  opacity: 1; 
+  color: var(--brand-orange-hover);
+  text-decoration: underline;
 }
 
 .rp-chips { 
   display: flex; 
-  gap: 0.5rem; 
+  gap: 0.625rem; 
   flex-wrap: wrap; 
   margin-left: auto; 
 }
@@ -214,89 +189,98 @@
 .rp-chip {
   display: inline-flex; 
   align-items: center; 
-  gap: 0.5rem;
-  padding: 0.35rem 0.75rem; 
-  border-radius: 20px; /* Más redondeado para un look más moderno */
-  font-size: var(--text-xs); 
-  font-family: var(--font-mono); 
+  gap: 0.6rem;
+  padding: 0.45rem 1rem; /* Más acolchado */
+  border-radius: 50px; /* Estilo píldora perfecto */
+  font-size: 13px; /* Aumentado para legibilidad */
+  font-family: var(--font-sans); 
   cursor: pointer;
-  /* Fondo café oscuro integrado con el AppShell */
-  background: #3d2b24; 
-  color: #fdfbf7;
-  border: 1px solid transparent; 
+  background: var(--bg-app); /* Blanco puro de fondo */
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
   transition: all var(--transition-fast);
+  font-weight: 500;
 }
 
 /* Estado cuando no está seleccionado (atenuado) */
 .rp-chip[data-dimmed="true"] { 
-  opacity: 0.4;
-  background: #2a1a14;
-  color: #a3938d;
+  opacity: 0.5;
+  background: transparent;
+  color: var(--text-muted);
+  border-color: var(--border-subtle);
 }
 
-/* Efecto hover para invitar al clic */
+/* Efecto hover */
 .rp-chip:hover:not([data-dimmed="true"]) {
-  background: #4a372f;
-  transform: translateY(-1px);
+  background: var(--primary-8);
+  border-color: var(--primary-25);
+  color: var(--brand-orange);
 }
 
-/* Cuando el chip está activo/seleccionado, brilla con la marca */
+/* Cuando el chip está activo, brilla con el naranja il forno */
 .rp-chip[data-active="true"] {
-  background: rgba(223, 97, 41, 0.15);
-  border-color: #df6129;
-  color: #df6129;
+  background: var(--primary-10);
+  border-color: var(--brand-orange);
+  color: var(--brand-orange);
   font-weight: 700;
+  box-shadow: var(--shadow-sm);
 }
 
 .rp-chip-dot { 
-  width: 0.5rem; 
-  height: 0.5rem; 
-  border-radius: var(--radius-full); 
+  width: 6px; 
+  height: 6px; 
+  border-radius: 50%; 
   flex-shrink: 0;
-  /* Por defecto el punto es crema, pero el componente lo sobreescribirá por estado */
-  background: #fdfbf7; 
+  background: currentColor; /* El punto hereda el color del texto */
+  opacity: 0.6;
 }
 
-/* Ajuste para el punto cuando el chip está activo */
+/* Resplandor para el chip activo */
 .rp-chip[data-active="true"] .rp-chip-dot {
-  background: #df6129;
-  box-shadow: 0 0 8px rgba(223, 97, 41, 0.4);
+  opacity: 1;
+  box-shadow: 0 0 6px var(--brand-orange);
 }
-/* ── TABLA (EDICIÓN LA RECETA) ── */
+
+/* ── TABLA (il forno / La Receta) ── */
 .rp-table-wrap {
-  border-radius: var(--radius-xl); 
-  overflow: hidden;
-  /* Fondo café profundo para que resalte la tipografía clara */
-  background: #2a1a14; 
-  border: 1px solid #3d2b24;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-xl);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Fondo blanco puro para que la tabla destaque sobre el melocotón de la página */
+  background: var(--bg-app); 
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+  margin-top: 0.5rem;
 }
 
 .rp-table { 
   width: 100%; 
+  min-width: 32rem;
   border-collapse: collapse; 
 }
 
 .rp-thead-row { 
-  /* Línea divisoria en un tono café cobrizo */
-  border-bottom: 1px solid #4a372f; 
-  background: #21140f; /* Un tono más oscuro para el encabezado */
+  /* CAMBIO: Eliminamos el fondo verde oscuro por un gris/melocotón casi imperceptible */
+  background: var(--bg-card-dim);
+  border-bottom: 2px solid var(--primary-15); /* Línea naranja sutil */
 }
 
 .rp-th {
-  padding: 1rem 1.25rem; 
+  padding: 1.15rem 1.25rem; /* Un poco más de altura para elegancia */
   text-align: left;
 }
 
 .rp-th-label {
-  font-size: var(--text-xs); 
-  font-weight: 700;
-  /* Espaciado elegante para títulos técnicos */
-  letter-spacing: 0.15em; 
+  /* Aumentado de xs a 12px para mejor lectura de títulos */
+  font-size: 12px; 
+  font-weight: 800;
+  /* Espaciado técnico pero limpio */
+  letter-spacing: 0.1em; 
   text-transform: uppercase;
-  /* Color Crema/Trigo para máxima legibilidad */
-  color: #a3938d; 
-  font-family: var(--font-mono);
+  /* CAMBIO: Usamos el verde marca pero muy oscuro (casi negro) para legibilidad */
+  color: var(--text-primary);
+  font-family: var(--font-display); /* Usamos Dosis también en títulos de tabla */
+  opacity: 0.9;
 }
 
 /* ── RESPONSIVIDAD ── */
@@ -311,28 +295,27 @@
   .rp-col-lg { display: table-cell; } 
 }
 
-/* Detalle extra: Un sutil degradado al final de la tabla para dar profundidad */
 .rp-table-wrap::after {
   content: "";
   display: block;
-  height: 4px;
-  background: linear-gradient(to bottom, #3d2b24, transparent);
-  opacity: 0.5;
+  height: 3px;
+  background: linear-gradient(to right, transparent, var(--brand-earth-cream), transparent);
+  opacity: 0.6;
 }
-/* ── FILA (EDICIÓN LA RECETA) ── */
+
+/* ── FILA (il forno / La Receta) ── */
 .rp-row {
   cursor: pointer; 
-  /* Un borde sutil que separa las recepciones sin ensuciar la vista */
-  border-bottom: 1px solid #3d2b24; 
-  background: transparent;
+  border-bottom: 1px solid var(--border-faint);
+  /* Fondo blanco puro para limpieza total */
+  background: var(--bg-app);
   transition: all var(--transition-fast);
 }
 
 .rp-row:hover { 
-  /* Un fondo café un poco más claro que el fondo general para resaltar la fila */
-  background: rgba(74, 55, 47, 0.4); 
-  /* Añadimos una pequeña línea naranja a la izquierda para guiar el ojo de Aníbal */
-  box-shadow: inset 4px 0 0 0 #df6129; 
+  background: var(--bg-row-hover);
+  /* El indicador lateral naranja de il forno */
+  box-shadow: inset 4px 0 0 0 var(--brand-orange);
 }
 
 .rp-row:last-child { 
@@ -340,175 +323,163 @@
 }
 
 .rp-td { 
-  padding: 1rem; 
+  padding: 1.125rem 1rem; /* Aumento de padding para que la letra respire */
   vertical-align: middle; 
-  /* Color de texto base para los datos */
-  color: #fdfbf7; 
-}
-
-.rp-td-last { 
-  padding: 1rem; 
-  text-align: right; 
+  color: var(--text-primary);
 }
 
 /* Número de recepción */
 .rp-rec-num {
-  font-size: var(--text-sm); 
+  font-size: 15px; /* Aumentado de var-sm (14px) */
   font-weight: 700; 
-  /* Usamos el Crema/Trigo por defecto */
-  color: #fdfbf7; 
-  font-family: var(--font-mono);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
   transition: color var(--transition-fast);
 }
 
-/* Al hacer hover, el número se ilumina con el Naranja de la marca */
 .rp-row:hover .rp-rec-num { 
-  color: #df6129; 
+  color: var(--brand-orange);
 }
 
 .rp-rec-oc { 
-  font-size: var(--text-xs); 
-  font-family: var(--font-mono); 
-  /* Café suave para la Orden de Compra */
-  color: #a3938d; 
+  font-size: 12px; /* Aumentado de xs */
+  font-family: var(--font-mono); /* Mantenemos mono solo para códigos técnicos */
+  color: var(--text-muted); /* Gris neutro, no tierra */
   margin-top: 0.125rem; 
 }
 
 /* Proveedor */
 .rp-prov { 
-  font-size: var(--text-sm); 
-  /* Color Crema para resaltar el nombre del proveedor */
-  color: #fdfbf7; 
-  font-weight: 500; 
+  font-size: 15px; /* Aumentado para facilitar lectura rápida */
+  color: var(--text-primary);
+  font-weight: 600; 
 }
 
 /* Fecha / hora */
 .rp-fecha { 
-  font-size: var(--text-sm); 
-  /* Un tono tierra claro */
-  color: #c9bcaf; 
+  font-size: 14px; 
+  color: var(--text-secondary);
 }
 
 .rp-hora { 
-  font-size: var(--text-xs); 
-  font-family: var(--font-mono); 
-  color: #a3938d; 
+  font-size: 12px; 
+  font-family: var(--font-sans);
+  color: var(--brand-orange); /* Toque de marca en la hora */
+  opacity: 0.8;
   margin-top: 0.125rem; 
 }
 
-/* Placa badge (El identificador del camión) */
+/* Placa badge (Identificador técnico) */
 .rp-placa {
-  font-size: var(--text-xs); 
+  font-size: 12px; 
   font-family: var(--font-mono);
-  padding: 0.25rem 0.5rem; 
+  padding: 0.35rem 0.6rem; 
   border-radius: var(--radius-sm);
-  /* Fondo café medio y texto trigo */
-  background: #3d2b24; 
-  color: #fdfbf7;
-  border: 1px solid #4a372f;
+  /* Melocotón sutil con borde naranja suave */
+  background: var(--primary-8);
+  color: var(--brand-orange);
+  border: 1px solid var(--primary-15);
   text-transform: uppercase;
+  font-weight: 700;
 }
 
 /* Estado badge */
 .rp-badge {
   display: inline-flex; 
   align-items: center; 
-  gap: 0.375rem;
-  padding: 0.25rem 0.625rem; 
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem; 
   border-radius: var(--radius-md);
-  font-size: var(--text-xs); 
-  font-weight: 600;
-  /* Fondo oscuro para que el punto de color destaque */
-  background: rgba(33, 20, 15, 0.5); 
-  color: #fdfbf7;
+  font-size: 12px; 
+  font-weight: 700;
+  background: var(--bg-card-dim);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
 }
 
-.rp-badge-dot { 
-  width: 0.375rem; 
-  height: 0.375rem; 
-  border-radius: var(--radius-full); 
-  flex-shrink: 0; 
-}
-
-/* Chevron (Indicador de flecha) */
+/* Chevron */
 .rp-chevron { 
-  stroke: #7d6b63; 
+  stroke: var(--text-tertiary);
   transition: all var(--transition-fast); 
-  display: inline; 
 }
 
 .rp-row:hover .rp-chevron { 
-  stroke: #df6129; /* Se ilumina en naranja al seleccionar la fila */
-  transform: translateX(2px); /* Un pequeño salto sutil */
+  stroke: var(--brand-orange);
+  transform: translateX(3px);
 }
 
 /* ── BARRA DE LOTES (MINI) ── */
 .rp-lotes-bar {
   display: flex; 
   align-items: center; 
-  gap: 0.5rem;
+  gap: 0.75rem; /* Más aire */
 }
 
 .rp-lotes-track {
   display: flex; 
-  height: 6px; 
+  height: 8px; /* Un poco más gruesa para que se vea el color */
   border-radius: var(--radius-full); 
   overflow: hidden;
-  width: 5rem; 
-  /* Fondo café neutro para el track */
-  background: #3d2b24; 
+  width: 5.5rem; 
+  background: var(--border-subtle);
   gap: 1px;
 }
 
-/* Colores de Calidad La Receta */
+/* Colores de Calidad il forno (Más vivos y limpios) */
 .rp-lotes-liberados { 
   height: 100%; 
-  background: #3d8c40; /* Verde Esmeralda (Corporativo) */
+  background: #2D6A4F; /* Verde esmeralda profundo de la marca */
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
 }
 
 .rp-lotes-rechazados { 
   height: 100%; 
-  background: #b93d3d; /* Rojo Arcilla / Terracota */
+  background: var(--danger); /* Usamos el rojo de la paleta compartida */
 }
 
 .rp-lotes-count { 
-  font-size: var(--text-xs); 
-  font-family: var(--font-mono); 
-  /* Color crema suave para el contador */
-  color: #a3938d; 
+  /* Aumentado para legibilidad técnica */
+  font-size: 13px; 
+  font-family: var(--font-sans); /* Cambiado de mono a sans */
+  color: var(--text-secondary);
+  font-weight: 600;
 }
-/* ── SKELETON + EMPTY (EDICIÓN LA RECETA) ── */
+
+/* ── SKELETON + EMPTY (il forno / La Receta) ── */
 .rp-skeleton-td { 
-  padding: 1rem; 
+  padding: 1.125rem 1rem; 
 }
 
 .rp-skeleton-line {
   border-radius: var(--radius-sm); 
-  /* Usamos un café medio para que el pulso sea sutil sobre el fondo oscuro */
-  background: #3d2b24; 
-  animation: pulse 1.5s ease-in-out infinite;
+  /* Cambio: Gris melocotón muy suave en lugar de café */
+  background: var(--primary-8);
+  animation: pulse-il-forno 1.5s ease-in-out infinite;
 }
 
 .rp-empty {
-  padding: 5rem 1rem; 
+  padding: 6rem 1rem; 
   text-align: center;
-  font-size: var(--text-sm); 
-  /* Color café grisáceo para que el mensaje de "No hay datos" sea discreto */
-  color: #a3938d;
+  font-size: 16px; /* Aumentado para que el mensaje sea claro */
+  font-family: var(--font-display);
+  color: var(--text-muted);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
+  background: var(--bg-app);
+  border-radius: var(--radius-xl);
 }
 
-/* El icono o texto de 'vacío' puede llevar un toque de la marca */
+/* Icono de estado vacío con el naranja de la marca */
 .rp-empty::before {
-  content: "📂"; /* O un componente de icono si lo prefieres */
-  font-size: 2rem;
-  opacity: 0.3;
+  content: "📦"; 
+  font-size: 2.5rem;
+  opacity: 0.2;
+  filter: grayscale(1) sepia(1) saturate(5) hue-rotate(340deg); /* Tinte naranja */
 }
 
-@keyframes pulse { 
-  0%, 100% { opacity: 1; background: #3d2b24; } 
-  50% { opacity: 0.5; background: #4a372f; } 
+@keyframes pulse-il-forno { 
+  0%, 100% { opacity: 0.6; background: var(--primary-8); } 
+  50% { opacity: 1; background: var(--primary-15); } 
 }

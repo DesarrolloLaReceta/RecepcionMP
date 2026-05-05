@@ -12,7 +12,7 @@ const CalidadDashboard = () => {
       description: 'Inspección de infraestructura, aseo y áreas de planta.',
       icon: '🏢', 
       path: '/calidad/verificacion-instalaciones',
-      color: '#e67e22'
+      color: '#df6129'
     },
     {
       title: 'Lavado de Botas y Manos',
@@ -20,16 +20,16 @@ const CalidadDashboard = () => {
       description: 'Control de ingreso de personal y cumplimiento de BPM.',
       icon: '🧼',
       path: '/calidad/lavado-botas-manos',
-      color: '#3498db'
+      color: '#273719'
     },
 
     {
-      title: 'Liberación de Cocina', // <--- NUEVA TARJETA
+      title: 'Liberación de Cocina',
       subtitle: 'CAL-FORMU-145-01',
       description: 'Inspección diaria de áreas de preparación, equipos y personal.',
       icon: '🍳',
       path: ROUTES.LIBERACION_COCINA || '/calidad/liberacion-cocina',
-      color: '#27ae60' // Un verde profesional
+      color: '#a48363'
     },
 
     {
@@ -38,7 +38,7 @@ const CalidadDashboard = () => {
       description: 'Nuevos módulos de auditoría en desarrollo.',
       icon: '📝',
       path: '#',
-      color: '#95a5a6',
+      color: '#48271a',
       disabled: true
     }
   ];
@@ -46,7 +46,7 @@ const CalidadDashboard = () => {
   return (
     <div className="dashboard-calidad-container">
       <header className="dashboard-header">
-        <span className="breadcrumb">Calidad / Gestión</span>
+        <span className="dashboard-breadcrumb">Calidad / Gestión</span>
         <h1>Panel de Control Calidad</h1>
         <p>Selecciona el proceso que deseas inspeccionar hoy</p>
       </header>
@@ -58,7 +58,7 @@ const CalidadDashboard = () => {
             className={`card-item ${card.disabled ? 'disabled' : ''}`}
             onClick={() => !card.disabled && navigate(card.path)}
           >
-            <div className="card-icon-container" style={{ backgroundColor: card.color + '22' }}>
+            <div className="card-icon-container" style={{ backgroundColor: `${card.color}18` }}>
               <span className="card-emoji" style={{ color: card.color }}>{card.icon}</span>
             </div>
             <div className="card-info">

@@ -99,7 +99,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     >
       {loading
         ? <Spinner size={size === "xs" || size === "sm" ? "xs" : "sm"}
-            color={variant === "primary" ? "#000" : "currentColor"} />
+            color={variant === "primary" ? "#ffffff" : "currentColor"} />
         : iconLeft && <Icon path={iconLeft} size={iconPx} />
       }
 

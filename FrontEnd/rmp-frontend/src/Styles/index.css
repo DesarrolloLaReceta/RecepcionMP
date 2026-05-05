@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@300;400;500;600;700;800&display=swap');
 
 @import './tokens.css';
 
@@ -8,7 +8,9 @@
 
 
 /* ── Reset ──────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; }
+*, *::before, *::after { 
+  box-sizing: border-box; 
+}
 
 html, body, #root {
   height: 100%;
@@ -18,28 +20,102 @@ html, body, #root {
 
 body {
   font-family:             var(--font-sans);
-  background-color:        var(--bg-app);
-  color:                   var(--text-primary);
-  -webkit-font-smoothing:  antialiased;
+  font-weight:              400;
+  font-variant-numeric:     tabular-nums;
+  background-color:         var(--bg-app);
+  color:                    var(--text-primary);
+  -webkit-font-smoothing:   antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-
-/* ── Scrollbar ──────────────────────────────────────────────── */
-::-webkit-scrollbar       { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background:    var(--border-strong);
-  border-radius: 2px;
+/* Títulos destacados cortos — Super Clarendon */
+.app-main h1,
+.app-main .rmp-heading,
+.rmp-page-title {
+  font-family:    var(--font-display);
+  font-weight:    700;
+  letter-spacing: 0.01em;
+  color:          var(--text-secondary); /* Verde marca para coherencia */
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
 
-.scrollbar-hide                        { scrollbar-width: none; -ms-overflow-style: none; }
-.scrollbar-hide::-webkit-scrollbar     { display: none; }
+
+/* ── Tablas: scroll horizontal en pantallas estrechas ───────── */
+.rmp-table-scroll {
+  width:                      100%;
+  max-width:                  100%;
+  overflow-x:                 auto;
+  overflow-y:                 visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rmp-table-scroll > table {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .rmp-table-scroll--minwide > table {
+    min-width: 36rem;
+  }
+}
+
+
+/* ── Scrollbar (Limpio y profesional) ───────────────────────── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+::-webkit-scrollbar-thumb {
+  background:    var(--border-medium); /* Usamos gris neutro de tokens */
+  border-radius: 3px;
+  transition:    background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover { 
+  /* Eliminado el café: ahora usa el naranja marca suave al pasar el mouse */
+  background: var(--primary-30); 
+}
+
+.scrollbar-hide { 
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
+
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none; 
+}
 
 
 /* ── Selección de texto ─────────────────────────────────────── */
 ::selection {
-  background: var(--primary-20);
+  background: var(--primary-20); /* Naranja muy suave */
   color:      var(--primary-dark);
+}
+
+/* ── ELIMINADOR DE AMARILLO Y CAFÉ (FORCE CLEAN) ── */
+
+/* 1. Forzar que cualquier fondo que Tailwind crea que es "crema" sea blanco */
+[class*="bg-brand-earth"], 
+[class*="bg-orange-50"], 
+[class*="bg-amber-50"],
+.bg-card-dim {
+  background-color: #ffffff !important;
+  border-color: var(--border-subtle) !important;
+}
+
+/* 2. Forzar que los encabezados de las tarjetas sean del color melocotón sutil de il forno */
+.rmp-section-header,
+[class*="bg-brand-earth-cream"] {
+  background-color: var(--bg-card-secondary) !important;
+  color: var(--brand-nav) !important;
+}
+
+/* 3. Cambiar cualquier texto café/marrón por el verde oscuro de la marca */
+[class*="text-brand-earth"],
+[class*="text-[#48271a]"] {
+  color: var(--brand-nav) !important;
+}
+
+/* 4. Limpiar los bordes que se vean color tierra */
+[class*="border-brand-earth"],
+[class*="border-[#a48363]"] {
+  border-color: var(--border-subtle) !important;
 }

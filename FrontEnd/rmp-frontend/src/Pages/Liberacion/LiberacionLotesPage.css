@@ -1,16 +1,16 @@
 /* ============================================================
-   LIBERACIÓN DE LOTES — ESTÉTICA LA RECETA
+   LIBERACIÓN DE LOTES — (il forno / La Receta)
+   Panel de Aprobación Final y Calidad
    ============================================================ */
 
-/* ===== PÁGINA ===== */
 .lib-page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Aumentamos el gap para dar más aire industrial */
+  gap: 1.5rem; 
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem; /* Margen de seguridad para tablets */
-  animation: fadeSlideUp 0.35s ease both;
+  padding: 1.5rem; /* Aumentamos para mejor ergonomía en tablets */
+  animation: fadeSlideUp var(--transition-base) ease both;
 }
 
 /* ============================================================
@@ -22,58 +22,68 @@
   flex-direction: column;
   gap: 0.75rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(61, 43, 36, 0.5); /* Borde café sutil */
+  /* Cambio: Línea divisoria melocotón sutil */
+  border-bottom: 2px solid var(--primary-15);
 }
 
 @media (min-width: 640px) {
   .lib-header {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end; /* Alineación a la base para look moderno */
     justify-content: space-between;
   }
 }
 
-/* La etiqueta pequeña superior (ej: "MÓDULO DE CALIDAD") */
+/* Etiqueta superior (Contexto del Módulo) */
 .lib-header-meta {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  letter-spacing: 0.25em; /* Un poco menos de tracking para legibilidad */
+  /* Aumento de 10px a 12px para evitar fatiga visual */
+  font-size: 12px;
+  font-family: var(--font-sans); /* Adiós al mono para etiquetas de lectura */
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #a3938d; /* Color Trigo */
-  margin-bottom: 0.35rem;
+  /* Color secundario profesional */
+  color: var(--text-secondary); 
+  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
+  font-weight: 700;
 }
 
-/* Punto decorativo tipo "Status" en el meta */
+/* Punto decorativo "Status" con Naranja il forno */
 .lib-header-meta::before {
   content: "";
-  width: 6px;
-  height: 6px;
-  background-color: #df6129; /* Naranja Marca */
+  width: 8px;
+  height: 8px;
+  background-color: var(--brand-orange); 
   border-radius: 50%;
   display: inline-block;
+  /* Efecto de pulso suave opcional para denotar actividad */
+  box-shadow: 0 0 0 3px var(--primary-15);
 }
 
 .lib-header-title {
-  font-size: 1.5rem; /* var(--text-2xl) aprox */
+  /* Aumento a 1.75rem para mayor jerarquía */
+  font-size: 1.75rem; 
   font-weight: 800;
-  color: #3d2b24; 
-  font-family: 'Dosis', sans-serif; /* Tipografía de marca */
+  /* Color de texto principal (il forno oscuro) */
+  color: var(--text-primary); 
+  font-family: var(--font-display); /* Dosis */
   text-transform: uppercase;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  line-height: 1;
 }
 
 
 /* ============================================================
-   KPI CARDS — ESTÉTICA INDUSTRIAL LA RECETA
+   KPI CARDS — (il forno / La Receta)
+   Métricas de Decisión en Planta
    ============================================================ */
 
 .lib-kpi-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem; /* Un poco más de aire para el grid */
+  gap: 1.25rem; 
 }
 
 @media (min-width: 1024px) {
@@ -81,136 +91,138 @@
 }
 
 .lib-kpi-card {
-  padding: 1.25rem 1.5rem;
-  border-radius: var(--radius-lg);
-  background: #2a1a14; /* Chocolate base de la marca */
-  border: 1px solid #3d2b24;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  /* Cambio: De chocolate a blanco puro con sombra suave */
+  background: #ffffff; 
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
   transition: transform var(--transition-fast), border-color var(--transition-fast);
 }
 
 .lib-kpi-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(223, 97, 41, 0.3); /* Brillo naranja sutil */
+  transform: translateY(-4px);
+  border-color: var(--primary-25); 
+  box-shadow: var(--shadow-md);
 }
 
 .lib-kpi-label {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  letter-spacing: 0.15em;
+  /* Aumento de 10px a 12px para legibilidad industrial */
+  font-size: 12px;
+  font-family: var(--font-sans); 
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-secondary); 
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
+  font-weight: 800;
 }
 
-/* Indicador de "métrica viva" */
+/* Indicador de "métrica viva" en naranja marca */
 .lib-kpi-label::after {
   content: "";
-  width: 4px;
-  height: 4px;
-  background: currentColor; /* Hereda el color del texto o inline */
+  width: 6px;
+  height: 6px;
+  background: var(--brand-orange); 
   border-radius: 50%;
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .lib-kpi-value {
-  font-size: 1.75rem; /* Un poco más grande para impacto */
+  font-size: 2rem; 
   font-weight: 800;
-  font-family: var(--font-mono);
-  margin-top: 0.5rem;
+  font-family: var(--font-mono); /* Mantenemos mono para cifras numéricas */
+  margin-top: 0.75rem;
   line-height: 1;
-  color: #fdfbf7; /* Blanco Crema por defecto */
-  /* Los colores dinámicos (rojo, verde, naranja) se aplican inline */
+  color: var(--text-primary); 
 }
 
 .lib-kpi-sub {
-  font-size: 11px;
-  color: #7d6b63; /* Café Ceniza */
-  margin-top: 0.375rem;
-  font-weight: 500;
+  font-size: 12px;
+  color: var(--text-muted); 
+  margin-top: 0.5rem;
+  font-weight: 600;
 }
 
 /* ============================================================
-   CHIPS DE CATEGORÍA — ESTÉTICA INDUSTRIAL
+   CHIPS DE CATEGORÍA — (il forno / La Receta)
    ============================================================ */
 
 .lib-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.625rem;
+  gap: 0.75rem;
   align-items: center;
-  padding: 0.5rem 0;
+  padding: 0.75rem 0;
 }
 
 .lib-chip {
-  font-size: 11px; /* var(--text-xs) aprox */
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  font-family: var(--font-mono);
+  /* Aumento a 13px para mejor interacción táctil */
+  font-size: 13px; 
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  border: 1px solid #3d2b24; /* Borde café de la marca */
-  background: #1a110d; /* Fondo casi negro para el estado inactivo */
-  color: #7d6b63; /* Café Ceniza */
+  /* Estado inactivo: limpio y profesional */
+  border: 1px solid var(--border-default); 
+  background: var(--bg-app); 
+  color: var(--text-secondary); 
   transition: all var(--transition-fast);
 }
 
 .lib-chip:hover {
-  background: #2a1a14;
-  border-color: #7d6b63;
-  color: #a3938d; /* Color Trigo */
+  background: #ffffff;
+  border-color: var(--primary-25);
+  color: var(--brand-orange);
 }
 
-/* Estado Activo: El toque de La Receta */
+/* Estado Activo: Identidad il forno */
 .lib-chip[data-active="true"] {
-  background: rgba(223, 97, 41, 0.1); /* Fondo naranja muy sutil */
-  border-color: #df6129; /* Naranja Marca */
-  color: #df6129;
-  box-shadow: 0 0 12px rgba(223, 97, 41, 0.1);
+  background: var(--primary-10); 
+  border-color: var(--brand-orange); 
+  color: var(--brand-orange);
+  box-shadow: 0 0 0 1px var(--brand-orange);
 }
 
-.lib-chip[data-active="true"]:hover {
-  background: rgba(223, 97, 41, 0.15);
-  border-color: #f1713a;
-}
-
-/* Punto indicador opcional para el chip activo */
 .lib-chip[data-active="true"]::before {
   content: "•";
-  margin-right: 0.375rem;
-  font-size: 14px;
+  margin-right: 0.5rem;
+  font-size: 16px;
   vertical-align: middle;
 }
 
 /* ============================================================
-   LOTE CARD — ESTÉTICA INDUSTRIAL "LA RECETA"
+   LOTE CARD — (il forno / La Receta)
+   Estética Limpia para Gestión de Materia Prima
    ============================================================ */
 
 .lib-lote-card {
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: #2a1a14; /* Chocolate Base */
-  border: 1px solid #3d2b24;
+  /* Cambio: Fondo blanco para máxima visibilidad en planta */
+  background: #ffffff; 
+  border: 1px solid var(--border-default);
   transition: all var(--transition-base);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   position: relative;
 }
 
 .lib-lote-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(223, 97, 41, 0.4); /* Brillo Naranja */
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-5px);
+  /* Brillo Naranja Marca il forno */
+  border-color: var(--primary-25); 
+  box-shadow: var(--shadow-md);
 }
 
-/* Barra de urgencia superior (Dinámica) */
+/* Barra de urgencia superior (Visualización rápida de prioridad) */
 .lib-lote-top-bar {
-  height: 3px; /* Un poco más gruesa para que se note el estado */
+  height: 4px; 
   width: 100%;
 }
 
@@ -219,377 +231,411 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1rem 0.5rem;
-  gap: 0.5rem;
+  padding: 1.25rem 1.25rem 0.5rem;
+  gap: 0.75rem;
 }
 
 .lib-lote-number {
-  font-size: 11px;
+  /* Aumento a 13px para legibilidad industrial */
+  font-size: 13px;
   font-family: var(--font-mono);
-  font-weight: 700;
-  color: #a3938d; /* Color Trigo */
-  letter-spacing: 0.05em;
+  font-weight: 800;
+  /* Color secundario profesional */
+  color: var(--text-secondary); 
+  letter-spacing: 0.02em;
 }
 
 .lib-lote-categoria {
-  font-size: 9px;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-family: var(--font-mono);
+  /* Aumento a 11px */
+  font-size: 11px;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  /* background y color se mantienen dinámicos, pero el estilo es industrial */
 }
 
-/* Nombre del Producto (Impacto visual) */
+/* Nombre del Producto (Identidad il forno) */
 .lib-lote-item {
-  font-size: 1rem; 
-  font-weight: 700;
-  color: #fdfbf7; /* Blanco Crema */
-  padding: 0.25rem 1rem;
+  /* Aumento a 1.25rem para impacto inmediato */
+  font-size: 1.25rem; 
+  font-weight: 800;
+  color: var(--text-primary); 
+  padding: 0.25rem 1.25rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: 'Dosis', sans-serif;
+  font-family: var(--font-display); /* Dosis */
   text-transform: uppercase;
 }
 
 /* Proveedor */
 .lib-lote-proveedor {
-  font-size: 11px;
-  color: #7d6b63; /* Café Ceniza */
-  padding: 0 1rem 0.75rem;
-  font-family: var(--font-mono);
+  /* Aumento a 13px */
+  font-size: 13px;
+  color: var(--text-muted); 
+  padding: 0 1.25rem 1rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--primary-10);
 }
 
-/* ── LOTE CARD: DETALLES TÉCNICOS Y ALERTAS ── */
-
-/* Grid de datos de inspección */
+/* Grid de datos técnicos (Limpieza Visual) */
 .lib-lote-info {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem 1.5rem;
-  padding: 0.875rem 1rem;
-  background: rgba(0, 0, 0, 0.15); /* Fondo ligeramente más oscuro para agrupar datos */
+  gap: 0.75rem 1.5rem;
+  padding: 1rem 1.25rem;
+  /* Fondo melocotón muy sutil para agrupar datos técnicos */
+  background: var(--primary-4); 
 }
 
 .lib-lote-info-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
 }
 
 .lib-lote-info-key {
   font-size: 11px;
-  color: #7d6b63; /* Café Ceniza */
-  font-family: var(--font-mono);
+  color: var(--text-secondary); 
+  font-family: var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
+  font-weight: 700;
   flex-shrink: 0;
 }
 
 .lib-lote-info-val {
-  font-size: 12px;
+  /* Aumento a 13px para lectura técnica precisa */
+  font-size: 13px;
   font-family: var(--font-mono);
-  font-weight: 600;
-  color: #a3938d; /* Color Trigo */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 700;
+  color: var(--text-primary); 
 }
 
 /* Observaciones de recepción */
 .lib-lote-obs {
-  font-size: 11px;
-  color: #7d6b63;
+  font-size: 13px;
+  color: var(--text-secondary);
   font-style: italic;
   line-height: 1.5;
-  padding: 0.5rem 1rem;
-  border-left: 2px solid #3d2b24;
-  margin: 0.25rem 1rem 0.75rem;
+  padding: 0.75rem 1.25rem;
+  /* Acento Naranja Marca */
+  border-left: 3px solid var(--brand-orange); 
+  margin: 0.5rem 1.25rem 1rem;
+  background: var(--bg-app);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
-/* Alerta de documentos faltantes (Estilo La Receta) */
+/* Alerta de documentos faltantes (Trazabilidad Crítica) */
 .lib-docs-alert {
   display: flex;
   align-items: flex-start;
-  gap: 0.625rem;
-  padding: 0.75rem;
-  margin: 0 1rem 1rem;
-  border-radius: var(--radius-md);
-  /* Fondo ámbar sutil para precaución */
-  background: rgba(223, 97, 41, 0.08); 
-  border: 1px solid rgba(223, 97, 41, 0.2);
+  gap: 0.75rem;
+  padding: 1rem;
+  margin: 0 1.25rem 1.25rem;
+  border-radius: var(--radius-lg);
+  /* Melocotón de advertencia profesional */
+  background: var(--primary-10); 
+  border: 1px solid var(--primary-20);
 }
 
 .lib-docs-alert-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #df6129; /* Naranja Marca */
-  font-family: var(--font-sans);
-  margin-bottom: 0.25rem;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--brand-orange); 
+  font-family: var(--font-display); /* Dosis */
+  margin-bottom: 0.35rem;
   text-transform: uppercase;
 }
 
 .lib-docs-alert-item {
-  font-size: 11px;
-  color: #f1713a; /* Naranja más brillante para visibilidad */
-  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--brand-orange);
+  font-family: var(--font-sans);
+  font-weight: 600;
 }
 
-/* Contenedor de Botones (Footer de la Card) */
+/* Contenedor de Botones (Acciones de Liberación) */
 .lib-lote-actions {
   display: flex;
-  gap: 0.75rem;
-  padding: 0 1rem 1.25rem;
-  margin-top: auto; /* Empuja los botones al final si hay poco contenido */
+  gap: 1rem;
+  padding: 0 1.25rem 1.5rem;
+  margin-top: auto;
 }
 
 /* ============================================================
-   TOAST — ESTÉTICA PREMIUM LA RECETA
+   TOAST — (il forno / La Receta)
+   Notificaciones de Sistema de Alta Visibilidad
    ============================================================ */
 
 .lib-toast {
   position: fixed;
-  bottom: 2rem; /* Un poco más arriba para no estorbar */
+  bottom: 2.5rem; 
   right: 2rem;
-  z-index: 1000; /* Aseguramos que esté por encima de todo */
+  z-index: 1000; 
   display: flex;
   align-items: center;
-  gap: 0.875rem;
-  padding: 0.875rem 1.25rem;
-  border-radius: var(--radius-lg);
-  /* Chocolate base con transparencia y blur para efecto moderno */
-  background: rgba(33, 20, 15, 0.9); 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #3d2b24;
-  animation: lib-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-  min-width: 16rem;
-  max-width: 24rem;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-xl);
+  
+  /* Cambio: De chocolate oscuro a Glassmorphism Claro il forno */
+  background: rgba(255, 255, 255, 0.95); 
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  
+  /* Borde melocotón sutil en lugar de café */
+  border: 1px solid var(--primary-20);
+  animation: lib-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  
+  min-width: 18rem;
+  max-width: 26rem;
+  /* Sombra más suave y moderna */
+  box-shadow: 0 10px 25px rgba(223, 97, 41, 0.15);
 }
 
-/* Variación Éxito (Liberado) */
+/* Variación Éxito (Lote Liberado Correctamente) */
 .lib-toast[data-type="ok"] {
-  border-left: 4px solid #10b981; /* Verde esmeralda industrial */
+  border-left: 5px solid #15803d; /* Verde il forno sólido */
 }
 
-/* Variación Error (Rechazado o Fallo) */
+/* Variación Error (Fallo en ERP SIESA o Rechazo) */
 .lib-toast[data-type="error"] {
-  border-left: 4px solid #ef4444; /* Rojo alerta */
+  border-left: 5px solid var(--danger); 
 }
 
-/* El punto o icono indicador */
+/* Icono indicador */
 .lib-toast-dot {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 800;
 }
 
 .lib-toast[data-type="ok"] .lib-toast-dot { 
-  background: rgba(16, 185, 129, 0.2); 
-  color: #10b981;
+  background: #f0fdf4; 
+  color: #15803d;
 }
 
 .lib-toast[data-type="error"] .lib-toast-dot { 
-  background: rgba(239, 68, 68, 0.2); 
-  color: #ef4444;
+  background: var(--danger-10); 
+  color: var(--danger);
 }
 
 .lib-toast-text {
-  font-size: 13px;
-  color: #fdfbf7; /* Blanco Crema */
-  font-weight: 500;
+  font-size: 14px;
+  /* Cambio: Texto principal oscuro para contraste sobre blanco */
+  color: var(--text-primary); 
+  font-weight: 700;
   line-height: 1.4;
   font-family: var(--font-sans);
 }
 
-/* Animación más suave */
+/* Animación optimizada */
 @keyframes lib-slide-up {
   from { 
     opacity: 0; 
-    transform: translateX(20px) scale(0.95); 
+    transform: translateY(30px) scale(0.9); 
   }
   to { 
     opacity: 1; 
-    transform: translateX(0) scale(1); 
+    transform: translateY(0) scale(1); 
   }
 }
 
 /* ============================================================
-   MODAL CONTENT — interior de ModalLiberar y ModalRechazar
+   MODAL CONTENT — (il forno / La Receta)
+   Interior de ModalLiberar y ModalRechazar
    ============================================================ */
 
-/* ── MODAL DE ACCIÓN: LIBERACIÓN / RECHAZO ── */
-
-/* Cabecera del modal (ícono + título + subtítulo) */
+/* Cabecera del modal (Enfoque en visibilidad de marca) */
 .lib-modal-head {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
   margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #3d2b24;
+  padding-bottom: 1.25rem;
+  /* Cambio: Línea melocotón sutil */
+  border-bottom: 2px solid var(--primary-15);
 }
 
 .lib-modal-icon {
-  width: 3rem;
-  height: 3rem;
-  border-radius: var(--radius-lg);
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 1.25rem;
-  /* background y border se manejan dinámicos (verde/rojo) */
+  font-size: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  /* Los estados (verde/rojo) se inyectan dinámicamente */
 }
 
 .lib-modal-title {
-  font-size: 1.25rem;
+  /* Aumento de 1.25rem a 1.5rem para jerarquía */
+  font-size: 1.5rem;
   font-weight: 800;
-  color: #fdfbf7; /* Blanco Crema */
-  font-family: 'Dosis', sans-serif;
+  /* Cambio: Color de texto principal oscuro */
+  color: var(--text-primary); 
+  font-family: var(--font-display); /* Dosis */
   text-transform: uppercase;
+  line-height: 1.1;
 }
 
 .lib-modal-subtitle {
+  /* Aumento a 13px y cambio de fuente para legibilidad */
   font-size: 13px;
-  color: #a3938d; /* Color Trigo */
-  font-family: var(--font-mono);
-  margin-top: 0.25rem;
+  color: var(--text-secondary); 
+  font-family: var(--font-sans);
+  font-weight: 600;
+  margin-top: 0.35rem;
   display: block;
+  letter-spacing: 0.02em;
 }
 
-/* Resumen del lote (grid 2 cols) */
+/* Resumen del lote (Grid de lectura rápida) */
 .lib-modal-summary {
-  padding: 1.25rem;
+  padding: 1.5rem;
   margin-bottom: 1.5rem;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem 1.5rem;
-  background: #1a110d !important; /* Fondo más oscuro */
-  border: 1px solid #3d2b24 !important;
+  gap: 1rem 2rem;
+  /* Cambio: Fondo melocotón ultra-suave con borde marca */
+  background: var(--primary-4) !important; 
+  border: 1px solid var(--primary-15) !important;
 }
 
 .lib-modal-summary-key {
   font-size: 11px;
-  color: #7d6b63; /* Café Ceniza */
-  font-family: var(--font-mono);
+  color: var(--text-secondary); 
+  font-family: var(--font-sans);
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .lib-modal-summary-val {
-  font-size: 13px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  color: #fdfbf7;
-}
-
-/* Label de campo en modal */
-.lib-modal-label {
-  display: block;
-  font-size: 11px;
+  /* Aumento a 14px para validación técnica */
+  font-size: 14px;
   font-family: var(--font-mono);
   font-weight: 700;
-  letter-spacing: 0.1em;
+  color: var(--text-primary);
+}
+
+/* Label de campo en modal (Ergonomía Industrial) */
+.lib-modal-label {
+  display: block;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #a3938d;
-  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.625rem;
 }
 
 .lib-modal-label-required {
-  color: #df6129; /* Naranja Marca para requeridos */
+  /* Naranja Marca il forno */
+  color: var(--brand-orange); 
   margin-left: 0.25rem;
+  font-size: 1.1rem;
 }
 
 .lib-modal-label-hint {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0;
   text-transform: none;
-  color: #7d6b63;
-  font-weight: 400;
+  color: var(--text-muted);
+  font-weight: 600;
   margin-left: 0.5rem;
+  font-style: italic;
 }
 
-/* Alerta docs faltantes dentro del modal */
+/* Alerta docs faltantes dentro del modal (Prioridad de Calidad) */
 .lib-modal-docs-warn {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
   margin-bottom: 1.5rem;
-  border-radius: var(--radius-md);
-  background: rgba(223, 97, 41, 0.08); /* Naranja sutil */
-  border: 1px solid rgba(223, 97, 41, 0.2);
+  border-radius: var(--radius-lg);
+  /* Fondo melocotón de advertencia sólida */
+  background: var(--primary-10); 
+  border: 1px solid var(--primary-25);
 }
 
 .lib-modal-docs-warn-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #df6129;
-  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--brand-orange);
+  font-family: var(--font-display);
   margin-bottom: 0.25rem;
   text-transform: uppercase;
 }
 
 .lib-modal-docs-warn-item {
-  font-size: 11px;
-  color: #f1713a;
-  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--brand-orange);
+  font-family: var(--font-sans);
+  font-weight: 600;
 }
 
 /* ============================================================
-   TIPO DE RECHAZO — ESTÉTICA INDUSTRIAL "LA RECETA"
+   TIPO DE RECHAZO — (il forno / La Receta)
+   Selección de Motivos de No Conformidad
    ============================================================ */
 
 .lib-tipo-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; /* Un poco más de aire entre opciones */
-  margin-bottom: 1.25rem;
+  gap: 0.75rem; 
+  margin-bottom: 1.5rem;
 }
 
 .lib-tipo-btn {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-lg);
+  gap: 1.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-xl);
   text-align: left;
   cursor: pointer;
   transition: all var(--transition-fast);
-  background: #1a110d; /* Fondo casi negro */
-  border: 1px solid #3d2b24;
+  /* Cambio: Fondo claro profesional */
+  background: #ffffff; 
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Estado Seleccionado: Rojo Alerta pero Integrado */
+/* Estado Seleccionado: Rojo Crítico il forno */
 .lib-tipo-btn[data-selected="true"] {
-  background: rgba(239, 68, 68, 0.05);
-  border-color: #ef4444; /* Rojo vibrante para la acción de rechazo */
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
+  background: var(--danger-10); /* Fondo rojo muy suave */
+  border-color: var(--danger); 
+  box-shadow: 0 0 0 1px var(--danger);
 }
 
 .lib-tipo-btn:hover:not([data-selected="true"]) {
-  background: #2a1a14;
-  border-color: #7d6b63;
+  background: var(--bg-app);
+  border-color: var(--primary-25);
 }
 
-/* Radio indicator (El círculo del check) */
+/* Radio indicator (Diseño limpio sin brillos LED) */
 .lib-tipo-radio {
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: var(--radius-full);
   border: 2px solid;
   display: flex;
@@ -601,97 +647,102 @@
 
 /* Colores del Radio según estado */
 .lib-tipo-btn[data-selected="true"] .lib-tipo-radio { 
-  border-color: #ef4444; 
+  border-color: var(--danger); 
 }
 .lib-tipo-btn[data-selected="false"] .lib-tipo-radio { 
-  border-color: #3d2b24; 
+  border-color: var(--border-default); 
 }
 
-/* El punto central cuando está activo */
+/* El punto central sólido */
 .lib-tipo-radio-dot {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.625rem;
+  height: 0.625rem;
   border-radius: var(--radius-full);
-  background: #ef4444;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+  background: var(--danger);
+  /* Eliminamos box-shadow para un look más limpio */
 }
 
-/* Texto del nombre del tipo */
+/* Texto del nombre del tipo (Identidad Corporativa) */
 .lib-tipo-name {
-  font-size: 14px;
-  font-weight: 700;
-  font-family: 'Dosis', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: var(--font-display); /* Dosis */
   text-transform: uppercase;
   letter-spacing: 0.02em;
   transition: color var(--transition-fast);
 }
 
 .lib-tipo-btn[data-selected="true"] .lib-tipo-name { 
-  color: #fdfbf7; /* Blanco crema para que resalte sobre el rojo */
+  color: var(--danger); 
 }
 .lib-tipo-btn[data-selected="false"] .lib-tipo-name { 
-  color: #a3938d; /* Color Trigo */
+  color: var(--text-primary); 
 }
 
-/* Descripción del motivo */
+/* Descripción del motivo (Legibilidad Industrial) */
 .lib-tipo-desc {
-  font-size: 11px;
-  color: #7d6b63; /* Café Ceniza */
-  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted); 
+  font-family: var(--font-sans);
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 /* ============================================================
-   TOGGLE NC — ESTÉTICA INDUSTRIAL "LA RECETA"
+   TOGGLE NC — (il forno / La Receta)
+   Interruptor de Estado de No Conformidad
    ============================================================ */
 
 .lib-nc-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 0;
+  padding: 1.25rem 0;
   margin-bottom: 1.5rem;
-  border-top: 1px solid #3d2b24;
-  border-bottom: 1px solid #3d2b24;
+  /* Cambio: Líneas sutiles melocotón */
+  border-top: 1px solid var(--primary-15);
+  border-bottom: 1px solid var(--primary-15);
 }
 
 .lib-nc-label {
-  font-size: 14px;
-  font-weight: 700;
-  color: #fdfbf7; /* Blanco Crema */
-  font-family: 'Dosis', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  /* Cambio: Texto principal oscuro */
+  color: var(--text-primary); 
+  font-family: var(--font-display); /* Dosis */
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
 }
 
 .lib-nc-hint {
-  font-size: 11px;
-  color: #7d6b63; /* Café Ceniza */
-  font-family: var(--font-mono);
-  margin-top: 0.25rem;
+  font-size: 12px;
+  color: var(--text-muted); 
+  font-family: var(--font-sans);
+  font-weight: 600;
+  margin-top: 0.35rem;
 }
 
 /* Track del toggle (El riel) */
 .lib-nc-track {
-  width: 2.75rem; 
-  height: 1.35rem;
-  border-radius: 50px;
+  width: 3.25rem; 
+  height: 1.75rem;
+  border-radius: 100px;
   position: relative;
   cursor: pointer;
   transition: all var(--transition-base);
   flex-shrink: 0;
-  border: 1px solid #3d2b24 !important;
-  background-color: #1a110d !important; /* Fondo inactivo café oscuro */
+  /* Cambio: Fondo inactivo neutro claro */
+  border: 2px solid var(--border-default) !important;
+  background-color: var(--bg-app) !important; 
 }
 
-/* Cuando el toggle está activo (estilo dinámico forzado) */
-/* Nota: Si el background es inline, esto servirá de refuerzo */
-.lib-nc-track[style*="background: rgb(223, 97, 41)"],
+/* Estado Activo: Naranja Institucional il forno */
 .lib-nc-track[data-active="true"] {
-  border-color: #df6129 !important;
-  box-shadow: 0 0 10px rgba(223, 97, 41, 0.2);
+  background-color: var(--brand-orange) !important;
+  border-color: var(--brand-orange) !important;
+  box-shadow: 0 4px 12px rgba(223, 97, 41, 0.25);
 }
 
 /* Círculo interior del toggle (El interruptor) */
@@ -699,16 +750,19 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 1rem;
-  height: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: 50%;
-  background: #fdfbf7 !important; /* Blanco Crema para que resalte */
-  transition: left var(--transition-base), background var(--transition-base);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  /* Blanco puro para máximo contraste */
+  background: #ffffff !important; 
+  transition: left 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  left: 3px;
 }
 
-/* Ajuste sutil al thumb cuando está activo */
-.lib-nc-track[style*="background: rgb(223, 97, 41)"] .lib-nc-thumb {
-  background: #ffffff !important;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+/* Posición del thumb cuando está activo */
+.lib-nc-track[data-active="true"] .lib-nc-thumb {
+  /* Cálculo preciso para el desplazamiento en 3.25rem */
+  left: calc(100% - 1.25rem - 3px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }

@@ -31,7 +31,14 @@
 }
 
 .app-main-inner {
-  padding: 1.5rem;   /* p-6 */
+  padding: 1.5rem;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .app-main-inner {
+    padding: 1rem;
+  }
 }
 
 /* Backdrop móvil — cubre el contenido al abrir sidebar en pantallas pequeñas */
@@ -53,66 +60,70 @@
 
 
 /* ============================================================
-   HEADER — SISTEMA LA RECETA (COLORES INDUSTRIALES)
+   HEADER — il forno / La Receta (Limpieza de Verdes)
    ============================================================ */
 
 .app-header {
-  position:      fixed;
-  top:           0;
-  left:          0;
-  right:         0;
-  z-index:       100; /* Aumentado para asegurar que esté sobre el sidebar móvil */
-  display:       flex;
-  align-items:   center;
+  position:       fixed;
+  top:            0;
+  left:           0;
+  right:          0;
+  z-index:        100;
+  display:        flex;
+  align-items:    center;
   justify-content: space-between;
-  padding:       0 1rem;
-  height:        var(--header-height);
-  flex-shrink:   0;
+  padding:        0 1rem;
+  height:         var(--header-height);
+  flex-shrink:    0;
   
-  /* CAMBIO DE COLORES: Chocolate profundo y borde óxido */
-  background:    #1a110d; 
-  border-bottom: 1px solid #3d2b24; 
-  box-shadow:    0 2px 10px rgba(0, 0, 0, 0.4);
+  /* CAMBIO CLAVE: Cambiamos el verde oscuro por blanco puro o melocotón sutil */
+  background:     var(--bg-app); 
+  /* Usamos un borde naranja muy fino en lugar del borde verde/café */
+  border-bottom:  1px solid var(--primary-15);
+  box-shadow:     var(--shadow-xs);
 }
 
 /* Lado izquierdo */
 .header-left {
-  display:     flex;
-  align-items: center;
-  gap:         0.75rem;
-  min-width:   0;
+  display:      flex;
+  align-items:  center;
+  gap:          0.75rem;
+  min-width:    0;
 }
 
 /* Lado derecho */
 .header-right {
-  display:     flex;
-  align-items: center;
-  gap:         0.75rem;
-  flex-shrink: 0;
+  display:      flex;
+  align-items:  center;
+  gap:          0.75rem;
+  flex-shrink:  0;
 }
 
-/* Divisor vertical — Color óxido para que sea sutil */
+/* Divisor vertical — Ahora en naranja sutil para que no parezca óxido */
 .header-divider {
-  width:      1px;
-  height:     1rem;
-  background: #3d2b24; 
+  width:       1px;
+  height:      1rem;
+  background:  var(--primary-20);
   flex-shrink: 0;
 }
 
-/* Botón Hamburguesa (Si lo tienes dentro del header-left) */
+/* Botón Hamburguesa */
 .header-hamburger {
-  color: #df6129 !important; /* Naranja Marca para que resalte */
+  /* Usamos la variable de marca directamente */
+  color: var(--brand-orange) !important; 
   background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: var(--transition-fast);
 }
 
 .header-hamburger:hover {
-  background: rgba(223, 97, 41, 0.1); /* Destello naranja sutil al pasar el mouse */
-  border-radius: 4px;
+  /* Destello melocotón al pasar el mouse */
+  background: var(--bg-item-hover);
+  border-radius: var(--radius-sm);
 }
 
 .header-divider-lg {
@@ -122,6 +133,7 @@
 @media (min-width: 1024px) {
   .header-divider-lg {
     display: block;
+    background: var(--border-subtle);
   }
 }
 
@@ -130,23 +142,23 @@
   display:         flex;
   align-items:     center;
   justify-content: center;
-  width:           2.25rem; /* Un poco más grande para facilitar el toque en tablet */
+  width:           2.25rem; 
   height:          2.25rem;
   border-radius:   var(--radius-md);
   flex-shrink:     0;
   background:      transparent;
   border:          none;
   cursor:          pointer;
-  /* CAMBIO: Usamos el naranja marca para que destaque la interacción */
-  color:           #df6129; 
+  /* Mantenemos el naranja marca de il forno */
+  color:           var(--brand-orange); 
   transition:      background var(--transition-fast),
                    color      var(--transition-fast);
 }
 
 .header-hamburger:hover {
-  /* CAMBIO: Fondo chocolate claro al pasar el mouse */
-  background: #2a1a14;
-  color:      #fdfbf7;
+  /* Cambio: fondo naranja muy sutil en lugar de blanco traslúcido */
+  background: var(--primary-8);
+  color:      var(--brand-orange-hover);
 }
 
 .header-hamburger-icon {
@@ -166,18 +178,20 @@
   align-items:     center;
   justify-content: center;
   flex-shrink:     0;
-  /* CAMBIO: Estilo contenedor metálico */
-  background:      rgba(223, 97, 41, 0.1); 
-  border:          1px solid #3d2b24;
+  /* Cambio: Usamos el fondo melocotón sutil en lugar del verde sidebar */
+  background:      var(--bg-card-dim);
+  /* Borde naranja suave */
+  border:          1px solid var(--primary-15);
 }
 
 /* ── Fecha ── */
 .header-date {
-  font-size:   11px; /* Más pequeño y técnico */
-  font-family: var(--font-mono);
-  /* CAMBIO: Color trigo apagado */
-  color:       #7d6b63; 
-  text-transform: uppercase; /* Más industrial */
+  font-size:   10px; 
+  font-family: var(--font-sans); /* Cambiado de mono a sans para suavizarlo */
+  /* Cambio: Texto en gris profesional, no en el tono del sidebar */
+  color:       var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   display:     none;
 }
 
@@ -190,8 +204,7 @@
   display:     flex;
   align-items: center;
   gap:         0.375rem;
-  /* CAMBIO: Fondo sutil para el indicador */
-  background:  #7d6b63;
+  background:  rgba(255, 255, 255, 0.12);
   padding:     2px 8px;
   border-radius: 10px;
 }
@@ -223,7 +236,7 @@
 .header-user-btn {
   display:       flex;
   align-items:   center;
-  gap:           0.65rem; /* Un poco más de aire */
+  gap:           0.65rem; 
   border-radius: var(--radius-md);
   padding:       0.375rem 0.65rem;
   background:    transparent;
@@ -235,27 +248,28 @@
 
 .header-user-btn:hover,
 .header-user-btn[data-open="true"] {
-  /* CAMBIO: Usamos el chocolate base para el hover */
-  background:   #2a1a14;
-  border-color: #3d2b24; /* Borde óxido */
+  /* CAMBIO: Fondo melocotón sutil y borde naranja marca */
+  background:   var(--primary-8);
+  border-color: var(--primary-20);
 }
 
 /* Avatar cuadrado/técnico con iniciales */
 .header-avatar {
   width:           1.85rem;
   height:          1.85rem;
-  border-radius:   4px; /* Menos redondeado, más rudo */
+  border-radius:   4px; 
   display:         flex;
   align-items:     center;
   justify-content: center;
   font-size:       11px;
   font-weight:     800;
-  font-family:     var(--font-mono);
+  font-family:     var(--font-sans); /* Cambiado a sans para consistencia */
   flex-shrink:     0;
-  /* CAMBIO: Fondo oscuro con texto naranja marca */
-  background:      #3d2b24; 
-  border:          1px solid #7d6b63;
-  color:           #df6129; 
+  /* CAMBIO: Fondo naranja marca muy suave en lugar de blanco traslúcido */
+  background:      var(--primary-10);
+  /* CAMBIO: Borde naranja sutil en lugar del verde sidebar */
+  border:          1px solid var(--primary-25);
+  color:           var(--brand-orange);
 }
 
 /* Info de nombre + rol */
@@ -264,12 +278,24 @@
   display:    none;
 }
 
+/* Aseguramos que el texto del nombre y rol no sea verde */
+.header-user-info .user-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.header-user-info .user-role {
+  color: var(--brand-orange);
+  opacity: 0.8;
+  font-size: 10px;
+}
+
 @media (min-width: 640px) {
   .header-user-info { display: block; }
 }
 
 .header-user-name {
-  font-size:     13px; /* Tamaño más controlado */
+  font-size:     13px;
   font-weight:   600;
   line-height:   1.1;
   margin-bottom: 0.125rem;
@@ -277,24 +303,25 @@
   max-width:     120px;
   overflow:      hidden;
   text-overflow: ellipsis;
-  /* CAMBIO: Blanco crema para legibilidad sobre el chocolate */
-  color:         #fdfbf7; 
+  /* CAMBIO: Texto oscuro profesional en lugar del color del sidebar */
+  color:         var(--text-primary);
 }
 
 .header-user-role {
   font-size:   10px;
   line-height: 1;
-  /* CAMBIO: Color trigo ceniza */
-  color:       #a3938d;
+  /* CAMBIO: Naranja de la marca para el rol, le da vida al header */
+  color:       var(--brand-orange);
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  opacity: 0.9;
 }
 
 /* Chevron del dropdown */
 .header-user-chevron {
   fill:           none;
-  /* CAMBIO: Color ceniza técnica */
-  stroke:         #7d6b63; 
+  /* CAMBIO: Gris neutro en lugar del tono del sidebar */
+  stroke:         var(--text-muted);
   stroke-width:   2.5;
   stroke-linecap: round;
   transition:     transform var(--transition-base);
@@ -302,94 +329,55 @@
 
 .header-user-chevron[data-open="true"] {
   transform: rotate(180deg);
-  /* CAMBIO: Se ilumina en naranja cuando está desplegado */
-  stroke: #df6129;
+  stroke: var(--brand-orange);
 }
 
 /* ── Dropdown de usuario ── */
 .header-dropdown {
-  position:      absolute;
-  right:         0;
-  top:           calc(100% + 0.5rem);
-  width:         15rem; /* Un poco más ancho para nombres largos */
-  border-radius: var(--radius-lg);
-  overflow:      hidden;
-  z-index:       110;
-  /* CAMBIO: Fondo Chocolate Profundo con cristal esmerilado */
-  background:    rgba(26, 17, 13, 0.98); 
+  position:       absolute;
+  right:          0;
+  top:            calc(100% + 0.5rem);
+  width:          15rem;
+  border-radius:  var(--radius-lg);
+  overflow:       hidden;
+  z-index:        110;
+  background:     var(--bg-modal);
   backdrop-filter: blur(8px);
-  border:        1px solid #3d2b24; /* Borde óxido */
-  box-shadow:    0 10px 25px rgba(0, 0, 0, 0.6);
-  animation:     fadeSlideUp 0.15s ease both;
+  /* CAMBIO: Borde más sutil para que no se vea "sucio" */
+  border:         1px solid var(--border-subtle);
+  box-shadow:     var(--shadow-dropdown);
+  animation:      fadeSlideUp 0.15s ease both;
 }
 
 .header-dropdown-info {
   padding:       0.85rem 1rem;
-  /* CAMBIO: Divisor sutil */
-  border-bottom: 1px solid #3d2b24;
-  background:    rgba(255, 255, 255, 0.02);
-}
-
-.header-dropdown-name {
-  font-size:     14px;
-  font-weight:   700;
-  /* CAMBIO: Blanco crema */
-  color:         #fdfbf7; 
-  white-space:   nowrap;
-  overflow:      hidden;
-  text-overflow: ellipsis;
+  border-bottom: 1px solid var(--border-faint);
+  /* CAMBIO: Fondo melocotón sutil */
+  background:    var(--bg-card-dim);
 }
 
 .header-dropdown-email {
   font-size:   11px;
-  font-family: var(--font-mono);
-  /* CAMBIO: Trigo apagado */
-  color:       #a3938d; 
+  /* CAMBIO: Usamos sans para que sea más legible que la mono */
+  font-family: var(--font-sans);
+  color:       var(--text-muted);
   margin-top:  0.125rem;
   white-space: nowrap;
   overflow:    hidden;
   text-overflow: ellipsis;
 }
 
-.header-dropdown-roles {
-  display:    flex;
-  gap:        0.35rem;
-  margin-top: 0.6rem;
-  flex-wrap:  wrap;
-}
-
-/* Reutilizamos el estilo de badge industrial para los roles */
+/* Reutilizamos el estilo de badge con el naranja de la marca */
 .header-role-badge {
-  background: #2a1a14;
-  color: #a3938d;
-  border: 1px solid #3d2b24;
+  background: var(--primary-10); /* Fondo naranja muy suave */
+  color: var(--brand-orange);    /* Texto naranja */
+  border: 1px solid var(--primary-20);
   padding: 0.15rem 0.45rem;
   font-size: 9px;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   border-radius: 4px;
   text-transform: lowercase;
-}
-
-/* Pastilla de rol (Ajuste final) */
-.header-role-badge {
-  font-size:     9px;
-  font-family:   var(--font-mono);
-  padding:       0.125rem 0.375rem;
-  border-radius: 4px;
-  /* CAMBIO: Colores tierra para no competir con el botón de logout */
-  background:    #2a1a14;
-  color:         #a3938d;
-  border:        1px solid #3d2b24;
-}
-
-/* Sección del dropdown */
-.header-dropdown-section {
-  padding: 0.25rem 0;
-}
-
-.header-dropdown-section + .header-dropdown-section {
-  /* CAMBIO: Divisor óxido sutil */
-  border-top: 1px solid #3d2b24;
+  font-weight: 600;
 }
 
 /* Ítem del dropdown */
@@ -403,36 +391,27 @@
   background:  transparent;
   border:      none;
   cursor:      pointer;
-  /* CAMBIO: Texto trigo ceniza */
-  color:       #a3938d;
+  /* CAMBIO: Verde oscuro de la marca solo para iconos/textos de acción */
+  color:       var(--text-secondary);
   transition:  background var(--transition-fast),
                color      var(--transition-fast);
 }
 
 .header-dropdown-item:hover {
-  /* CAMBIO: Hover chocolate con texto blanco crema */
-  background: #2a1a14;
-  color:      #fdfbf7;
+  /* CAMBIO: Hover melocotón */
+  background: var(--bg-row-hover);
+  color:      var(--brand-orange);
 }
 
-/* Ítem de cierre de sesión — rojo en hover */
+/* Ítem de cierre de sesión */
 .header-dropdown-item-danger:hover {
-  /* CAMBIO: Rojo industrial (estilo botón de emergencia) */
-  background: rgba(239, 68, 68, 0.1);
-  color:      #ef4444;
-}
-
-.header-dropdown-icon {
-  fill:           none;
-  stroke:         currentColor;
-  stroke-width:   1.8;
-  stroke-linecap: round;
-  flex-shrink:    0;
+  background: var(--danger-bg);
+  color:      var(--danger);
 }
 
 
 /* ============================================================
-   SIDEBAR — LA RECETA (ESTILO CONSOLA)
+   SIDEBAR — il forno / La Receta (Limpieza de Verdes)
    ============================================================ */
 
 .app-sidebar {
@@ -441,8 +420,8 @@
   height:          100%;
   flex-shrink:     0;
   overflow:        hidden;
-  /* CAMBIO: Chocolate profundo para el fondo */
-  background: #1a110d; 
+  /* CAMBIO: Usamos el fondo melocotón sutil en lugar del verde sólido */
+  background:      var(--bg-card-dim); 
   transition:      width           var(--transition-slow),
                    border-color    var(--transition-slow),
                    box-shadow      var(--transition-slow);
@@ -450,9 +429,9 @@
 
 .app-sidebar[data-open="true"] {
   width:        var(--sidebar-width);
-  /* CAMBIO: Borde color óxido */
-  border-right: 1px solid #3d2b24; 
-  box-shadow:   10px 0 15px rgba(0, 0, 0, 0.3);
+  /* CAMBIO: Borde naranja sutil en lugar de verde */
+  border-right: 1px solid var(--primary-15);
+  box-shadow:   var(--shadow-sm);
 }
 
 .app-sidebar[data-open="false"] {
@@ -468,164 +447,139 @@
     left:     0;
     top:      var(--header-height);
     height:   calc(100vh - var(--header-height));
-    z-index:  110; /* Por encima del header y backdrop */
-    /* Aseguramos que el fondo sea opaco en móvil */
-    background: #1a110d;
+    z-index:  110; 
+    /* Mantenemos la consistencia del fondo claro */
+    background: var(--bg-card-dim);
   }
 }
 
-/* Backdrop */
+/* Backdrop - Ajustado al naranja marca oscuro traslúcido */
 @media (max-width: 1024px) {
   .app-backdrop {
     display: block;
-    background: rgba(0, 0, 0, 0.6);
+    /* CAMBIO: Quitamos el negro genérico por un tono cálido de la marca */
+    background: var(--bg-overlay);
     backdrop-filter: blur(4px);
   }
 }
 
-/* Wrapper interno */
+/* Wrapper interno — Limpieza total de negros y cafés */
 .sidebar-inner {
-  display:         flex;
-  flex-direction: column;
-  height:          100%;
-  overflow:        hidden;
-  width:           var(--sidebar-width);
-  min-width:       var(--sidebar-width);
-  /* CAMBIO: Gradiente sutil para dar profundidad */
-  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0) 100%);
+  display:          flex;
+  flex-direction:  column;
+  height:           100%;
+  overflow:         hidden;
+  width:            var(--sidebar-width);
+  min-width:        var(--sidebar-width);
+  /* CAMBIO: Quitamos el degradado oscuro por uno melocotón sutil */
+  background: linear-gradient(180deg, var(--bg-card-dim) 0%, var(--bg-app) 100%);
 }
 
 /* ── Navegación ── */
 .sidebar-nav {
   flex:       1;
   overflow-y: auto;
-  overflow-x: hidden;
   padding:    0.75rem 0;
-  /* CAMBIO: Ocultamos scrollbar pero mantenemos funcionalidad */
   scrollbar-width: none;
 }
 
-.sidebar-nav::-webkit-scrollbar {
-  display: none;
-}
-
-/* Grupo de navegación */
-.sidebar-group {
-  margin-bottom: 0.5rem; /* Un poco más de aire entre bloques */
-}
-
-/* Etiqueta del grupo — Estilo Etiqueta Técnica */
+/* Etiqueta del grupo — Estilo il forno Limpio */
 .sidebar-group-label {
-  padding:        1rem 1.25rem 0.5rem; /* Alineado con los items */
-  font-size:      10px;
-  font-weight:    700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  font-family:    var(--font-mono);
-  /* CAMBIO: Color café ceniza para un look técnico apagado */
-  color: #7d6b63; 
-  opacity: 0.8;
+  padding:        1rem 1.25rem 0.5rem;
+  font-size:       10px;
+  font-weight:     700;
+  letter-spacing:  0.1em;
+  text-transform:  uppercase;
+  font-family:     var(--font-sans); /* Cambiado de mono a sans */
+  /* CAMBIO: Verde marca il forno suavizado para etiquetas */
+  color: var(--text-secondary);
+  opacity: 0.7;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-/* Opcional: Una pequeña línea decorativa al lado del grupo */
+/* CAMBIO: Línea decorativa ahora en naranja sutil, no óxido */
 .sidebar-group-label::after {
   content: "";
   flex: 1;
   height: 1px;
-  background: rgba(61, 43, 36, 0.4); /* Línea óxido muy sutil */
+  background: var(--primary-15); 
 }
 
 /* Nav item — NavLink */
 .sidebar-nav-item {
-  position:       relative;
-  display:        flex;
-  align-items:    center;
-  gap:            0.75rem; /* Un poco más de aire para el icono */
-  margin:         0.125rem 0.65rem;
-  padding:        0.65rem 0.85rem;
-  border-radius:  6px;
-  font-size:      14px;
-  font-weight:    400;
-  white-space:    nowrap;
+  position:        relative;
+  display:         flex;
+  align-items:     center;
+  gap:             0.75rem;
+  margin:          0.125rem 0.65rem;
+  padding:         0.65rem 0.85rem;
+  border-radius:   var(--radius-md);
+  font-size:       13px;
+  font-weight:     500;
+  white-space:     nowrap;
   text-decoration: none;
-  transition:     background var(--transition-fast),
-                  color      var(--transition-fast);
-  background:     transparent;
-  /* CAMBIO: Color trigo apagado para ítems inactivos */
-  color: #a3938d;
+  transition:      all var(--transition-fast);
+  background:      transparent;
+  /* CAMBIO: Color de texto neutro profesional */
+  color: var(--text-tertiary);
 }
 
 .sidebar-nav-item:hover {
-  /* CAMBIO: Fondo chocolate claro al pasar el mouse */
-  background: rgba(61, 43, 36, 0.4);
-  color:      #fdfbf7;
+  /* CAMBIO: Fondo melocotón sutil en lugar de chocolate */
+  background: var(--primary-8);
+  color:      var(--brand-orange);
 }
 
-/* Estado activo — El "Encendido" */
+/* Estado activo — El toque de marca il forno */
 .sidebar-nav-item[data-active="true"] {
-  /* CAMBIO: Fondo chocolate base con texto naranja marca */
-  background:  rgba(223, 97, 41, 0.08); 
-  color:       #df6129; 
-  font-weight: 600;
+  /* CAMBIO: Fondo naranja marca muy suave con texto naranja vibrante */
+  background:  var(--primary-10); 
+  color:       var(--brand-orange);
+  font-weight: 700;
 }
 
 .sidebar-nav-item[data-active="true"]:hover {
-  background: rgba(223, 97, 41, 0.12);
-  color:      #df6129;
+  background: var(--primary-15);
+  color:      var(--brand-orange-hover);
 }
 
 /* Barra indicadora izquierda — El detalle de luz */
 .sidebar-nav-indicator {
   position:      absolute;
-  left:          -0.65rem; /* Se ancla al borde del contenedor */
+  left:          -0.65rem; 
   top:           50%;
   transform:     translateY(-50%);
   width:         3px;
   height:        60%;
   border-radius: 0 4px 4px 0;
-  /* CAMBIO: Naranja marca con resplandor sutil */
-  background: #df6129;
-  box-shadow: 2px 0 8px rgba(223, 97, 41, 0.4);
-}
-
-.sidebar-nav-icon {
-  flex-shrink: 0;
-  /* El icono hereda el color del texto automáticamente */
-}
-
-/* Ícono del item */
-.sidebar-nav-icon {
-  flex-shrink: 0;
-  /* El icono hereda el color del item (trigo o naranja) */
-}
-
-/* Texto del item */
-.sidebar-nav-label {
-  line-height: 1;
-  white-space: nowrap;
+  /* Mantenemos el naranja vibrante con un brillo más sutil */
+  background: var(--brand-orange);
+  box-shadow: 2px 0 6px rgba(223, 97, 41, 0.3);
 }
 
 /* ── Perfil activo (pie del sidebar) ── */
 .sidebar-profile {
   margin:        0 0.75rem 1rem;
   padding:       0.75rem;
-  border-radius: 8px;
-  /* CAMBIO: Fondo más oscuro que el sidebar para dar profundidad */
-  background:    rgba(0, 0, 0, 0.2); 
-  border:        1px solid #3d2b24; /* Borde óxido */
+  border-radius: var(--radius-md);
+  /* CAMBIO: Fondo melocotón sutil y borde naranja suave en lugar de negro/verde */
+  background:    var(--primary-8);
+  border:        1px solid var(--primary-15);
 }
 
 .sidebar-profile-label {
   font-size:      9px;
-  font-family:    var(--font-mono);
-  letter-spacing: 0.15em;
+  /* CAMBIO: Dosis (sans) en lugar de mono para suavizar el look */
+  font-family:    var(--font-sans);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  /* CAMBIO: Color café ceniza */
-  color: #7d6b63; 
+  /* CAMBIO: Verde marca il forno con opacidad */
+  color:          var(--text-secondary);
+  opacity:        0.8;
   margin-bottom:  0.5rem;
+  font-weight:    700;
 }
 
 .sidebar-profile-roles {
@@ -634,21 +588,16 @@
   gap:       0.35rem;
 }
 
-/* Nota: Los roles dentro de este bloque usarán la clase .sidebar-role-badge 
-   que definimos antes, asegurando consistencia en toda la app. */
-
-/* Pastilla de rol en el sidebar */
+/* Pastilla de rol en el sidebar — Consistencia total */
 .sidebar-role-badge {
-  font-size:     9px; /* Un poco más pequeña para el look técnico */
-  font-family:   var(--font-mono);
+  font-size:     9px;
+  font-family:   var(--font-sans);
   padding:       0.125rem 0.4rem;
-  border-radius: 4px; /* Menos redondeado para estilo industrial */
-  
-  /* CAMBIO: Colores tierra apagados para que se vea como una placa metálica */
-  background:    #2a1a14; /* Chocolate base */
-  color:         #a3938d; /* Color trigo */
-  border:        1px solid #3d2b24; /* Borde óxido */
-  
-  text-transform: lowercase; /* Estilo 'tag' de programación */
-  letter-spacing: 0.02em;
+  border-radius: 4px;
+  /* CAMBIO: Naranja suave con texto naranja fuerte */
+  background:    var(--primary-15);
+  color:         var(--brand-orange);
+  border:        1px solid var(--primary-25);
+  text-transform: lowercase;
+  font-weight:   600;
 }

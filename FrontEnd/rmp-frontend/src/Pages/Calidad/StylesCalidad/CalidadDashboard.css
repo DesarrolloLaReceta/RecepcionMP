@@ -1,8 +1,14 @@
 .dashboard-calidad-container {
-  padding: 2rem;
+  padding: 1.5rem 2rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
   animation: fadeIn 0.4s ease-out;
+}
+
+@media (max-width: 640px) {
+  .dashboard-calidad-container {
+    padding: 1rem;
+  }
 }
 
 @keyframes fadeIn {
@@ -11,55 +17,55 @@
 }
 
 .dashboard-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
-.breadcrumb-cal {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  letter-spacing: 0.1em;
+.dashboard-breadcrumb {
+  font-size: var(--text-xs);
+  font-family: var(--font-sans);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #df6129; /* El naranja oficial */
+  color: var(--brand-orange);
   margin-bottom: 0.5rem;
   display: block;
 }
 
 .dashboard-header h1 {
-  font-size: 2rem;
-  color: #3d2b24; /* Tu color de texto claro */
-  margin: 0.5rem 0;
+  font-size: 1.75rem;
+  color: var(--text-primary);
+  margin: 0.35rem 0;
   font-weight: 700;
 }
 
 .dashboard-header p {
-  color: #a3938d; /* Tu color de texto secundario */
+  color: var(--text-muted);
   font-size: var(--text-sm);
 }
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 1.25rem;
 }
 
 .card-item {
-  border: 1px solid #3d2b24; /* Tu color de borde oficial */
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
-  background: #21140f; /* Tu fondo oscuro oficial */
+  background: var(--bg-card);
   padding: 1.5rem;
   display: flex;
   align-items: flex-start;
   gap: 1.25rem;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   position: relative;
   overflow: hidden;
 }
 
 .card-item:hover:not(.disabled) {
-  border-color: #df6129;
-  background: #2a1a14;
-  transform: translateY(-4px);
+  border-color: var(--brand-orange);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
 }
 
 .card-item::before {
@@ -74,61 +80,68 @@
 }
 
 .card-item:hover:not(.disabled)::before {
-  background: #df6129;
+  background: var(--brand-orange);
 }
 
 .card-item.disabled {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
-  filter: grayscale(1);
+  filter: grayscale(0.6);
 }
 
-.card-icon-circle {
+.card-icon-container {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
-  background: rgba(223, 97, 41, 0.08); /* El naranja con transparencia */
-  border: 1px solid rgba(223, 97, 41, 0.2);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 1.5rem;
   flex-shrink: 0;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-card-secondary);
+}
+
+.card-emoji {
+  line-height: 1;
 }
 
 .card-info {
   flex: 1;
+  min-width: 0;
 }
 
 .card-subtitle {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: #a3938d;
+  font-size: var(--text-xs);
+  font-family: var(--font-sans);
+  color: var(--brand-earth-mid);
   text-transform: uppercase;
+  letter-spacing: 0.06em;
   display: block;
   margin-bottom: 0.25rem;
 }
 
 .card-title {
-  color: #fdfbf7;
-  font-size: 1.15rem;
+  color: var(--text-primary);
+  font-size: 1.1rem;
   margin: 0 0 0.5rem 0;
   font-weight: 600;
+  font-family: var(--font-sans);
 }
 
 .card-description {
-  color: #a3938d;
+  color: var(--text-muted);
   font-size: var(--text-sm);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .card-arrow {
   align-self: center;
-  color: #3d2b24;
+  color: var(--border-medium);
   font-size: 1.25rem;
   transition: color 0.2s;
 }
 
 .card-item:hover .card-arrow {
-  color: #df6129;
+  color: var(--brand-orange);
 }
