@@ -1,19 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { apiClient } from '../Services/apiClient';
+import { type AdGroup } from './adGroups';
 
 // ─── TIPOS ACTUALIZADOS PARA ACTIVE DIRECTORY ─────────────────────────────────
 
 // Ahora AppRole usa los nombres de tus grupos de AD
-export type AppRole = 
-  | "App_Recepcion_LE"
-  | "App_Calidad_LE"
-  | "Sistemas_LE"
-  | "Auditoria_LE"
-  | "Compras_LE";
+export type AppRole = AdGroup;
 
 interface User {
   nombre: string;
-  grupos: string[]; // Cambiamos 'perfil' por el array de grupos del AD
+  grupos: AdGroup[]; // Cambiamos 'perfil' por el array de grupos del AD
 }
 
 interface AuthContextValue {
@@ -22,7 +18,7 @@ interface AuthContextValue {
   isLoading: boolean;
   displayName: string;
   email: string;
-  roles: string[]; // Lista de grupos activos
+  roles: AdGroup[]; // Lista de grupos activos
   initials: string;
   hasRole: (role: AppRole | AppRole[]) => boolean;
   login: (username: string, password: string) => Promise<void>;
@@ -57,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const parsed = JSON.parse(storedUser);
         // Recuperamos nombre y la lista de grupos
-        setUser({ nombre: parsed.nombre, grupos: parsed.grupos || [] });
+        setUser({ nombre: parsed.nombre, grupos: (parsed.grupos || []) as AdGroup[] });
       } catch (e) {
         console.error('Error al parsear el usuario almacenado', e);
         localStorage.clear();
@@ -74,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify({ nombre, grupos }));
     
-    setUser({ nombre, grupos });
+    setUser({ nombre, grupos: (grupos || []) as AdGroup[] });
   }, []);
 
   const logout = useCallback(() => {

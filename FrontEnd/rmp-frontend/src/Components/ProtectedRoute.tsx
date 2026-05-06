@@ -1,16 +1,8 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../Auth/AuthContext";
+import { type AppRole, useAuth } from "../Auth/AuthContext";
 import { ROUTES } from "../Constants/routes";
 import { Spinner } from "./UI/Index";
 import "./ProtectedRoute.css";
-
-// ─── Definición local de roles (coincide con PerfilUsuario en backend) ───────
-export type AppRole = 
-  | "Administrador"
-  | "App_Calidad_LE"
-  | "App_Recibo"
-  | "Compras"
-  | "RecepcionAlmacen";
 
 interface ProtectedRouteProps {
   requiredRoles?: AppRole | AppRole[];
@@ -25,19 +17,8 @@ interface ProtectedRouteProps {
  * - Con permisos: renderiza el <Outlet />.
  */
 export function ProtectedRoute({ requiredRoles }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, hasRole } = useAuth();
   const location = useLocation();
-
-  // Función auxiliar para verificar grupos del AD
-  const hasRole = (roles: AppRole | AppRole[]): boolean => {
-    // IMPORTANTE: Ahora buscamos en 'grupos' (Active Directory)
-    if (!user?.grupos || !Array.isArray(user.grupos)) return false;
-    
-    const required = Array.isArray(roles) ? roles : [roles];
-    
-    // Verificamos si alguno de los grupos del usuario coincide con los requeridos
-    return required.some(role => user.grupos.includes(role));
-  };
 
   // ── Verificando sesión ───────────────────────────────────────────────────
   if (isLoading) {

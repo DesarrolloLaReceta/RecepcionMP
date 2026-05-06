@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { apiClient } from "../../Services/apiClient";
-import { Spinner, Badge } from "../../Components/UI/Index";
+import { Spinner } from "../../Components/UI/Index";
 import "./StylesLogin/LoginPage.css";
 
 // ─── ÍCONOS SVG ───────────────────────────────────────────────────────────────
@@ -43,14 +42,9 @@ function FactoryIcon() {
   );
 }
 
-// ─── PERFILES DE ACCESO ───────────────────────────────────────────────────────
-
-const SYSTEM_ROLES = ["Recepción", "Calidad", "Compras", "Auditoría", "Admin"];
-
 // ─── LOGIN PAGE ───────────────────────────────────────────────────────────────
 
 export default function LoginPage() {
-  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -77,9 +71,9 @@ export default function LoginPage() {
         username: username.trim(),
         password,
       });
-      const { token, nombre, perfil } = response.data;
+      const { token, nombre, grupos } = response.data;
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify({ nombre, perfil }));
+      localStorage.setItem("user", JSON.stringify({ nombre, grupos: grupos ?? [] }));
       
       // Forzar recarga completa para que el contexto se reinicie con los nuevos datos
       window.location.href = "/";

@@ -32,7 +32,7 @@ public sealed class RecepcionesController : BaseController
 
         // 🔥 VALIDACIÓN
         if (!CurrentUser.TienePerfil(PerfilUsuario.RecepcionAlmacen))
-            throw new ForbiddenAccessException();
+            throw new ForbiddenAccessException(PerfilUsuario.RecepcionAlmacen, CurrentUser.Perfil);
 
         var result = await Mediator.Send(new GetRecepcionesQuery
         {

@@ -1,18 +1,10 @@
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { AuthProvider } from "./Auth/AuthContext";
+import { AD_GROUPS } from "./Auth/adGroups";
 import { ROUTES } from "./Constants/routes";
 import { AppShell } from "./Components/Layout/AppShell";
 import { ProtectedRoute } from "./Components/ProtectedRoute";
-
-// ── Definición local de roles (coincide con PerfilUsuario en backend) ────────────
-const AppRoles = {
-  Administrador: "Administrador",
-  Calidad: "App_Calidad_LE",
-  Auditor: "App_Calidad_LE",
-  Compras: "Compras",
-  RecepcionAlmacen: "App_Recibo",
-} as const;
 
 // ── Lazy pages ───────────────────────────────────────────────────────────────
 const LoginPage         = lazy(() => import("./Pages/Login/LoginPage"));
@@ -66,7 +58,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppShell />}>
 
-              <Route element={<ProtectedRoute requiredRoles={[AppRoles.RecepcionAlmacen, AppRoles.Calidad, AppRoles.Administrador]} />}>
+              <Route element={<ProtectedRoute requiredRoles={[AD_GROUPS.RECIBO, AD_GROUPS.CALIDAD, AD_GROUPS.ADMINISTRATIVO]} />}>
                 <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
                 <Route path={ROUTES.RECEPCIONES} element={<RecepcionesPage />} />
                 <Route path={ROUTES.NUEVA_RECEPCION} element={<NuevaRecepcionPage />} />
@@ -78,7 +70,7 @@ export default function App() {
               <Route path="/lotes/:id"          element={<DetalleLotePage />} />
 
               {/* Calidad + Admin */}
-              <Route element={<ProtectedRoute requiredRoles={[AppRoles.Calidad, AppRoles.Administrador]} />}>
+              <Route element={<ProtectedRoute requiredRoles={[AD_GROUPS.CALIDAD, AD_GROUPS.ADMINISTRATIVO]} />}>
                 <Route path={ROUTES.LIBERACION} element={<LiberacionPage />} />
                 <Route path="/calidad" element={<CalidadDashboard />} />
                 <Route path="/calidad/verificacion-instalaciones" element={<VerificacionInstalacionesPage />} />
@@ -87,7 +79,7 @@ export default function App() {
               </Route>
 
               {/* Calidad + Admin + Auditor */}
-              <Route element={<ProtectedRoute requiredRoles={[AppRoles.Calidad, AppRoles.Administrador, AppRoles.Auditor]} />}>
+              <Route element={<ProtectedRoute requiredRoles={[AD_GROUPS.CALIDAD, AD_GROUPS.ADMINISTRATIVO]} />}>
                 <Route path={ROUTES.NO_CONFORMIDADES} element={<NoConformPage />} />
                 <Route path="/no-conformidades/:id"   element={<DetalleNoConformPage />} />
                 <Route path={ROUTES.ORDENES_COMPRA}   element={<OrdenesCompraPage />} />
@@ -95,12 +87,12 @@ export default function App() {
               </Route>
 
               {/* Maestros: Admin + Compras */}
-              <Route element={<ProtectedRoute requiredRoles={[AppRoles.Administrador, AppRoles.Compras]} />}>
+              <Route element={<ProtectedRoute requiredRoles={[AD_GROUPS.ADMINISTRATIVO]} />}>
                 <Route path={ROUTES.PROVEEDORES} element={<ProveedoresPage />} />
               </Route>
 
               {/* Maestros: solo Admin */}
-              <Route element={<ProtectedRoute requiredRoles={[AppRoles.Administrador]} />}>
+              <Route element={<ProtectedRoute requiredRoles={[AD_GROUPS.ADMINISTRATIVO]} />}>
                 <Route path={ROUTES.ITEMS}      element={<ItemsPage />} />
                 <Route path={ROUTES.CHECKLISTS} element={<ChecklistsPage />} />
               </Route>

@@ -1,10 +1,11 @@
 import { useMemo, useRef, useState, useEffect, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Auth/AuthContext";
 import { Button } from "../../Components/UI/Index";
 import { SelectField, TextAreaField } from "../../Components/Forms/Index";
 import { ROUTES } from "../../Constants/routes";
 import { ZONAS_CALIDAD } from "../../Constants/zonasCalidad";
-import { calidadService, type VerificacionSeccionPayload } from "../../Services/calidad.service";
+import { calidadService, type GuardarVerificacionPayload } from "../../Services/calidad.service";
 import "../Recepciones/StylesRecepciones/NuevaRecepcionPage.css";
 import "./StylesCalidad/VerificacionInstalaciones.css";
 
@@ -84,6 +85,7 @@ function calcCumplimiento(filas: ItemFila[]): number {
 
 export default function VerificacionInstalaciones() {
   const navigate = useNavigate();
+  const { displayName, roles } = useAuth();
   const [zona, setZona] = useState("");
   const [secciones, setSecciones] = useState<Seccion[]>(SECCIONES_BASE);
   const [observacionesGenerales, setObservacionesGenerales] = useState("");
@@ -156,12 +158,7 @@ export default function VerificacionInstalaciones() {
     setFieldErrors({});
 
     try {
-      const payload: {
-        zona: string;
-        cumplimientoTotal: number;
-        secciones: VerificacionSeccionPayload[];
-        observacionesGenerales?: string;
-      } = {
+      const payload: GuardarVerificacionPayload = {
         zona,
         cumplimientoTotal,
         secciones: secciones.map((seccion) => ({
@@ -175,6 +172,8 @@ export default function VerificacionInstalaciones() {
           })),
         })),
         observacionesGenerales: observacionesGenerales || undefined,
+        nombreResponsable: displayName || "Usuario AD",
+        cargoResponsable: roles[0] || "No especificado",
       };
 
       const fotos = secciones.flatMap((seccion) => seccion.filas.flatMap((fila) => fila.fotos));

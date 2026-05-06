@@ -1,17 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { MOCK_USERS, type MockUser, useMockAuth } from "../../Auth/mockAuth";
-import { AppRoles } from "../../Auth/msalConfig";
+import { AD_GROUPS } from "../../Auth/adGroups";
 import { Badge, type BadgeColor } from "../../Components/UI/Index";
 import "./StylesLogin/MockLoginPage.css";
 
 // ─── COLORES POR ROL ──────────────────────────────────────────────────────────
 
 const ROLE_TO_BADGE_COLOR: Record<string, BadgeColor> = {
-  [AppRoles.Administrador]: "red",
-  [AppRoles.Calidad]: "blue",
-  [AppRoles.Recepcion]: "green",
-  [AppRoles.Compras]: "purple",
-  [AppRoles.Auditor]: "yellow",
+  [AD_GROUPS.ADMINISTRATIVO]: "red",
+  [AD_GROUPS.CALIDAD]: "blue",
+  [AD_GROUPS.RECIBO]: "green",
 };
 
 // Colores para el avatar (cuando el rol no está mapeado)
@@ -19,6 +16,38 @@ const FALLBACK_AVATAR_COLOR = {
   bg: "rgba(255,255,255,0.05)",
   text: "#94A3B8",
 };
+
+interface MockUser {
+  id: string;
+  displayName: string;
+  email: string;
+  initials: string;
+  roles: string[];
+}
+
+const MOCK_USERS: MockUser[] = [
+  {
+    id: "u-admin",
+    displayName: "Usuario Administrativo",
+    email: "administrativo@empresa.local",
+    initials: "UA",
+    roles: [AD_GROUPS.ADMINISTRATIVO],
+  },
+  {
+    id: "u-calidad",
+    displayName: "Inspector Calidad",
+    email: "calidad@empresa.local",
+    initials: "IC",
+    roles: [AD_GROUPS.CALIDAD],
+  },
+  {
+    id: "u-recibo",
+    displayName: "Operador Recibo",
+    email: "recibo@empresa.local",
+    initials: "OR",
+    roles: [AD_GROUPS.RECIBO],
+  },
+];
 
 // ─── USER CARD ────────────────────────────────────────────────────────────────
 
@@ -36,16 +65,12 @@ function UserCard({
   const avatarColors = (() => {
     // Si el rol está mapeado, usamos colores específicos para el avatar
     switch(role) {
-      case AppRoles.Administrador:
+      case AD_GROUPS.ADMINISTRATIVO:
         return { bg: "rgba(239,68,68,0.1)", text: "#FCA5A5" };
-      case AppRoles.Calidad:
+      case AD_GROUPS.CALIDAD:
         return { bg: "rgba(59,130,246,0.1)", text: "#93C5FD" };
-      case AppRoles.Recepcion:
+      case AD_GROUPS.RECIBO:
         return { bg: "rgba(34,197,94,0.1)", text: "#86EFAC" };
-      case AppRoles.Compras:
-        return { bg: "rgba(168,85,247,0.1)", text: "#C4B5FD" };
-      case AppRoles.Auditor:
-        return { bg: "rgba(245,158,11,0.1)", text: "#FCD34D" };
       default:
         return FALLBACK_AVATAR_COLOR;
     }
@@ -54,11 +79,9 @@ function UserCard({
   // Label para mostrar en el Badge y ARIA label
   const roleLabel = (() => {
     switch(role) {
-      case AppRoles.Administrador: return "Administrador";
-      case AppRoles.Calidad: return "Calidad";
-      case AppRoles.Recepcion: return "Recepción";
-      case AppRoles.Compras: return "Compras";
-      case AppRoles.Auditor: return "Auditor";
+      case AD_GROUPS.ADMINISTRATIVO: return "Administrativo";
+      case AD_GROUPS.CALIDAD: return "Calidad";
+      case AD_GROUPS.RECIBO: return "Recibo";
       default: return role;
     }
   })();
@@ -110,11 +133,11 @@ function UserCard({
 // ─── MOCK LOGIN PAGE ──────────────────────────────────────────────────────────
 
 export default function MockLoginPage() {
-  const { setMockUser } = useMockAuth();
   const navigate        = useNavigate();
 
   const handleSelect = (user: MockUser) => {
-    setMockUser(user);
+    localStorage.setItem("token", "mock-token");
+    localStorage.setItem("user", JSON.stringify({ nombre: user.displayName, grupos: user.roles }));
     navigate("/", { replace: true });
   };
 

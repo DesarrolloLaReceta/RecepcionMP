@@ -1,19 +1,9 @@
 import { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { useAuth } from "../../Auth/AuthContext";
+import { type AppRole, useAuth } from "../../Auth/AuthContext";
+import { AD_GROUPS } from "../../Auth/adGroups";
 import { ROUTES } from "../../Constants/routes";
 import "./StylesLayout/Layout.css";
-
-// ─── DEFINICIÓN LOCAL DE ROLES (coincide con PerfilUsuario en backend) ──────
-const AppRoles = {
-  Administrador: "Administrador",
-  Calidad: "Calidad",
-  Auditor: "Auditor",
-  Compras: "Compras",
-  RecepcionAlmacen: "RecepcionAlmacen",
-} as const;
-
-type AppRole = typeof AppRoles[keyof typeof AppRoles];
 
 // ─── ÍCONO SVG LOCAL ──────────────────────────────────────────────────────────
 function Icon({ d, size = 16, className = "" }: { d: string; size?: number; className?: string }) {
@@ -77,19 +67,19 @@ const NAV_MENU: NavGroup[] = [
         label: "Liberación de lotes",
         icon:  "liberacion",
         path:  ROUTES.LIBERACION,
-        roles: [AppRoles.Calidad, AppRoles.Administrador],
+        roles: [AD_GROUPS.CALIDAD, AD_GROUPS.ADMINISTRATIVO],
       },
       {
         label: "Gestión de Calidad",
         icon: "liberacion", // O puedes usar "dashboard" si ese icono ya existe en tu proyecto
         path: ROUTES.GESTION_CALIDAD, 
-        roles: [AppRoles.Calidad, AppRoles.Administrador],
+        roles: [AD_GROUPS.CALIDAD, AD_GROUPS.ADMINISTRATIVO],
       },
       {
         label: "No conformidades",
         icon:  "noConformidad",
         path:  ROUTES.NO_CONFORMIDADES,
-        roles: [AppRoles.Calidad, AppRoles.Administrador, AppRoles.Auditor],
+        roles: [AD_GROUPS.CALIDAD, AD_GROUPS.ADMINISTRATIVO],
       },
     ],
   },
@@ -100,7 +90,7 @@ const NAV_MENU: NavGroup[] = [
         label: "Órdenes de Compra",
         icon:  "ordenesCompra",
         path:  ROUTES.ORDENES_COMPRA,
-        roles: [AppRoles.Compras, AppRoles.Administrador],
+        roles: [AD_GROUPS.ADMINISTRATIVO],
       },
     ],
   },
@@ -111,19 +101,19 @@ const NAV_MENU: NavGroup[] = [
         label: "Proveedores",
         icon:  "proveedores",
         path:  ROUTES.PROVEEDORES,
-        roles: [AppRoles.Administrador, AppRoles.Compras],
+        roles: [AD_GROUPS.ADMINISTRATIVO],
       },
       {
         label: "Ítems",
         icon:  "items",
         path:  ROUTES.ITEMS,
-        roles: [AppRoles.Administrador],
+        roles: [AD_GROUPS.ADMINISTRATIVO],
       },
       {
         label: "Checklists BPM",
         icon:  "checklists",
         path:  ROUTES.CHECKLISTS,
-        roles: [AppRoles.Administrador, AppRoles.Calidad],
+        roles: [AD_GROUPS.ADMINISTRATIVO, AD_GROUPS.CALIDAD],
       },
     ],
   },

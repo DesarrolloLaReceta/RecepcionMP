@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using SistemaRecepcionMP.Domain.Constants;
 using SistemaRecepcionMP.Domain.Entities;
 using SistemaRecepcionMP.Domain.Interfaces.Repositories;
 
@@ -27,8 +28,10 @@ public class TokenRepository : ITokenRepository
             new Claim("local_user_id", usuario.Id.ToString()) // Importante para tu CurrentService
         };
 
-        // Agregamos cada grupo de AD como un Claim de Rol
-        foreach (var role in roles)
+        var allowedGroups = new HashSet<string>(ActiveDirectoryGroups.Allowed, StringComparer.OrdinalIgnoreCase);
+
+        // Agregamos únicamente los 3 grupos válidos como claims de rol.
+        foreach (var role in roles.Where(r => allowedGroups.Contains(r)).Distinct(StringComparer.OrdinalIgnoreCase))
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
         }

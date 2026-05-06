@@ -1,4 +1,5 @@
 using SistemaRecepcionMP.Application.Common.Interfaces;
+using SistemaRecepcionMP.Domain.Constants;
 using SistemaRecepcionMP.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
@@ -69,9 +70,9 @@ public sealed class CurrentUserService : ICurrentUserService
     {
         _perfil = nombrePerfil switch
         {
-            "App_Recepcion_LE" => PerfilUsuario.RecepcionAlmacen,
-            "App_Calidad_LE" => PerfilUsuario.Calidad,
-            "Sistemas_LE" => PerfilUsuario.Administrador,
+            ActiveDirectoryGroups.AppRecibo => PerfilUsuario.RecepcionAlmacen,
+            ActiveDirectoryGroups.AppCalidad => PerfilUsuario.Calidad,
+            ActiveDirectoryGroups.Administrativo => PerfilUsuario.Administrador,
             _ => PerfilUsuario.RecepcionAlmacen  //Valor por defecto
         };
     }

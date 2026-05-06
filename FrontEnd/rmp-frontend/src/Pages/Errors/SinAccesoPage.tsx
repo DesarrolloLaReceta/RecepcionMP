@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { type AppRole, useAuth } from "../../Auth/AuthContext";
+import { AD_GROUPS } from "../../Auth/adGroups";
 import { ROUTES } from "../../Constants/routes";
-import { AppRoles, type AppRole } from "../../Auth/msalConfig";
 import { Button, Badge } from "../../Components/UI/Index";
 import "./StylesErrors/Errors.css";
 
@@ -16,48 +17,46 @@ const MODULE_ACCESS: ModuleAccess[] = [
   {
     label: "Dashboard",
     icon:  "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10",
-    roles: [AppRoles.Administrador, AppRoles.Calidad, AppRoles.Recepcion, AppRoles.Compras, AppRoles.Auditor],
+    roles: [AD_GROUPS.ADMINISTRATIVO, AD_GROUPS.CALIDAD, AD_GROUPS.RECIBO],
   },
   {
     label: "Recepciones",
     icon:  "M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16",
-    roles: [AppRoles.Administrador, AppRoles.Recepcion, AppRoles.Calidad],
+    roles: [AD_GROUPS.ADMINISTRATIVO, AD_GROUPS.RECIBO, AD_GROUPS.CALIDAD],
   },
   {
     label: "Lotes",
     icon:  "M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82zM7 7h.01",
-    roles: [AppRoles.Administrador, AppRoles.Recepcion, AppRoles.Calidad, AppRoles.Auditor],
+    roles: [AD_GROUPS.ADMINISTRATIVO, AD_GROUPS.RECIBO, AD_GROUPS.CALIDAD],
   },
   {
     label: "Liberación de lotes",
     icon:  "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
-    roles: [AppRoles.Administrador, AppRoles.Calidad],
+    roles: [AD_GROUPS.ADMINISTRATIVO, AD_GROUPS.CALIDAD],
   },
   {
     label: "No conformidades",
     icon:  "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z",
-    roles: [AppRoles.Administrador, AppRoles.Calidad, AppRoles.Recepcion],
+    roles: [AD_GROUPS.ADMINISTRATIVO, AD_GROUPS.CALIDAD, AD_GROUPS.RECIBO],
   },
   {
     label: "Órdenes de compra",
     icon:  "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
-    roles: [AppRoles.Administrador, AppRoles.Compras, AppRoles.Recepcion],
+    roles: [AD_GROUPS.ADMINISTRATIVO, AD_GROUPS.RECIBO],
   },
   {
     label: "Maestros",
     icon:  "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4",
-    roles: [AppRoles.Administrador],
+    roles: [AD_GROUPS.ADMINISTRATIVO],
   },
 ];
 
 // ─── COLORES POR ROL ──────────────────────────────────────────────────────────
 
 const ROL_CFG: Record<AppRole, { colorToken: string; bg?: never }> = {
-  [AppRoles.Administrador]: { colorToken: "#F59E0B" },
-  [AppRoles.Calidad]:       { colorToken: "#86EFAC" },
-  [AppRoles.Recepcion]:     { colorToken: "#93C5FD" },
-  [AppRoles.Compras]:       { colorToken: "#C4B5FD" },
-  [AppRoles.Auditor]:       { colorToken: "#94A3B8" },
+  [AD_GROUPS.ADMINISTRATIVO]: { colorToken: "#F59E0B" },
+  [AD_GROUPS.CALIDAD]:       { colorToken: "#86EFAC" },
+  [AD_GROUPS.RECIBO]:        { colorToken: "#93C5FD" },
 };
 
 // Fallback para roles no definidos
@@ -84,10 +83,17 @@ function RoleBadge({ role }: { role: AppRole }) {
 export default function SinAccesoPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
 
   const state      = location.state as { requiredRoles?: AppRole[]; from?: string } | null;
   const requeridos = state?.requiredRoles ?? [];
   const desde      = state?.from;
+
+  const exitBlockedFlow = (target: string) => {
+    // Limpiamos la sesión para evitar loops de redirección con permisos inválidos/cacheados.
+    logout();
+    navigate(target, { replace: true, state: null });
+  };
 
   return (
     <div className="ep-page">
@@ -149,18 +155,18 @@ export default function SinAccesoPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate(-1)}
+          onClick={() => exitBlockedFlow(ROUTES.LOGIN)}
           iconLeft="M15 18l-6-6 6-6"
         >
-          Volver
+          Ir al Login
         </Button>
         <Button
           variant="primary"
           size="sm"
-          onClick={() => navigate(ROUTES.DASHBOARD)}
+          onClick={() => exitBlockedFlow(ROUTES.DASHBOARD)}
           iconLeft="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10"
         >
-          Ir al Dashboard
+          Reiniciar e ir al Dashboard
         </Button>
       </div>
 

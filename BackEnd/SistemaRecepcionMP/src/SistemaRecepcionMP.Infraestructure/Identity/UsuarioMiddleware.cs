@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SistemaRecepcionMP.Application.Common.Interfaces;
+using SistemaRecepcionMP.Domain.Constants;
 using SistemaRecepcionMP.Infraestructure.Persistence;
 using System.Security.Claims;
 
@@ -22,13 +23,17 @@ public class UsuarioMiddleware
 
             // 2. Establecemos el perfil de forma dinámica basándonos en los grupos
             // Dentro de UsuarioMiddleware.cs
-            if (roles.Contains("App_Recepcion_LE"))
+            if (roles.Contains(ActiveDirectoryGroups.Administrativo))
             {
-                currentUser.EstablecerPerfilDesdeNombre("App_Recepcion_LE");
+                currentUser.EstablecerPerfilDesdeNombre(ActiveDirectoryGroups.Administrativo);
             }
-            else if (roles.Contains("App_Calidad_LE"))
+            else if (roles.Contains(ActiveDirectoryGroups.AppCalidad))
             {
-                currentUser.EstablecerPerfilDesdeNombre("App_Calidad_LE");
+                currentUser.EstablecerPerfilDesdeNombre(ActiveDirectoryGroups.AppCalidad);
+            }
+            else if (roles.Contains(ActiveDirectoryGroups.AppRecibo))
+            {
+                currentUser.EstablecerPerfilDesdeNombre(ActiveDirectoryGroups.AppRecibo);
             }
         }
 
