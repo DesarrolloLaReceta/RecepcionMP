@@ -17,24 +17,43 @@ public class TokenRepository : ITokenRepository
         _config = config;
     }
 
-    public string GenerateToken(Usuario usuario)
+    public string GenerateToken(Usuario usuario, List<string> roles)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
             new Claim(ClaimTypes.Name, usuario.Username),
             new Claim(ClaimTypes.Email, usuario.Email),
-            new Claim(ClaimTypes.Role, usuario.Perfil.ToString())
+            new Claim("local_user_id", usuario.Id.ToString()) // Importante para tu CurrentService
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        // Agregamos cada grupo de AD como un Claim de Rol
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        // Mantenemos el perfil de la DB por compatibilidad
+        claims.Add(new Claim("PerfilLocal", usuario.Perfil.ToString()));
+
+        // --- SOLUCIÓN AL ERROR DE COMPILACIÓN ---
+        
+        // 1. Creamos la llave
+        var keyBytes = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
+        var securityKey = new SymmetricSecurityKey(keyBytes);
+        
+        // 2. Definimos 'creds' (esta es la línea que faltaba)
+        var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        // 3. Creamos el token usando 'creds'
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
             expires: DateTime.UtcNow.AddHours(8),
-            signingCredentials: creds);
+            signingCredentials: creds // <--- Ahora 'creds' ya existe
+        );
+
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

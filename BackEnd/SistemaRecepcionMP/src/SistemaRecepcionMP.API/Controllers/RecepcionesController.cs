@@ -9,6 +9,7 @@ using SistemaRecepcionMP.API.Models;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.AgregarItemRecepcion;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.FinalizarRecepcion;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarLotes;
+using SistemaRecepcionMP.Application.Common.Exceptions;
 
 namespace SistemaRecepcionMP.API.Controllers;
 
@@ -28,6 +29,11 @@ public sealed class RecepcionesController : BaseController
         [FromQuery] DateOnly? fechaHasta = null,
         CancellationToken ct = default)
     {
+
+        // 🔥 VALIDACIÓN
+        if (!CurrentUser.TienePerfil(PerfilUsuario.RecepcionAlmacen))
+            throw new ForbiddenAccessException();
+
         var result = await Mediator.Send(new GetRecepcionesQuery
         {
             Estado = estado,

@@ -60,4 +60,19 @@ public sealed class CurrentUserService : ICurrentUserService
     /// inyectar el perfil leído desde la BD.
     /// </summary>
     public void EstablecerPerfil(PerfilUsuario perfil) => _perfil = perfil;
+
+    /// <summary>
+    /// NUEVO: Permite establecer el perfil usando el nombre del grupo de AD (string).
+    /// Mapea el string del AD al Enum local.
+    /// </summary>
+    public void EstablecerPerfilDesdeNombre(string nombrePerfil)
+    {
+        _perfil = nombrePerfil switch
+        {
+            "App_Recepcion_LE" => PerfilUsuario.RecepcionAlmacen,
+            "App_Calidad_LE" => PerfilUsuario.Calidad,
+            "Sistemas_LE" => PerfilUsuario.Administrador,
+            _ => PerfilUsuario.RecepcionAlmacen  //Valor por defecto
+        };
+    }
 }

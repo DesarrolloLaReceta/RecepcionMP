@@ -8,10 +8,10 @@ import { ProtectedRoute } from "./Components/ProtectedRoute";
 // ── Definición local de roles (coincide con PerfilUsuario en backend) ────────────
 const AppRoles = {
   Administrador: "Administrador",
-  Calidad: "Calidad",
-  Auditor: "Auditor",
+  Calidad: "App_Calidad_LE",
+  Auditor: "App_Calidad_LE",
   Compras: "Compras",
-  RecepcionAlmacen: "RecepcionAlmacen",
+  RecepcionAlmacen: "App_Recibo",
 } as const;
 
 // ── Lazy pages ───────────────────────────────────────────────────────────────
@@ -66,11 +66,12 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppShell />}>
 
-              {/* Acceso para todos los roles */}
-              <Route path={ROUTES.DASHBOARD}    element={<DashboardPage />} />
-              <Route path={ROUTES.RECEPCIONES}  element={<RecepcionesPage />} />
-              <Route path={ROUTES.NUEVA_RECEPCION} element={<NuevaRecepcionPage />} />
-              <Route path="/recepciones/:id"    element={<DetalleRecepcionPage />} />
+              <Route element={<ProtectedRoute requiredRoles={[AppRoles.RecepcionAlmacen, AppRoles.Calidad, AppRoles.Administrador]} />}>
+                <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+                <Route path={ROUTES.RECEPCIONES} element={<RecepcionesPage />} />
+                <Route path={ROUTES.NUEVA_RECEPCION} element={<NuevaRecepcionPage />} />
+                <Route path="/recepciones/:id" element={<DetalleRecepcionPage />} />
+              </Route>
 
               {/* Lotes — acceso a todos los roles */}
               <Route path={ROUTES.LOTES}        element={<LotesPage />} />

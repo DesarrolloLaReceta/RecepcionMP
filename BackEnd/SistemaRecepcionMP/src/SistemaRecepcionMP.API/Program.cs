@@ -110,6 +110,7 @@ app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseCors("Dev");
 app.UseAuthentication();
+app.UseMiddleware<UsuarioMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

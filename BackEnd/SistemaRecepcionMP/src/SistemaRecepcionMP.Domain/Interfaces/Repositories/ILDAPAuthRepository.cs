@@ -12,4 +12,5 @@ public class ADUserInfo
     public string DisplayName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string DistinguishedName { get; set; } = string.Empty;
+    public List<string> Groups { get; set; } = new List<string>();
 }

@@ -11,5 +11,8 @@ public interface ICurrentUserService
     bool EstaAutenticado { get; }
     bool TienePerfil(PerfilUsuario perfil);
     bool TieneAlgunPerfil(params PerfilUsuario[] perfiles);
+
+    // NUEVO: Método para que el Middleware inyecte el perfil del AD
+    void EstablecerPerfilDesdeNombre(string nombrePerfil);
 }
 

@@ -71,6 +71,9 @@ public class LDAPAuthRepository : ILDAPAuthRepository
                     searcher.PropertiesToLoad.Add("mail");
                     searcher.PropertiesToLoad.Add("sAMAccountName");
                     searcher.PropertiesToLoad.Add("distinguishedName");
+                    // 1. Agregamos memberOf para traer los grupos
+                    searcher.PropertiesToLoad.Add("memberOf");
+
                     var result = await Task.Run(() => searcher.FindOne());
                     if (result == null) return null;
 
@@ -81,15 +84,31 @@ public class LDAPAuthRepository : ILDAPAuthRepository
                         return string.Empty;
                     }
 
+                    // 2. Lógica para extraer y limpiar los nombres de los grupos
+                    var groups = new List<string>();
+                    if (result.Properties.Contains("memberOf"))
+                    {
+                        foreach (var prop in result.Properties["memberOf"])
+                        {
+                            // Los grupos vienen en formato: CN=NombreGrupo,OU=Users,DC=dominio...
+                            // Esta línea extrae solo "NombreGrupo"
+                            var fullDn = prop.ToString();
+                            var cn = fullDn?.Split(',')[0].Replace("CN=", "");
+                            if (!string.IsNullOrEmpty(cn)) groups.Add(cn);
+                        }
+                    }
+
                     return new ADUserInfo
                     {
                         SamAccountName = GetProperty("sAMAccountName"),
                         DisplayName = GetProperty("displayName"),
                         Email = GetProperty("mail"),
-                        DistinguishedName = GetProperty("distinguishedName")
+                        DistinguishedName = GetProperty("distinguishedName"),
+                        // 3. Asignamos la lista de grupos al objeto
+                        Groups = groups 
                     };
                 }
-            }
+            }   
         }
         catch (Exception ex)
         {

@@ -46,40 +46,56 @@ public class AuthController : ControllerBase
             _logger.LogWarning("Usuario {Username} no encontrado en AD", request.Username);
             return Unauthorized("Usuario no encontrado en AD");
         }
-        _logger.LogInformation("Información de AD obtenida: {SamAccountName}, {DisplayName}, {Email}", 
-            adInfo.SamAccountName, adInfo.DisplayName, adInfo.Email);
+
+        // --- NUEVA VALIDACIÓN DE SEGURIDAD POR GRUPOS ---
+        // Verificamos si el usuario pertenece al menos a uno de los grupos autorizados
+        var gruposUsuario = adInfo.Groups ?? new List<string>(); // Asegúrate que tu DTO adInfo tenga 'Groups'
+        var tienePermiso = gruposUsuario.Any(g => g.Contains("App_Recepcion_LE") || g.Contains("App_Calidad_LE"));
+
+        if (!tienePermiso)
+        {
+            _logger.LogWarning("Usuario {Username} autenticado pero no pertenece a grupos autorizados", request.Username);
+            return Unauthorized("No tienes permisos para acceder a esta aplicación.");
+        }
+        // ------------------------------------------------
 
         // 3. Buscar o crear el usuario en la base de datos local
         var usuario = await _unitOfWork.Usuarios.GetByUsernameAsync(adInfo.SamAccountName);
         if (usuario == null)
         {
             _logger.LogInformation("Usuario {Username} no existe en BD local, creando...", adInfo.SamAccountName);
+    
+            // Asignamos el perfil dinámicamente según el grupo de AD
+            var perfilInicial = PerfilUsuario.RecepcionAlmacen; // Un valor por defecto seguro
+            if (gruposUsuario.Any(g => g.Contains("App_Recepcion_LE"))) perfilInicial = PerfilUsuario.RecepcionAlmacen;
+            // else if (gruposUsuario.Any(g => g.Contains("App_Calidad_LE"))) perfilInicial = PerfilUsuario.Calidad;
+
             usuario = new Usuario
             {
                 Id = Guid.NewGuid(),
                 Username = adInfo.SamAccountName,
                 Nombre = adInfo.DisplayName ?? adInfo.SamAccountName,
                 Email = adInfo.Email ?? "",
-                Perfil = PerfilUsuario.RecepcionAlmacen,
+                Perfil = perfilInicial, // <-- Ya no es fijo, depende del AD
                 Activo = true,
                 CreadoEn = DateTime.UtcNow
             };
             await _unitOfWork.Usuarios.AddAsync(usuario);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
-        else if (!usuario.Activo)
-        {
-            _logger.LogWarning("Usuario {Username} inactivo en el sistema", usuario.Username);
-            return Unauthorized("Usuario inactivo en el sistema");
-        }
-        else
-        {
-            _logger.LogInformation("Usuario {Username} encontrado en BD local", usuario.Username);
-        }
 
         // 4. Generar token JWT
-        var token = _tokenRepository.GenerateToken(usuario);
-        _logger.LogInformation("Token JWT generado para usuario {Username}", usuario.Username);
-        return Ok(new { token, usuario.Nombre, Perfil = usuario.Perfil.ToString() });
+        // IMPORTANTE: Aquí pasamos 'gruposUsuario' como segundo argumento
+        var token = _tokenRepository.GenerateToken(usuario, adInfo.Groups ?? new List<string>()); 
+
+        _logger.LogInformation("Token JWT generado con grupos de AD para usuario {Username}", usuario.Username);
+
+        // Devolvemos también los grupos al frontend por si React los necesita
+        return Ok(new { 
+            token, 
+            usuario.Nombre, 
+            Perfil = usuario.Perfil.ToString(),
+            Grupos = gruposUsuario 
+        });
     }
-}
+} 

@@ -7,8 +7,8 @@ import "./ProtectedRoute.css";
 // ─── Definición local de roles (coincide con PerfilUsuario en backend) ───────
 export type AppRole = 
   | "Administrador"
-  | "Calidad"
-  | "Auditor"
+  | "App_Calidad_LE"
+  | "App_Recibo"
   | "Compras"
   | "RecepcionAlmacen";
 
@@ -28,11 +28,15 @@ export function ProtectedRoute({ requiredRoles }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
-  // Función auxiliar para verificar roles
+  // Función auxiliar para verificar grupos del AD
   const hasRole = (roles: AppRole | AppRole[]): boolean => {
-    if (!user?.perfil) return false;
+    // IMPORTANTE: Ahora buscamos en 'grupos' (Active Directory)
+    if (!user?.grupos || !Array.isArray(user.grupos)) return false;
+    
     const required = Array.isArray(roles) ? roles : [roles];
-    return required.includes(user.perfil as AppRole);
+    
+    // Verificamos si alguno de los grupos del usuario coincide con los requeridos
+    return required.some(role => user.grupos.includes(role));
   };
 
   // ── Verificando sesión ───────────────────────────────────────────────────
