@@ -178,3 +178,33 @@ public sealed class LoteRecibidoRepository : GenericRepository<LoteRecibido>, IL
             .ToListAsync();
     }
 }
+
+public sealed class RecepcionNovedadRepository : GenericRepository<RecepcionNovedad>, IRecepcionNovedadRepository
+{
+    public RecepcionNovedadRepository(ApplicationDbContext context) : base(context) { }
+
+    public async Task<bool> ExistePendientePorTipoAsync(
+        Guid recepcionId,
+        TipoNovedadRecepcion tipoNovedad,
+        CancellationToken ct = default)
+    {
+        return await Context.RecepcionesNovedad
+            .AnyAsync(x =>
+                x.RecepcionId == recepcionId &&
+                x.TipoNovedad == tipoNovedad &&
+                x.Estado != EstadoNovedadRecepcion.Resuelta &&
+                x.Estado != EstadoNovedadRecepcion.Descartada, ct);
+    }
+
+    public async Task<RecepcionNovedad?> ObtenerPendienteExcedenteAsync(Guid recepcionId, CancellationToken ct = default)
+    {
+        return await Context.RecepcionesNovedad
+            .Include(x => x.Recepcion)
+            .Include(x => x.Detalles)
+                .ThenInclude(d => d.Item)
+            .FirstOrDefaultAsync(x =>
+                x.RecepcionId == recepcionId &&
+                x.TipoNovedad == TipoNovedadRecepcion.ExcedenteSiesa &&
+                x.Estado == EstadoNovedadRecepcion.Pendiente, ct);
+    }
+}

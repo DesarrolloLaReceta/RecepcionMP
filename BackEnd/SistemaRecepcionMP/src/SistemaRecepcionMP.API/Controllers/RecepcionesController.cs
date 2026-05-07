@@ -8,6 +8,7 @@ using SistemaRecepcionMP.Application.Features.Recepciones.Queries;
 using SistemaRecepcionMP.API.Models;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.AgregarItemRecepcion;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.FinalizarRecepcion;
+using SistemaRecepcionMP.Application.Features.Recepciones.Commands.NotificarExcedenteCompras;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarLotes;
 using SistemaRecepcionMP.Application.Common.Exceptions;
 
@@ -159,11 +160,11 @@ public sealed class RecepcionesController : BaseController
         Guid id,
         CancellationToken ct = default)
     {
-        await Mediator.Send(new FinalizarRecepcionCommand
+        var result = await Mediator.Send(new FinalizarRecepcionCommand
         {
             RecepcionId = id
         }, ct);
-        return NoContent();
+        return Ok(result);
     }
 
     [HttpPost("{id:guid}/registrar-lotes-completo")] // <--- Añadimos el {id:guid}
@@ -173,6 +174,19 @@ public sealed class RecepcionesController : BaseController
         if (id != command.RecepcionId) return BadRequest("El ID de recepción no coincide.");
     
         var result = await Mediator.Send(command);
+        return Ok(result);
+    }
+
+    [HttpPost("{id:guid}/notificar-excedente")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> NotificarExcedente(Guid id, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new NotificarExcedenteComprasCommand
+        {
+            RecepcionId = id
+        }, ct);
+
         return Ok(result);
     }
 

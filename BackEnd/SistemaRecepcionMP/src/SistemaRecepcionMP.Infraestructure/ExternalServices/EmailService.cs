@@ -1,137 +1,76 @@
 using SistemaRecepcionMP.Application.Common.Interfaces;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using SendGrid;
-using SendGrid.Helpers.Mail;
+using MimeKit;
 
 namespace SistemaRecepcionMP.Infrastructure.ExternalServices;
 
-/// <summary>
-/// Implementa IEmailService usando SendGrid.
-/// Requiere el paquete: SendGrid
-/// </summary>
-public sealed class EmailService : IEmailService
+public sealed class SmtpEmailService : IEmailService
 {
-    private readonly ISendGridClient _sendGridClient;
-    private readonly string _remitente;
+    private readonly string _host;
+    private readonly int _port;
+    private readonly string _remitenteEmail;
     private readonly string _nombreRemitente;
-    private readonly ILogger<EmailService> _logger;
+    private readonly ILogger<SmtpEmailService> _logger;
 
-    public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+    public SmtpEmailService(IConfiguration configuration, ILogger<SmtpEmailService> logger)
     {
-        var apiKey = configuration["SendGrid:ApiKey"]
-            ?? throw new InvalidOperationException("SendGrid:ApiKey no está configurado.");
-
-        _sendGridClient = new SendGridClient(apiKey);
-        _remitente = configuration["SendGrid:Remitente"] ?? "noreply@empresa.com";
-        _nombreRemitente = configuration["SendGrid:NombreRemitente"] ?? "Sistema Recepción MP";
+        _host = configuration["Email:Smtp:Host"]
+            ?? throw new InvalidOperationException("Email:Smtp:Host no est? configurado.");
+        _port = int.TryParse(configuration["Email:Smtp:Port"], out var port)
+            ? port
+            : throw new InvalidOperationException("Email:Smtp:Port no est? configurado.");
+        _remitenteEmail = configuration["Email:Smtp:From"]
+            ?? "noreply@lareceta.co";
+        _nombreRemitente = configuration["Email:Smtp:FromName"]
+            ?? "Sistema Recepci?n MP";
         _logger = logger;
     }
 
-    public async Task EnviarAsync(
-        string destinatario,
-        string asunto,
-        string cuerpoHtml,
-        bool esHtml,
-        CancellationToken cancellationToken = default)
+    public async Task EnviarAsync(EmailMessage mensaje, CancellationToken cancellationToken = default)
     {
-        var mensaje = MailHelper.CreateSingleEmail(
-            new EmailAddress(_remitente, _nombreRemitente),
-            new EmailAddress(destinatario),
-            asunto,
-            plainTextContent: null,
-            htmlContent: cuerpoHtml);
+        var mimeMessage = new MimeMessage();
+        mimeMessage.From.Add(new MailboxAddress(_nombreRemitente, _remitenteEmail));
+        mimeMessage.To.Add(MailboxAddress.Parse(mensaje.Destinatario));
+        mimeMessage.Subject = mensaje.Asunto;
 
-        var response = await _sendGridClient.SendEmailAsync(mensaje, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-            _logger.LogWarning("Error al enviar email a {Destinatario}: {Status}",
-                destinatario, response.StatusCode);
+        var bodyBuilder = new BodyBuilder();
+        if (mensaje.EsHtml)
+            bodyBuilder.HtmlBody = mensaje.Cuerpo;
         else
-            _logger.LogInformation("Email enviado a {Destinatario}: {Asunto}", destinatario, asunto);
+            bodyBuilder.TextBody = mensaje.Cuerpo;
+
+        if (mensaje.Adjuntos is not null)
+        {
+            foreach (var adjunto in mensaje.Adjuntos)
+            {
+                bodyBuilder.Attachments.Add(adjunto.NombreArchivo, adjunto.Contenido, ContentType.Parse(adjunto.TipoMime));
+            }
+        }
+
+        mimeMessage.Body = bodyBuilder.ToMessageBody();
+
+        using var smtpClient = new SmtpClient();
+        await smtpClient.ConnectAsync(_host, _port, SecureSocketOptions.None, cancellationToken);
+        // Relay por IP autorizado: no autenticaci?n.
+        await smtpClient.SendAsync(mimeMessage, cancellationToken);
+        await smtpClient.DisconnectAsync(true, cancellationToken);
+
+        _logger.LogInformation(
+            "Email enviado por relay SMTP a {Destinatario} con asunto {Asunto}",
+            mensaje.Destinatario,
+            mensaje.Asunto);
     }
 
     public async Task EnviarAVariosAsync(
-        IEnumerable<string> destinatarios,
-        string asunto,
-        string cuerpoHtml,
-        bool esHtml,
+        IEnumerable<EmailMessage> mensajes,
         CancellationToken cancellationToken = default)
     {
-        var tareas = destinatarios
-            .Select(d => EnviarAsync(d, asunto, cuerpoHtml, esHtml, cancellationToken));
+        var tareas = mensajes
+            .Select(m => EnviarAsync(m, cancellationToken));
 
         await Task.WhenAll(tareas);
-    }
-
-    public async Task EnviarConAdjuntosAsync(
-        string destinatario,
-        string asunto,
-        string cuerpoHtml,
-        IEnumerable<(string NombreArchivo, byte[] Contenido, string TipoMime)> adjuntos,
-        CancellationToken cancellationToken = default)
-    {
-        var mensaje = MailHelper.CreateSingleEmail(
-            new EmailAddress(_remitente, _nombreRemitente),
-            new EmailAddress(destinatario),
-            asunto,
-            plainTextContent: null,
-            htmlContent: cuerpoHtml);
-
-        foreach (var (nombreArchivo, contenido, tipoMime) in adjuntos)
-        {
-            mensaje.AddAttachment(nombreArchivo,
-                Convert.ToBase64String(contenido),
-                type: tipoMime);
-        }
-
-        await _sendGridClient.SendEmailAsync(mensaje, cancellationToken);
-    }
-
-    public async Task EnviarConPlantillaAsync(
-        string destinatario,
-        string plantilla,
-        IDictionary<string, string> variables,
-        CancellationToken cancellationToken = default)
-    {
-        // Construir cuerpo HTML desde plantilla simple con reemplazos de variables
-        // En producción puedes usar plantillas de SendGrid Dynamic Templates
-        var cuerpo = ObtenerPlantilla(plantilla, variables.ToDictionary(kv => kv.Key, kv => kv.Value));
-        var asunto = ObtenerAsunto(plantilla);
-
-        await EnviarAsync(destinatario, asunto, cuerpo, true, cancellationToken);
-    }
-
-    private static string ObtenerAsunto(string plantilla) => plantilla switch
-    {
-        "LoteRechazado"         => "Notificación: Lote rechazado en recepción",
-        "LoteLiberado"          => "Notificación: Lote aprobado y liberado",
-        "DocumentoPorVencer"    => "Alerta: Documento sanitario próximo a vencer",
-        "NoConformidadCreada"   => "Nueva no conformidad registrada",
-        _                       => "Notificación del Sistema de Recepción"
-    };
-
-    private static string ObtenerPlantilla(string plantilla, Dictionary<string, string> vars)
-    {
-        // Plantillas HTML básicas — en producción usar archivos .html o SendGrid Dynamic Templates
-        var cuerpo = plantilla switch
-        {
-            "LoteRechazado" =>
-                $"<p>El lote <strong>{vars.GetValueOrDefault("CodigoLote", "")}</strong> fue rechazado.</p>" +
-                $"<p><strong>Motivo:</strong> {vars.GetValueOrDefault("Motivo", "")}</p>" +
-                $"<p><strong>Responsable:</strong> {vars.GetValueOrDefault("Responsable", "")}</p>",
-
-            "LoteLiberado" =>
-                $"<p>El lote <strong>{vars.GetValueOrDefault("CodigoLote", "")}</strong> fue aprobado y liberado.</p>",
-
-            "DocumentoPorVencer" =>
-                $"<p>El documento <strong>{vars.GetValueOrDefault("TipoDocumento", "")}</strong> del proveedor " +
-                $"<strong>{vars.GetValueOrDefault("Proveedor", "")}</strong> vence el " +
-                $"<strong>{vars.GetValueOrDefault("FechaVencimiento", "")}</strong>.</p>",
-
-            _ => "<p>Notificación del sistema.</p>"
-        };
-
-        return $"<html><body>{cuerpo}</body></html>";
     }
 }

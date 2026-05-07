@@ -214,6 +214,15 @@ public class Recepcion : BaseEntity
         FechaFinalizacion = DateTime.UtcNow;
     }
 
+    public void MarcarPendienteAjuste(string? observaciones = null)
+    {
+        Estado = EstadoRecepcion.PendienteAjuste;
+        if (!string.IsNullOrWhiteSpace(observaciones))
+        {
+            ObservacionesGenerales = observaciones;
+        }
+    }
+
     private void ValidarPuedeFinalizar()
     {
         if (Estado != EstadoRecepcion.RegistroLotes)

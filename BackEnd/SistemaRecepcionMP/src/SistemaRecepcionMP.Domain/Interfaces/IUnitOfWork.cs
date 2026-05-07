@@ -17,6 +17,7 @@ public interface IUnitOfWork : IDisposable
     ILavadoBotasManosRepository LavadosBotasManos { get; }
     IBitacoraAuditoriaRepository Bitacora { get; }
     IVerificacionInstalacionRepository VerificacionesInstalaciones { get; }
+    IRecepcionNovedadRepository RecepcionesNovedad { get; }
     IRepository<SistemaRecepcionMP.Domain.Entities.LiberacionCocina> LiberacionesCocinas { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

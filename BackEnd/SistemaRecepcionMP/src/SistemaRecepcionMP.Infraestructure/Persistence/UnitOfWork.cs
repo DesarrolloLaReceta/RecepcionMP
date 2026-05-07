@@ -21,6 +21,7 @@ public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     private IUsuarioRepository? _usuarios;
     private IBitacoraAuditoriaRepository? _bitacora;
     private IVerificacionInstalacionRepository? _verificacionesInstalaciones;
+    private IRecepcionNovedadRepository? _recepcionesNovedad;
     private IRepository<LiberacionCocina>? _liberacionesCocinas;
 
     public UnitOfWork(ApplicationDbContext context)
@@ -63,6 +64,9 @@ public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
     public IVerificacionInstalacionRepository VerificacionesInstalaciones
         => _verificacionesInstalaciones ??= new VerificacionInstalacionRepository(_context);
+
+    public IRecepcionNovedadRepository RecepcionesNovedad
+        => _recepcionesNovedad ??= new RecepcionNovedadRepository(_context);
 
     public IRepository<LiberacionCocina> LiberacionesCocinas 
         => _liberacionesCocinas ??= new LiberacionCocinaRepository(_context);

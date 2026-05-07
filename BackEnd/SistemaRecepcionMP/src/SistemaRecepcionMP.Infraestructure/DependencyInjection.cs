@@ -53,7 +53,8 @@ public static class DependencyInjection
 
         // ── Servicios externos ────────────────────────────────────────────────
         services.AddScoped<IQrCodeService, QrCodeService>();
-        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailService, SmtpEmailService>();
+        services.AddScoped<ISiesaService, SiesaMockService>();
 
         // Agregamos el servicio de fecha para Colombia
         services.AddTransient<IDateTime, DateTimeService>();
@@ -67,6 +68,7 @@ public static class DependencyInjection
         
         // Si no tienes el IItemRepository agregado, agrégalo también:
         services.AddScoped<IItemRepository, ItemRepository>();
+        services.AddScoped<IRecepcionNovedadRepository, RecepcionNovedadRepository>();
         services.AddScoped<ILavadoBotasManosRepository, LavadoBotasManosRepository>();
         services.AddScoped<IVerificacionInstalacionRepository, VerificacionInstalacionRepository>();
 

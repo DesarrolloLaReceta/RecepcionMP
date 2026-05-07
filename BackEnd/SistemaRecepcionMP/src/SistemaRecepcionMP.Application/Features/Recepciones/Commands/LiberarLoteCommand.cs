@@ -126,15 +126,18 @@ public sealed class LiberarLoteCommandHandler : IRequestHandler<LiberarLoteComma
             var recepcion = await _unitOfWork.Recepciones.GetByIdAsync(lote.Recepcion.Id);
             if (recepcion?.Proveedor?.EmailContacto is not null)
             {
-                await _emailService.EnviarConPlantillaAsync(
-                    recepcion.Proveedor.EmailContacto,
-                    "LoteRechazado",
-                    new Dictionary<string, string>
-                    {
-                        { "CodigoLote", lote.CodigoLoteInterno },
-                        { "Motivo", request.Observaciones ?? string.Empty },
-                        { "Responsable", _currentUser.Nombre }
-                    },
+                var cuerpo = $"""
+                             <p>El lote <strong>{lote.CodigoLoteInterno}</strong> fue rechazado.</p>
+                             <p><strong>Motivo:</strong> {request.Observaciones ?? string.Empty}</p>
+                             <p><strong>Responsable:</strong> {_currentUser.Nombre}</p>
+                             """;
+
+                await _emailService.EnviarAsync(
+                    new EmailMessage(
+                        Destinatario: recepcion.Proveedor.EmailContacto,
+                        Asunto: "Notificación: Lote rechazado en recepción",
+                        Cuerpo: cuerpo,
+                        EsHtml: true),
                     cancellationToken);
             }
         }

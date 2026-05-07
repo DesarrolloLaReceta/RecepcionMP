@@ -5,7 +5,8 @@ public enum EstadoRecepcion
     Iniciada = 0,
     InspeccionVehiculo = 1,
     RegistroLotes = 2,
-    PendienteCalidad = 3,
-    Finalizada = 4,
-    Rechazada = 5
+    PendienteAjuste = 3,
+    PendienteCalidad = 4,
+    Finalizada = 5,
+    Rechazada = 6
 }

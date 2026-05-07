@@ -36,6 +36,9 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<Cuarentena> Cuarentenas => Set<Cuarentena>();
     public DbSet<DocumentoRecepcion> DocumentosRecepcion => Set<DocumentoRecepcion>();
     public DbSet<TemperaturaRegistro> RegistrosTemperatura => Set<TemperaturaRegistro>();
+    public DbSet<RecepcionNovedad> RecepcionesNovedad => Set<RecepcionNovedad>();
+    public DbSet<RecepcionNovedadDetalle> RecepcionesNovedadDetalle => Set<RecepcionNovedadDetalle>();
+    public DbSet<RecepcionNovedadNotificacion> RecepcionesNovedadNotificacion => Set<RecepcionNovedadNotificacion>();
 
     // ── Checklists ────────────────────────────────────────────────────────────
     public DbSet<ChecklistBPM> ChecklistsBPM => Set<ChecklistBPM>();

@@ -65,11 +65,6 @@ public class RecepcionItem : BaseEntity
         if (Lotes.Any(x => x.CodigoLoteInterno == lote.CodigoLoteInterno))
             throw new BusinessRuleException("El lote ya fue agregado");
 
-        var totalConNuevo = Lotes.Sum(x => x.CantidadRecibida) + lote.CantidadRecibida;
-
-        if (totalConNuevo > CantidadEsperada)
-            throw new BusinessRuleException("No puedes recibir más de lo solicitado");
-
         _lotes.Add(lote);
 
         RecalcularCantidades();
@@ -80,7 +75,5 @@ public class RecepcionItem : BaseEntity
         CantidadRecibida = Lotes.Sum(x => x.CantidadRecibida);
         CantidadRechazada = Lotes.Sum(x => x.CantidadRechazada);
 
-        if (CantidadRecibida > CantidadEsperada)
-            throw new BusinessRuleException("Cantidad recibida excede la esperada");
     }
 }
