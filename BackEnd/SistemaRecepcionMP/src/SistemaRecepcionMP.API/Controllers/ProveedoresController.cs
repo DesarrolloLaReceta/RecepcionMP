@@ -8,6 +8,7 @@ using SistemaRecepcionMP.Application.Features.Proveedores.Queries.GetProveedores
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using SistemaRecepcionMP.API.Models;
+using SistemaRecepcionMP.Domain.Constants;
 
 namespace SistemaRecepcionMP.API.Controllers;
 
@@ -111,7 +112,7 @@ public sealed class ProveedoresController : BaseController
     }
 
     [HttpDelete("{proveedorId:guid}/documentos/{documentoId:guid}")]
-    [Authorize(Roles = "Calidad,Administrador")]
+    [Authorize(Roles = $"{ActiveDirectoryGroups.AppCalidad},{ActiveDirectoryGroups.Administrativo}")]
     public async Task<IActionResult> EliminarDocumento(
         Guid proveedorId, Guid documentoId, CancellationToken ct)
     {

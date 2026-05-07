@@ -40,6 +40,19 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
+function normalizeGroups(input: unknown): AdGroup[] {
+  if (!Array.isArray(input)) return [];
+  return input.filter((value): value is AdGroup => typeof value === "string") as AdGroup[];
+}
+
+function parseStoredUser(rawUser: string): User {
+  const parsed = JSON.parse(rawUser);
+  const nombre = parsed?.nombre ?? parsed?.Nombre ?? "";
+  const grupos = normalizeGroups(parsed?.grupos ?? parsed?.Grupos ?? parsed?.roles ?? parsed?.Roles);
+
+  return { nombre, grupos };
+}
+
 // ─── PROVIDER ─────────────────────────────────────────────────────────────────
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -47,30 +60,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    if (token && storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        // Recuperamos nombre y la lista de grupos
-        setUser({ nombre: parsed.nombre, grupos: (parsed.grupos || []) as AdGroup[] });
-      } catch (e) {
-        console.error('Error al parsear el usuario almacenado', e);
-        localStorage.clear();
+    try {
+      const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+      if (token && storedUser) {
+        // Hidratamos sesión únicamente cuando token+usuario estén listos.
+        setUser(parseStoredUser(storedUser));
       }
+    } catch (e) {
+      console.error("Error al parsear el usuario almacenado", e);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
-    // La API ahora devuelve: { token, nombre, perfil, grupos }
-    const response = await apiClient.post('/api/auth/login', { username, password });
-    const { token, nombre, grupos } = response.data;
-    
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify({ nombre, grupos }));
-    
-    setUser({ nombre, grupos: (grupos || []) as AdGroup[] });
+    setIsLoading(true);
+    try {
+      // La API ahora devuelve: { token, nombre, perfil, grupos }
+      const response = await apiClient.post("/api/auth/login", { username, password });
+      const { token, nombre, grupos } = response.data;
+      const normalizedGroups = normalizeGroups(grupos);
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify({ nombre, grupos: normalizedGroups }));
+
+      setUser({ nombre, grupos: normalizedGroups });
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const logout = useCallback(() => {

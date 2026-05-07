@@ -19,7 +19,10 @@ public class UsuarioMiddleware
         if (context.User.Identity?.IsAuthenticated == true)
         {
             // 1. Extraemos los grupos del AD que metimos en el Token (Claims de tipo Role)
-            var roles = context.User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+            var roles = context.User
+                .FindAll(ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             // 2. Establecemos el perfil de forma dinámica basándonos en los grupos
             // Dentro de UsuarioMiddleware.cs

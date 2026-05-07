@@ -17,8 +17,15 @@ interface ProtectedRouteProps {
  * - Con permisos: renderiza el <Outlet />.
  */
 export function ProtectedRoute({ requiredRoles }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, hasRole } = useAuth();
+  const { isAuthenticated, isLoading, roles } = useAuth();
   const location = useLocation();
+  const hasAnyRequiredRole = (required: AppRole | AppRole[]): boolean => {
+    const requiredList = (Array.isArray(required) ? required : [required]).map((r) => r.toLowerCase());
+    const userRoles = (roles ?? []).map((r) => r.toLowerCase());
+
+    // Permitir acceso si tiene al menos uno de los grupos requeridos.
+    return requiredList.some((requiredRole) => userRoles.includes(requiredRole));
+  };
 
   // ── Verificando sesión ───────────────────────────────────────────────────
   if (isLoading) {
@@ -44,7 +51,7 @@ export function ProtectedRoute({ requiredRoles }: ProtectedRouteProps) {
   }
 
   // ── Sin rol requerido → Sin acceso ──────────────────────────────────────
-  if (requiredRoles && !hasRole(requiredRoles)) {
+  if (requiredRoles && !hasAnyRequiredRole(requiredRoles)) {
     return (
       <Navigate
         to={ROUTES.SIN_ACCESO}

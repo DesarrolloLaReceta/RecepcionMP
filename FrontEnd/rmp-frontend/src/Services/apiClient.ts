@@ -25,11 +25,14 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Token expirado o inválido → limpiar sesión y redirigir al login
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
+    const status = error.response?.status;
+    const requestUrl = error.config?.url?.toLowerCase() ?? "";
+    const isLoginRequest = requestUrl.includes("/api/auth/login");
+
+    if ((status === 401 || status === 403) && !isLoginRequest) {
+      // Evita cerrar sesión por fallos parciales (ej. widgets del dashboard sin permiso).
+      // La UI consumidora decide cómo manejar errores de autorización por endpoint.
+      console.warn(`Error de autorización (${status}) en ${requestUrl}`);
     }
     return Promise.reject(error);
   }

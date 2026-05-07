@@ -46,6 +46,9 @@ function PageLoader() {
 }
 
 export default function App() {
+  const DASHBOARD_ROLES = [AD_GROUPS.ADMINISTRATIVO, AD_GROUPS.CALIDAD, AD_GROUPS.RECIBO];
+  const CALIDAD_ADMIN_ROLES = [AD_GROUPS.CALIDAD, AD_GROUPS.ADMINISTRATIVO];
+
   return (
     <AuthProvider>
       <Suspense fallback={<PageLoader />}>
@@ -58,8 +61,9 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppShell />}>
 
-              <Route element={<ProtectedRoute requiredRoles={[AD_GROUPS.RECIBO, AD_GROUPS.CALIDAD, AD_GROUPS.ADMINISTRATIVO]} />}>
+              <Route element={<ProtectedRoute requiredRoles={DASHBOARD_ROLES} />}>
                 <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path={ROUTES.RECEPCIONES} element={<RecepcionesPage />} />
                 <Route path={ROUTES.NUEVA_RECEPCION} element={<NuevaRecepcionPage />} />
                 <Route path="/recepciones/:id" element={<DetalleRecepcionPage />} />
@@ -70,7 +74,7 @@ export default function App() {
               <Route path="/lotes/:id"          element={<DetalleLotePage />} />
 
               {/* Calidad + Admin */}
-              <Route element={<ProtectedRoute requiredRoles={[AD_GROUPS.CALIDAD, AD_GROUPS.ADMINISTRATIVO]} />}>
+              <Route element={<ProtectedRoute requiredRoles={CALIDAD_ADMIN_ROLES} />}>
                 <Route path={ROUTES.LIBERACION} element={<LiberacionPage />} />
                 <Route path="/calidad" element={<CalidadDashboard />} />
                 <Route path="/calidad/verificacion-instalaciones" element={<VerificacionInstalacionesPage />} />
@@ -79,7 +83,7 @@ export default function App() {
               </Route>
 
               {/* Calidad + Admin + Auditor */}
-              <Route element={<ProtectedRoute requiredRoles={[AD_GROUPS.CALIDAD, AD_GROUPS.ADMINISTRATIVO]} />}>
+              <Route element={<ProtectedRoute requiredRoles={CALIDAD_ADMIN_ROLES} />}>
                 <Route path={ROUTES.NO_CONFORMIDADES} element={<NoConformPage />} />
                 <Route path="/no-conformidades/:id"   element={<DetalleNoConformPage />} />
                 <Route path={ROUTES.ORDENES_COMPRA}   element={<OrdenesCompraPage />} />

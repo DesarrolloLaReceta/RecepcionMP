@@ -28,12 +28,20 @@ public class TokenRepository : ITokenRepository
             new Claim("local_user_id", usuario.Id.ToString()) // Importante para tu CurrentService
         };
 
-        var allowedGroups = new HashSet<string>(ActiveDirectoryGroups.Allowed, StringComparer.OrdinalIgnoreCase);
+        var allowedGroupsByName = ActiveDirectoryGroups.Allowed
+            .ToDictionary(group => group, group => group, StringComparer.OrdinalIgnoreCase);
 
         // Agregamos únicamente los 3 grupos válidos como claims de rol.
-        foreach (var role in roles.Where(r => allowedGroups.Contains(r)).Distinct(StringComparer.OrdinalIgnoreCase))
+        foreach (var role in roles.Distinct(StringComparer.OrdinalIgnoreCase))
         {
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            if (!allowedGroupsByName.TryGetValue(role, out var canonicalRole))
+            {
+                continue;
+            }
+
+            // Ambos claims ("role" y ClaimTypes.Role) para máxima compatibilidad.
+            claims.Add(new Claim(ClaimTypes.Role, canonicalRole));
+            claims.Add(new Claim("role", canonicalRole));
         }
 
         // Mantenemos el perfil de la DB por compatibilidad
