@@ -223,6 +223,14 @@ public class Recepcion : BaseEntity
         }
     }
 
+    public void RestaurarEstadoPrevioFinalizacion()
+    {
+        if (Estado != EstadoRecepcion.PendienteAjuste)
+            throw new BusinessRuleException("La recepción no está en estado PendienteAjuste.");
+
+        Estado = EstadoRecepcion.RegistroLotes;
+    }
+
     private void ValidarPuedeFinalizar()
     {
         if (Estado != EstadoRecepcion.RegistroLotes)

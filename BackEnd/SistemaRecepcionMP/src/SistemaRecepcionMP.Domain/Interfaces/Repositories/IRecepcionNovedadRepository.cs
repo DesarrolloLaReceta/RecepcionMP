@@ -7,4 +7,5 @@ public interface IRecepcionNovedadRepository : IRepository<RecepcionNovedad>
 {
     Task<bool> ExistePendientePorTipoAsync(Guid recepcionId, TipoNovedadRecepcion tipoNovedad, CancellationToken ct = default);
     Task<RecepcionNovedad?> ObtenerPendienteExcedenteAsync(Guid recepcionId, CancellationToken ct = default);
+    Task<RecepcionNovedad?> ObtenerActivaExcedenteAsync(Guid recepcionId, CancellationToken ct = default);
 }

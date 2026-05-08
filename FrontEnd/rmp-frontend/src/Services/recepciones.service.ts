@@ -4,10 +4,11 @@ import type {
   RegistrarInspeccionVehiculoCommand,
   RegistrarTemperaturaCommand,
   TipoDocumento,
-  EstadoRecepcion,
   AgregarItemRecepcionCommand,
   RegistrarLotesCommand,
 } from "../Types";
+
+export type EstadoRecepcionValue = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 // ─── DTOs DE RESPUESTA (basados en el backend) ─────────────────────────────────
 
@@ -21,7 +22,7 @@ export interface RecepcionResumen {
   horaLlegadaVehiculo: string;     // "HH:MM:SS"
   placaVehiculo?: string;
   nombreTransportista?: string;
-  estado: EstadoRecepcion;          // 0|1|2|3|4|5
+  estado: EstadoRecepcionValue;          // 0|1|2|3|4|5|6
   totalLotes: number;
   lotesLiberados: number;
   lotesRechazados: number;
@@ -77,6 +78,36 @@ export interface DocumentoRecepcionDto {
   esValido?: boolean;
 }
 
+export interface ExcedenteDetectadoDetalleDto {
+  recepcionItemId: string;
+  itemId: string;
+  cantidadFisica: number;
+  cantidadSiesa: number;
+  diferencia: number;
+  unidadMedida: string;
+}
+
+export interface FinalizarRecepcionResponse {
+  resultado: number; // 0=Finalizada, 1=ExcedenteDetectado
+  recepcionId: string;
+  excedentes?: ExcedenteDetectadoDetalleDto[];
+}
+
+export interface NotificarExcedenteResponse {
+  exito: boolean;
+  recepcionId: string;
+  recepcionNovedadId: string;
+  fechaNotificacionUtc: string;
+  mensaje: string;
+}
+
+export interface SincronizarRecepcionConSiesaResponse {
+  resultado: number; // 0=SinExcedentes, 1=ExcedentesPersisten
+  recepcionId: string;
+  excedentes?: ExcedenteDetectadoDetalleDto[];
+  mensaje?: string;
+}
+
 export interface TemperaturaRegistroDto {
   id: string;
   temperatura: number;
@@ -101,7 +132,7 @@ export interface RecepcionDetalle extends RecepcionResumen {
 // ─── FILTROS ──────────────────────────────────────────────────────────────────
 
 export interface RecepcionesFilter {
-  estado?: EstadoRecepcion;
+  estado?: EstadoRecepcionValue;
   proveedorId?: string;
   fechaDesde?: string; // "YYYY-MM-DD"
   fechaHasta?: string;
@@ -186,8 +217,19 @@ export const recepcionesService = {
   },
 
   // Finalizar recepción
-  async finalizarRecepcion(recepcionId: string): Promise<void> {
-    await apiClient.post(`/api/Recepciones/${recepcionId}/finalizar`);
+  async finalizarRecepcion(recepcionId: string): Promise<FinalizarRecepcionResponse> {
+    const { data } = await apiClient.post(`/api/Recepciones/${recepcionId}/finalizar`);
+    return data;
+  },
+
+  async notificarExcedente(recepcionId: string): Promise<NotificarExcedenteResponse> {
+    const { data } = await apiClient.post(`/api/Recepciones/${recepcionId}/notificar-excedente`);
+    return data;
+  },
+
+  async sincronizarConSiesa(recepcionId: string): Promise<SincronizarRecepcionConSiesaResponse> {
+    const { data } = await apiClient.post(`/api/Recepciones/${recepcionId}/sincronizar-siesa`);
+    return data;
   },
 
   // Agregar lote a un ítem de la recepción

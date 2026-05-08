@@ -14,15 +14,17 @@ const ESTADO_RECEPCION = {
   Iniciada: 0,
   InspeccionVehiculo: 1,
   RegistroLotes: 2,
-  PendienteCalidad: 3,
-  Finalizada: 4,
-  Rechazada: 5,
+  PendienteAjuste: 3,
+  PendienteCalidad: 4,
+  Finalizada: 5,
+  Rechazada: 6,
 } as const;
 
 const ESTADO_CFG: Record<number, { label: string; color: string; bg: string; dot: string }> = {
   [ESTADO_RECEPCION.Iniciada]:           { label: "Iniciada",       color: "#93C5FD", bg: "rgba(59,130,246,0.1)",  dot: "#3B82F6" },
   [ESTADO_RECEPCION.InspeccionVehiculo]: { label: "Insp. vehículo", color: "#C4B5FD", bg: "rgba(168,85,247,0.1)", dot: "#A855F7" },
   [ESTADO_RECEPCION.RegistroLotes]:      { label: "Reg. lotes",     color: "#FCD34D", bg: "rgba(245,158,11,0.1)", dot: "#F59E0B" },
+  [ESTADO_RECEPCION.PendienteAjuste]:    { label: "Pend. ajuste",   color: "#FDBA74", bg: "rgba(249,115,22,0.16)", dot: "#F97316" },
   [ESTADO_RECEPCION.PendienteCalidad]:   { label: "Pend. calidad",  color: "#FCA5A5", bg: "rgba(239,68,68,0.1)",  dot: "#EF4444" },
   [ESTADO_RECEPCION.Finalizada]:         { label: "Finalizada",     color: "#86EFAC", bg: "rgba(34,197,94,0.1)",  dot: "#22C55E" },
   [ESTADO_RECEPCION.Rechazada]:          { label: "Rechazada",      color: "#94A3B8", bg: "rgba(100,116,139,0.1)", dot: "#64748B" },

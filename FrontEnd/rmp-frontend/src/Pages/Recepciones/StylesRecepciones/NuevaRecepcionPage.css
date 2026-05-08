@@ -761,3 +761,64 @@
   text-align: right;
   flex: 1;
 }
+
+/* ── ALERTAS DE EXCEDENTE ── */
+.nr-excedente-alert,
+.nr-excedente-success {
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.nr-excedente-alert {
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(251, 146, 60, 0.5);
+}
+
+.nr-excedente-success {
+  background: rgba(22, 163, 74, 0.14);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+}
+
+.nr-excedente-title {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.nr-excedente-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.nr-excedente-head,
+.nr-excedente-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  font-size: var(--text-xs);
+}
+
+.nr-excedente-head {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.nr-excedente-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--brand-earth-mid);
+}
+
+.nr-excedente-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}

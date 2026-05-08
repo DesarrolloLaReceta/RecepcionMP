@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecepciones } from "../../Hooks/useRecepciones";
-import type { EstadoRecepcion } from "../../Types";
 import { ROUTES } from "../../Constants/routes";
-import type { RecepcionResumen } from "../../Services/recepciones.service";
+import type { EstadoRecepcionValue, RecepcionResumen } from "../../Services/recepciones.service";
 import { Button } from "../../Components/UI/Index";
 import { formatDate } from "../../Utils/formatters";
 import { MOCK_RECEPCIONES } from "./MockData";
@@ -30,15 +29,19 @@ const ESTADO_CFG: Record<number, {
     label: "Registro lotes", color: "#FCD34D",
     bg: "rgba(245,158,11,0.08)", dot: "#F59E0B",
   },
-  3: { // PendienteCalidad
+  3: { // PendienteAjuste
+    label: "Pend. ajuste", color: "#FDBA74",
+    bg: "rgba(249,115,22,0.16)", dot: "#F97316",
+  },
+  4: { // PendienteCalidad
     label: "Pend. calidad", color: "#FCA5A5",
     bg: "rgba(239,68,68,0.08)", dot: "#EF4444",
   },
-  4: { // Finalizada (antes Liberada)
+  5: { // Finalizada
     label: "Finalizada", color: "#86EFAC",
     bg: "rgba(34,197,94,0.08)", dot: "#22C55E",
   },
-  5: { // Rechazada
+  6: { // Rechazada
     label: "Rechazada", color: "#94A3B8",
     bg: "rgba(100,116,139,0.1)", dot: "#64748B",
   },
@@ -48,13 +51,14 @@ const ESTADO_RECEPCION_LABELS: Record<number, string> = {
   0: "Iniciada",
   1: "Inspección vehículo",
   2: "Registro lotes",
-  3: "Pendiente calidad",
-  4: "Finalizada",
-  5: "Rechazada",
+  3: "Pendiente ajuste",
+  4: "Pendiente calidad",
+  5: "Finalizada",
+  6: "Rechazada",
 };
 
 // ── Badge estado
-function EstadoBadge({ estado }: { estado: EstadoRecepcion }) {
+function EstadoBadge({ estado }: { estado: EstadoRecepcionValue }) {
   const c = ESTADO_CFG[estado];
   return (
     <span className="rp-badge" style={{ background: c.bg, color: c.color }}>
@@ -149,7 +153,7 @@ function RecepcionRow({
 
 export default function RecepcionesPage() {
   const navigate = useNavigate();
-  const [estadoFilter, setEstadoFilter] = useState<EstadoRecepcion | "">("");
+  const [estadoFilter, setEstadoFilter] = useState<EstadoRecepcionValue | "">("");
   const [search, setSearch] = useState("");
 
   const {
@@ -178,11 +182,13 @@ export default function RecepcionesPage() {
   // KPIs derivados
   const kpis = {
     total:      recepciones.length,
-    liberadas:  recepciones.filter(r => r.estado === 4).length, // Finalizada
+    liberadas:  recepciones.filter(r => r.estado === 5).length, // Finalizada
+    bloqueadasExcedente: recepciones.filter(r => r.estado === 3).length, // PendienteAjuste
     pendientes: recepciones.filter(r =>
-      r.estado === 3 || r.estado === 2   // PendienteCalidad o RegistroLotes
+      r.estado === 0 || r.estado === 1 || r.estado === 2 || r.estado === 4
+      // Iniciada, Inspección, Registro de lotes, Pendiente de calidad
     ).length,
-    rechazadas: recepciones.filter(r => r.estado === 5).length,
+    rechazadas: recepciones.filter(r => r.estado === 6).length,
   };
 
   return (
@@ -214,15 +220,16 @@ export default function RecepcionesPage() {
 
 <div className="db-kpi-grid"> {/* Usamos la grilla que definimos antes */}
   {[
-    { label: "Total",      value: kpis.total,      accent: "#fdfbf7" }, // Blanco crema
-    { label: "Liberadas",  value: kpis.liberadas,  accent: "#82c91e" }, // Verde éxito
-    { label: "Pendientes", value: kpis.pendientes, accent: "#df6129" }, // Naranja marca
-    { label: "Rechazadas", value: kpis.rechazadas, accent: "#ff6b6b" }, // Rojo alerta
+    { label: "Total",               value: kpis.total,              accent: "#fdfbf7" }, // Blanco crema
+    { label: "Finalizadas",         value: kpis.liberadas,          accent: "#82c91e" }, // Verde éxito
+    { label: "Bloq. excedente",     value: kpis.bloqueadasExcedente, accent: "#f97316" }, // Naranja advertencia
+    { label: "Pendientes",          value: kpis.pendientes,         accent: "#df6129" }, // Naranja marca
+    { label: "Rechazadas",          value: kpis.rechazadas,         accent: "#ff6b6b" }, // Rojo alerta
   ].map(k => (
     <div 
       key={k.label} 
       className="db-kpi-card"
-      style={{ borderColor: k.label === "Pendientes" ? "#df6129" : undefined }}
+      style={{ borderColor: k.label === "Bloq. excedente" ? "#f97316" : undefined }}
     >
       {/* Línea de acento superior opcional */}
       <div className="db-kpi-accent-line" style={{ background: k.accent }} />
@@ -286,7 +293,7 @@ export default function RecepcionesPage() {
           data-empty={estadoFilter === ""}
           value={estadoFilter}
           onChange={e => setEstadoFilter(
-            e.target.value === "" ? "" : Number(e.target.value) as EstadoRecepcion
+            e.target.value === "" ? "" : Number(e.target.value) as EstadoRecepcionValue
           )}
           aria-label="Filtrar por estado"
         >
@@ -323,7 +330,7 @@ export default function RecepcionesPage() {
                 data-dimmed={dimmed}
                 style={{ background: cfg.bg, color: cfg.color }}
                 onClick={() => setEstadoFilter(
-                  active ? "" : Number(k) as EstadoRecepcion
+                  active ? "" : Number(k) as EstadoRecepcionValue
                 )}
               >
                 <span className="rp-chip-dot" style={{ background: cfg.dot }} />

@@ -9,6 +9,7 @@ using SistemaRecepcionMP.API.Models;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.AgregarItemRecepcion;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.FinalizarRecepcion;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.NotificarExcedenteCompras;
+using SistemaRecepcionMP.Application.Features.Recepciones.Commands.SincronizarRecepcionConSiesa;
 using SistemaRecepcionMP.Application.Features.Recepciones.Commands.RegistrarLotes;
 using SistemaRecepcionMP.Application.Common.Exceptions;
 
@@ -183,6 +184,19 @@ public sealed class RecepcionesController : BaseController
     public async Task<IActionResult> NotificarExcedente(Guid id, CancellationToken ct = default)
     {
         var result = await Mediator.Send(new NotificarExcedenteComprasCommand
+        {
+            RecepcionId = id
+        }, ct);
+
+        return Ok(result);
+    }
+
+    [HttpPost("{id:guid}/sincronizar-siesa")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SincronizarConSiesa(Guid id, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new SincronizarRecepcionConSiesaCommand
         {
             RecepcionId = id
         }, ct);

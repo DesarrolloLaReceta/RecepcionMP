@@ -2,14 +2,15 @@ import { Badge, type BadgeSize, type BadgeColor } from "./Badge";
 
 // ─── CONSTANTES LOCALES (basadas en el backend real) ─────────────────────────
 
-// Recepción: 0=Iniciada, 1=InspeccionVehiculo, 2=RegistroLotes, 3=PendienteCalidad, 4=Finalizada, 5=Rechazada
+// Recepción: 0=Iniciada, 1=InspeccionVehiculo, 2=RegistroLotes, 3=PendienteAjuste, 4=PendienteCalidad, 5=Finalizada, 6=Rechazada
 const ESTADO_RECEPCION = {
   Iniciada: 0,
   InspeccionVehiculo: 1,
   RegistroLotes: 2,
-  PendienteCalidad: 3,
-  Finalizada: 4,
-  Rechazada: 5,
+  PendienteAjuste: 3,
+  PendienteCalidad: 4,
+  Finalizada: 5,
+  Rechazada: 6,
 } as const;
 
 // OC: 0=Abierta, 1=ParcialmenteRecibida, 2=TotalmenteRecibida, 3=Cancelada
@@ -56,6 +57,7 @@ const RECEPCION_CFG: Record<number, StatusConfig> = {
   [ESTADO_RECEPCION.Iniciada]:           { color: "amber",  label: "Iniciada",            dot: true },
   [ESTADO_RECEPCION.InspeccionVehiculo]: { color: "amber",  label: "Insp. vehículo",      dot: true },
   [ESTADO_RECEPCION.RegistroLotes]:      { color: "amber",  label: "Registro lotes",      dot: true },
+  [ESTADO_RECEPCION.PendienteAjuste]:    { color: "amber",  label: "Pendiente ajuste",    dot: true },
   [ESTADO_RECEPCION.PendienteCalidad]:   { color: "yellow", label: "Pendiente calidad",   dot: true },
   [ESTADO_RECEPCION.Finalizada]:         { color: "green",  label: "Finalizada",          dot: true },
   [ESTADO_RECEPCION.Rechazada]:          { color: "red",    label: "Rechazada",           dot: true },

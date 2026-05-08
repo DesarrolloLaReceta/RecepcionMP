@@ -207,4 +207,19 @@ public sealed class RecepcionNovedadRepository : GenericRepository<RecepcionNove
                 x.TipoNovedad == TipoNovedadRecepcion.ExcedenteSiesa &&
                 x.Estado == EstadoNovedadRecepcion.Pendiente, ct);
     }
+
+    public async Task<RecepcionNovedad?> ObtenerActivaExcedenteAsync(Guid recepcionId, CancellationToken ct = default)
+    {
+        return await Context.RecepcionesNovedad
+            .Include(x => x.Recepcion)
+            .Include(x => x.Detalles)
+                .ThenInclude(d => d.Item)
+            .Where(x =>
+                x.RecepcionId == recepcionId &&
+                x.TipoNovedad == TipoNovedadRecepcion.ExcedenteSiesa &&
+                x.Estado != EstadoNovedadRecepcion.Resuelta &&
+                x.Estado != EstadoNovedadRecepcion.Descartada)
+            .OrderByDescending(x => x.FechaDeteccionUtc)
+            .FirstOrDefaultAsync(ct);
+    }
 }

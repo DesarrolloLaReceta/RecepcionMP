@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
+import type { ExcedenteDetectadoDetalleDto } from "../../Services/recepciones.service";
 import { recepcionesService } from "../../Services/recepciones.service";
 import { ordenesCompraService, type OrdenCompraResumen } from "../../Services/ordenes-compra.service";
 import { ROUTES } from "../../Constants/routes";
@@ -15,6 +16,18 @@ const isMock = import.meta.env.VITE_USE_MOCK === "true";
 const today   = new Date().toISOString().slice(0, 10);
 const nowTime = new Date().toTimeString().slice(0, 5);
 const DEV_USER_ID = "a0000000-0000-0000-0000-000000000001";
+const EXCEDENTE_STORAGE_KEY = "nueva-recepcion-excedente";
+const FINALIZAR_RECEPCION_ESTADO = {
+  Finalizada: 0,
+  ExcedenteDetectado: 1,
+} as const;
+const SINCRONIZAR_SIESA_ESTADO = {
+  SinExcedentes: 0,
+  ExcedentesPersisten: 1,
+} as const;
+const ESTADO_RECEPCION = {
+  PendienteAjuste: 3,
+} as const;
 
 // ===== CONSTANTES LOCALES PARA ENUMS (coinciden con backend) =====
 
@@ -121,6 +134,23 @@ interface WizardState {
   itemsConLotes:          ItemConLotes[];
   documentos:             { tipo: TipoDocumento; archivo: File | null }[];
   recepcionId: string | null;
+}
+
+interface ExcedenteUiDetalle {
+  recepcionItemId: string;
+  itemId: string;
+  itemNombre: string;
+  cantidadFisica: number;
+  cantidadSiesa: number;
+  diferencia: number;
+  unidadMedida: string;
+}
+
+interface ExcedenteUiState {
+  recepcionId: string;
+  excedentes: ExcedenteUiDetalle[];
+  notificacionEnviada: boolean;
+  recepcionRegistrada: boolean;
 }
 
 type StringFieldKey = {
@@ -784,11 +814,15 @@ function Paso4Lotes({
 // ── PASO 5: Documentos + confirmación (sin cambios) ──────────────────────────
 
 function Paso5Documentos({
-  state, setState, onSubmit, submitting, onBack,
+  state, setState, onSubmit, submitting, onBack, lockSubmit, submitLabel,
 }: {
   state: WizardState;
   setState: Dispatch<SetStateAction<WizardState>>;
-  onSubmit: () => void; submitting: boolean; onBack: () => void;
+  onSubmit: () => void;
+  submitting: boolean;
+  onBack: () => void;
+  lockSubmit?: boolean;
+  submitLabel?: string;
 }) {
   const necesitaFrio = state.itemsConLotes.some(i => i.categoriaFrio);
   const TIPOS_REQ = [
@@ -880,8 +914,9 @@ function Paso5Documentos({
         <Button
           variant="primary" size="md"
           loading={submitting} onClick={onSubmit}
+          disabled={!!lockSubmit}
         >
-          Guardar recepción
+          {submitLabel ?? "Guardar recepción"}
         </Button>
       </div>
     </div>
@@ -897,6 +932,63 @@ export default function NuevaRecepcionPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState<string | null>(null);
   const [loadingOC,  setLoadingOC]  = useState(false);
+  const [excedenteState, setExcedenteState] = useState<ExcedenteUiState | null>(null);
+  const [notificandoExcedente, setNotificandoExcedente] = useState(false);
+  const [sincronizandoConSiesa, setSincronizandoConSiesa] = useState(false);
+  const [sincronizacionExitosa, setSincronizacionExitosa] = useState<string | null>(null);
+
+  const persistirExcedente = useCallback((next: ExcedenteUiState | null) => {
+    if (!next) {
+      localStorage.removeItem(EXCEDENTE_STORAGE_KEY);
+      return;
+    }
+    localStorage.setItem(EXCEDENTE_STORAGE_KEY, JSON.stringify(next));
+  }, []);
+
+  const mapExcedentesToUi = useCallback((raw: ExcedenteDetectadoDetalleDto[]) => {
+    const nombresPorItemId = new Map(state.itemsConLotes.map(item => [item.itemId, item.itemNombre]));
+    return raw.map(ex => ({
+      recepcionItemId: ex.recepcionItemId,
+      itemId: ex.itemId,
+      itemNombre: nombresPorItemId.get(ex.itemId) ?? ex.itemId,
+      cantidadFisica: ex.cantidadFisica,
+      cantidadSiesa: ex.cantidadSiesa,
+      diferencia: ex.diferencia,
+      unidadMedida: ex.unidadMedida,
+    }));
+  }, [state.itemsConLotes]);
+
+  useEffect(() => {
+    const restaurarExcedente = async () => {
+      const persisted = localStorage.getItem(EXCEDENTE_STORAGE_KEY);
+      if (!persisted) return;
+
+      try {
+        const parsed = JSON.parse(persisted) as ExcedenteUiState;
+        if (!parsed?.recepcionId) {
+          localStorage.removeItem(EXCEDENTE_STORAGE_KEY);
+          return;
+        }
+
+        const recepcion = await recepcionesService.getById(parsed.recepcionId);
+        if (recepcion.estado !== ESTADO_RECEPCION.PendienteAjuste) {
+          localStorage.removeItem(EXCEDENTE_STORAGE_KEY);
+          return;
+        }
+
+        setState(prev => ({ ...prev, recepcionId: parsed.recepcionId }));
+        setStep(5);
+        setExcedenteState({
+          ...parsed,
+          recepcionRegistrada: true,
+        });
+      } catch {
+        localStorage.removeItem(EXCEDENTE_STORAGE_KEY);
+      }
+    };
+
+    void restaurarExcedente();
+  }, []);
 
   // Crear la recepción al confirmar la OC
   const handleConfirmOC = async (oc: OrdenCompraResumen) => {
@@ -936,55 +1028,72 @@ export default function NuevaRecepcionPage() {
         throw new Error("No hay una recepción activa. Por favor, selecciona una OC nuevamente.");
       }
 
-      // 1. Registrar inspección del vehículo
-      await recepcionesService.registrarInspeccionVehiculo(recepcionId, {
-        temperaturaInicial: state.tempInicial ? Number(state.tempInicial) : undefined,
-        temperaturaDentroRango: state.temperaturaDentroRango,
-        integridadEmpaque: state.integridadEmpaque,
-        limpiezaVehiculo: state.limpiezaVehiculo,
-        presenciaOloresExtranos: state.oloresExtranos,
-        plagasVisible: state.plagasVisible,
-        documentosTransporteOk: state.documentosTransporteOk,
-        observaciones: state.obsInspeccion || undefined,
-      });
-
-      // 2. Crear RecepcionItems y asociarles sus lotes
-      const items = [];
-      for (const item of state.itemsConLotes) {
-        const { id: recepcionItemId } = await recepcionesService.agregarItem(recepcionId, {
-          detalleOrdenCompraId: item.detalleOcId,
+      if (!excedenteState?.recepcionRegistrada) {
+        // 1. Registrar inspección del vehículo
+        await recepcionesService.registrarInspeccionVehiculo(recepcionId, {
+          temperaturaInicial: state.tempInicial ? Number(state.tempInicial) : undefined,
+          temperaturaDentroRango: state.temperaturaDentroRango,
+          integridadEmpaque: state.integridadEmpaque,
+          limpiezaVehiculo: state.limpiezaVehiculo,
+          presenciaOloresExtranos: state.oloresExtranos,
+          plagasVisible: state.plagasVisible,
+          documentosTransporteOk: state.documentosTransporteOk,
+          observaciones: state.obsInspeccion || undefined,
         });
 
-        const lotes = item.lotes
-          .filter(l => l.fechaVencimiento && Number(l.cantidadRecibida) > 0)
-          .map(l => ({
-            numeroLoteProveedor: l.numeroLoteProveedor || undefined,
-            cantidadRecibida: Number(l.cantidadRecibida),
-            fechaVencimiento: l.fechaVencimiento,
-            temperaturaMedida: l.temperaturaMedida ? Number(l.temperaturaMedida) : undefined,
-            estadoSensorial: l.estadoSensorial,
-            estadoRotulado: l.estadoRotulado,
-          }));
+        // 2. Crear RecepcionItems y asociarles sus lotes
+        const items = [];
+        for (const item of state.itemsConLotes) {
+          const { id: recepcionItemId } = await recepcionesService.agregarItem(recepcionId, {
+            detalleOrdenCompraId: item.detalleOcId,
+          });
 
-        if (lotes.length > 0) {
-          items.push({ recepcionItemId, lotes });
+          const lotes = item.lotes
+            .filter(l => l.fechaVencimiento && Number(l.cantidadRecibida) > 0)
+            .map(l => ({
+              numeroLoteProveedor: l.numeroLoteProveedor || undefined,
+              cantidadRecibida: Number(l.cantidadRecibida),
+              fechaVencimiento: l.fechaVencimiento,
+              temperaturaMedida: l.temperaturaMedida ? Number(l.temperaturaMedida) : undefined,
+              estadoSensorial: l.estadoSensorial,
+              estadoRotulado: l.estadoRotulado,
+            }));
+
+          if (lotes.length > 0) {
+            items.push({ recepcionItemId, lotes });
+          }
+        }
+
+        const command = {
+          recepcionId: recepcionId,
+          items,
+        };
+
+        await recepcionesService.registrarLotesCompleto(recepcionId, command);
+
+        // 3. Subir documentos
+        for (const doc of state.documentos) {
+          if (doc.archivo) {
+            await recepcionesService.subirDocumento(recepcionId, doc.tipo, doc.archivo);
+          }
         }
       }
 
-      const command = {
-        recepcionId: recepcionId,
-        items,
-      };
-
-      await recepcionesService.registrarLotesCompleto(recepcionId, command);
-
-      // 3. Subir documentos
-      for (const doc of state.documentos) {
-        if (doc.archivo) {
-          await recepcionesService.subirDocumento(recepcionId, doc.tipo, doc.archivo);
-        }
+      const finalizar = await recepcionesService.finalizarRecepcion(recepcionId);
+      if (finalizar.resultado === FINALIZAR_RECEPCION_ESTADO.ExcedenteDetectado) {
+        const nextExcedenteState: ExcedenteUiState = {
+          recepcionId,
+          excedentes: mapExcedentesToUi(finalizar.excedentes ?? []),
+          notificacionEnviada: false,
+          recepcionRegistrada: true,
+        };
+        setExcedenteState(nextExcedenteState);
+        persistirExcedente(nextExcedenteState);
+        return;
       }
 
+      setExcedenteState(null);
+      persistirExcedente(null);
       navigate(ROUTES.DETALLE_RECEPCION(recepcionId));
 
     } catch (e: unknown) {
@@ -992,6 +1101,56 @@ export default function NuevaRecepcionPage() {
       setError("Ocurrió un error al guardar la recepción. Revisa los datos e intenta de nuevo.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleNotificarCompras = async () => {
+    if (!excedenteState) return;
+    setNotificandoExcedente(true);
+    setError(null);
+    try {
+      await recepcionesService.notificarExcedente(excedenteState.recepcionId);
+      const nextState: ExcedenteUiState = {
+        ...excedenteState,
+        notificacionEnviada: true,
+      };
+      setExcedenteState(nextState);
+      persistirExcedente(nextState);
+    } catch (e) {
+      console.error(e);
+      setError("No se pudo notificar a Compras. Intenta nuevamente.");
+    } finally {
+      setNotificandoExcedente(false);
+    }
+  };
+
+  const handleSincronizarConSiesa = async () => {
+    if (!excedenteState) return;
+    setSincronizandoConSiesa(true);
+    setSincronizacionExitosa(null);
+    setError(null);
+    try {
+      const result = await recepcionesService.sincronizarConSiesa(excedenteState.recepcionId);
+
+      if (result.resultado === SINCRONIZAR_SIESA_ESTADO.SinExcedentes) {
+        setExcedenteState(null);
+        persistirExcedente(null);
+        setSincronizacionExitosa("Sincronización exitosa con SIESA. Ya puedes finalizar la recepción.");
+        return;
+      }
+
+      const nextState: ExcedenteUiState = {
+        ...excedenteState,
+        excedentes: mapExcedentesToUi(result.excedentes ?? []),
+      };
+      setExcedenteState(nextState);
+      persistirExcedente(nextState);
+      setError("Persisten excedentes frente a SIESA. Ajusta y vuelve a sincronizar.");
+    } catch (e) {
+      console.error(e);
+      setError("No se pudo sincronizar con SIESA. Intenta nuevamente.");
+    } finally {
+      setSincronizandoConSiesa(false);
     }
   };
 
@@ -1026,6 +1185,77 @@ export default function NuevaRecepcionPage() {
         </div>
       )}
 
+      {excedenteState && !excedenteState.notificacionEnviada && (
+        <div className="nr-excedente-alert">
+          <p className="nr-excedente-title">
+            Se ha detectado un excedente respecto a la Orden de Compra de SIESA.
+          </p>
+          <div className="nr-excedente-table">
+            <div className="nr-excedente-head">
+              <span>Item</span>
+              <span>Cantidad SIESA</span>
+              <span>Cantidad Fisica</span>
+            </div>
+            {excedenteState.excedentes.map(ex => (
+              <div key={`${ex.recepcionItemId}-${ex.itemId}`} className="nr-excedente-row">
+                <span>{ex.itemNombre}</span>
+                <span>{ex.cantidadSiesa} {ex.unidadMedida}</span>
+                <span>{ex.cantidadFisica} {ex.unidadMedida}</span>
+              </div>
+            ))}
+          </div>
+          <div className="nr-excedente-actions">
+            <Button
+              variant="primary"
+              size="sm"
+              loading={notificandoExcedente}
+              onClick={handleNotificarCompras}
+            >
+              Notificar a Compras
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={sincronizandoConSiesa}
+              onClick={handleSincronizarConSiesa}
+            >
+              Sincronizar con SIESA
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {excedenteState?.notificacionEnviada && (
+        <div className="nr-excedente-success">
+          <p className="nr-excedente-title">
+            Notificación enviada con éxito. La recepción ha quedado en estado 'Pendiente de Ajuste'.
+          </p>
+          <div className="nr-excedente-actions">
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={sincronizandoConSiesa}
+              onClick={handleSincronizarConSiesa}
+            >
+              Sincronizar con SIESA
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate(ROUTES.RECEPCIONES)}
+            >
+              Volver al listado de recepciones
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {sincronizacionExitosa && (
+        <div className="nr-excedente-success">
+          <p className="nr-excedente-title">{sincronizacionExitosa}</p>
+        </div>
+      )}
+
       <div className="nr-card">
         {step === 1 && (
           <Paso1OC
@@ -1049,6 +1279,8 @@ export default function NuevaRecepcionPage() {
             {...stepProps}
             onSubmit={handleSubmit}
             submitting={submitting}
+            lockSubmit={!!excedenteState}
+            submitLabel={excedenteState?.recepcionRegistrada ? "Finalizar recepción" : "Guardar recepción"}
           />
         )}
       </div>

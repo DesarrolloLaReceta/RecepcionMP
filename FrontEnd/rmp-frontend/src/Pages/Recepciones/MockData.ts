@@ -5,9 +5,10 @@ const ESTADO_RECEPCION = {
   Iniciada: 0,
   InspeccionVehiculo: 1,
   RegistroLotes: 2,
-  PendienteCalidad: 3,
-  Finalizada: 4,
-  Rechazada: 5,
+  PendienteAjuste: 3,
+  PendienteCalidad: 4,
+  Finalizada: 5,
+  Rechazada: 6,
 } as const;
 
 export const MOCK_RECEPCIONES: RecepcionResumen[] = [
@@ -17,7 +18,7 @@ export const MOCK_RECEPCIONES: RecepcionResumen[] = [
     proveedorNombre: "AviCol S.A.", proveedorId: "prov-001",
     fechaRecepcion: "2026-02-24", horaLlegadaVehiculo: "07:30:00",
     placaVehiculo: "OPQ-451", nombreTransportista: "Luis García",
-    estado: ESTADO_RECEPCION.PendienteCalidad,
+    estado: ESTADO_RECEPCION.PendienteAjuste,
     totalLotes: 3, lotesLiberados: 0, lotesRechazados: 0,
   },
   {
@@ -77,7 +78,7 @@ export const MOCK_DETALLE: RecepcionDetalle = {
   horaLlegadaVehiculo: "07:30:00",
   placaVehiculo: "OPQ-451",
   nombreTransportista: "Luis García",
-  estado: ESTADO_RECEPCION.PendienteCalidad,
+  estado: ESTADO_RECEPCION.PendienteAjuste,
   totalLotes: 3,
   lotesLiberados: 0,
   lotesRechazados: 0,
