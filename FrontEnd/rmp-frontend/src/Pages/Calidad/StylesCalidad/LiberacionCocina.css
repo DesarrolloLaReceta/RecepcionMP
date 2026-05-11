@@ -68,3 +68,20 @@
     background: var(--bg-card-dim);
   }
 }
+
+.lc-historial-link {
+  align-self: center;
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.lc-historial-link:hover {
+  color: var(--brand-orange);
+}

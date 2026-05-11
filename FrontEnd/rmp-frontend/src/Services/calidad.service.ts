@@ -65,6 +65,31 @@ export interface DashboardCalidadDto {
   historialNovedades: NovedadRecienteDto[];
 }
 
+export interface LiberacionCocinaHistorialItem {
+  id: number;
+  fecha: string;
+  cocina: string;
+  nombreResponsable: string;
+  tieneFallas: boolean;
+}
+
+export interface LiberacionCocinaDetalleInspeccion {
+  item: string;
+  estado: string;
+}
+
+export interface LiberacionCocinaDetalle {
+  id: number;
+  fecha: string;
+  turno: string;
+  cocina: string;
+  nombreResponsable: string;
+  cargoResponsable: string;
+  observacionesInspeccion: string;
+  observacionesGenerales: string;
+  detalles: LiberacionCocinaDetalleInspeccion[];
+}
+
 export const calidadService = {
   async guardarVerificacionInstalaciones(
     payload: GuardarVerificacionPayload,
@@ -122,6 +147,20 @@ export const calidadService = {
 
   async getDashboardStats(): Promise<DashboardCalidadDto> {
     const { data } = await apiClient.get<DashboardCalidadDto>("/api/Calidad/stats");
+    return data;
+  },
+
+  async getLiberacionesCocinasHistorial(): Promise<LiberacionCocinaHistorialItem[]> {
+    const { data } = await apiClient.get<LiberacionCocinaHistorialItem[]>(
+      "/api/Calidad/liberacion-cocinas"
+    );
+    return data;
+  },
+
+  async getLiberacionCocinaById(id: number): Promise<LiberacionCocinaDetalle> {
+    const { data } = await apiClient.get<LiberacionCocinaDetalle>(
+      `/api/Calidad/liberacion-cocinas/${id}`
+    );
     return data;
   },
 };

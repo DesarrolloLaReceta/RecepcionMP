@@ -42,11 +42,13 @@ function Panel({
   count,
   children,
   onMore,
+  moreLabel = "Ver todo →",
 }: {
   title: string;
   count?: number;
   children: React.ReactNode;
   onMore?: () => void;
+  moreLabel?: string;
 }) {
   return (
     <div className="db-panel">
@@ -61,7 +63,7 @@ function Panel({
         </div>
         {onMore && (
           <button type="button" className="db-panel-more" onClick={onMore}>
-            Ver todo →
+            {moreLabel}
           </button>
         )}
       </div>
@@ -222,6 +224,8 @@ const CalidadDashboard = () => {
         <Panel
           title="Historial Reciente de Novedades"
           count={stats?.historialNovedades?.length ?? 0}
+          onMore={() => navigate(ROUTES.HISTORIAL_LIBERACION_COCINA)}
+          moreLabel="Ver Historial →"
         >
           {loading ? (
             <div style={{ padding: "0 1.25rem" }}>

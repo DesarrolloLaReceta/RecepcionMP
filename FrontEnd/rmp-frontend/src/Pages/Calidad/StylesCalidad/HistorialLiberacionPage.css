@@ -1,0 +1,36 @@
+.hl-page .nr-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hl-modal-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.hl-modal-meta strong {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-top: 0.15rem;
+}
+
+.hl-modal-obs {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.45;
+}
+
+.hl-modal-obs strong {
+  color: var(--text-primary);
+}

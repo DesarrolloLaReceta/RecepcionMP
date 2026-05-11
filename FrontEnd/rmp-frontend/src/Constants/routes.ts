@@ -21,6 +21,7 @@ export const ROUTES = {
   NO_CONFORMIDADES: "/no-conformidades",
   GESTION_CALIDAD: "/calidad",
   LIBERACION_COCINA:    "/calidad/liberacion-cocina",
+  HISTORIAL_LIBERACION_COCINA: "/calidad/liberacion-cocina/historial",
 
   // Órdenes de compra
   ORDENES_COMPRA:        "/ordenes-compra",
@@ -44,6 +45,7 @@ export const ROUTE_LABELS: Record<string, string> = {
   "/calidad/verificacion-instalaciones": "Verificación instalaciones",
   "/calidad/lavado-botas-manos": "Lavado botas y manos",
   "/calidad/liberacion-cocina": "Liberación de cocina",
+  "/calidad/liberacion-cocina/historial": "Historial liberación cocina",
   "/ordenes-compra":        "Órdenes de Compra",
   "/maestros":              "Maestros",
   "/maestros/proveedores":  "Proveedores",

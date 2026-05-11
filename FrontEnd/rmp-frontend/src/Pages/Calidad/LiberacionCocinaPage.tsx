@@ -98,14 +98,21 @@ export default function LiberacionCocinaPage() {
 
   return (
     <div className="nr-page">
-      <div className="nr-header">
+      <div className="nr-header" style={{ display: "flex", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
         <button className="nr-back-btn" onClick={() => navigate(ROUTES.GESTION_CALIDAD)}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
         </button>
-        <div>
+        <div style={{ flex: "1 1 auto", minWidth: 0 }}>
           <p className="nr-header-label">Gestión de Calidad</p>
           <h1 className="nr-header-title">Liberación de Cocina Diaria</h1>
         </div>
+        <button
+          type="button"
+          className="lc-historial-link"
+          onClick={() => navigate(ROUTES.HISTORIAL_LIBERACION_COCINA)}
+        >
+          Ver Historial →
+        </button>
       </div>
 
       <div className="nr-card">

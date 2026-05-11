@@ -17,6 +17,7 @@ const CalidadDashboard = lazy(() => import('./Pages/Calidad/CalidadDashboard'));
 const VerificacionInstalacionesPage = lazy(() => import("./Pages/Calidad/VerificacionInstalaciones"));
 const LavadoBotasManosPage = lazy(() => import("./Pages/Calidad/LavadoBotasManosPage"));
 const LiberacionCocinaPage = lazy(() => import("./Pages/Calidad/LiberacionCocinaPage"));
+const HistorialLiberacionPage = lazy(() => import("./Pages/Calidad/HistorialLiberacionPage"));
 const NoConformPage     = lazy(() => import("./Pages/NoConformidades/NoConformidadesPage"));
 const DetalleNoConformPage = lazy(() => import("./Pages/NoConformidades/DetalleNoConformidadPage"));
 const ProveedoresPage   = lazy(() => import("./Pages/Maestros/ProveedoresPage"));
@@ -80,6 +81,7 @@ export default function App() {
                 <Route path="/calidad/verificacion-instalaciones" element={<VerificacionInstalacionesPage />} />
                 <Route path="/calidad/lavado-botas-manos" element={<LavadoBotasManosPage />} />
                 <Route path={ROUTES.LIBERACION_COCINA} element={<LiberacionCocinaPage />} />
+                <Route path={ROUTES.HISTORIAL_LIBERACION_COCINA} element={<HistorialLiberacionPage />} />
               </Route>
 
               {/* Calidad + Admin + Auditor */}

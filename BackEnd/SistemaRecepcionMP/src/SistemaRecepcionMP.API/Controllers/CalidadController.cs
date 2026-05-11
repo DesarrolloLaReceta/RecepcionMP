@@ -222,6 +222,67 @@ public sealed class CalidadController : BaseController
         return Ok(dto);
     }
 
+    [HttpGet("liberacion-cocinas")]
+    [ProducesResponseType(typeof(List<LiberacionCocinaHistorialItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<LiberacionCocinaHistorialItemDto>>> GetLiberacionesCocinas(
+        CancellationToken ct = default)
+    {
+        var db = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+
+        var items = await db.LiberacionesCocinas
+            .AsNoTracking()
+            .OrderByDescending(x => x.Fecha)
+            .Select(x => new LiberacionCocinaHistorialItemDto
+            {
+                Id = x.Id,
+                Fecha = x.Fecha,
+                Cocina = x.Cocina,
+                NombreResponsable = x.NombreResponsable,
+                TieneFallas = x.Detalles.Any(d => d.Estado.ToLower() == "no cumple"),
+            })
+            .ToListAsync(ct);
+
+        return Ok(items);
+    }
+
+    [HttpGet("liberacion-cocinas/{id:int}")]
+    [ProducesResponseType(typeof(LiberacionCocinaDetalleDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<LiberacionCocinaDetalleDto>> GetLiberacionCocinaById(
+        int id,
+        CancellationToken ct = default)
+    {
+        var db = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+
+        var dto = await db.LiberacionesCocinas
+            .AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(x => new LiberacionCocinaDetalleDto
+            {
+                Id = x.Id,
+                Fecha = x.Fecha,
+                Turno = x.Turno,
+                Cocina = x.Cocina,
+                NombreResponsable = x.NombreResponsable,
+                CargoResponsable = x.CargoResponsable,
+                ObservacionesInspeccion = x.ObservacionesInspeccion,
+                ObservacionesGenerales = x.ObservacionesGenerales,
+                Detalles = x.Detalles
+                    .Select(d => new LiberacionCocinaDetalleInspeccionDto
+                    {
+                        Item = d.Item,
+                        Estado = d.Estado,
+                    })
+                    .ToList(),
+            })
+            .FirstOrDefaultAsync(ct);
+
+        if (dto is null)
+            return NotFound();
+
+        return Ok(dto);
+    }
+
     [HttpPost("verificacion-instalaciones")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status201Created)]
