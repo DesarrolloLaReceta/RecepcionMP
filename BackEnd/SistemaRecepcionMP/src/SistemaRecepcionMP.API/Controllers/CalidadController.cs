@@ -1,14 +1,227 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarLavadoBotasManos;
 using SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarVerificacionInstalacion;
 using SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarLiberacionCocina;
+using SistemaRecepcionMP.Application.Features.Calidad.DTOs;
 using SistemaRecepcionMP.API.Models;
+using SistemaRecepcionMP.Infraestructure.Persistence;
 using System.Text.Json;
 
 namespace SistemaRecepcionMP.API.Controllers;
 
 public sealed class CalidadController : BaseController
 {
+    [HttpGet("stats")]
+    [Authorize]
+    [ProducesResponseType(typeof(DashboardCalidadDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<DashboardCalidadDto>> GetDashboardStats(CancellationToken ct = default)
+    {
+        // ── Rango del día de hoy ─────────────────────────────────────────────
+        var inicioHoy = DateTime.Today;
+        var finHoy = inicioHoy.AddDays(1);
+
+        var scopeFactory = HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
+
+        // ── Métricas por tabla (en paralelo) ────────────────────────────────
+
+        async Task<int> CountLiberacionesAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return await db.LiberacionesCocinas
+                .Where(x => x.Fecha >= inicioHoy && x.Fecha < finHoy)
+                .CountAsync(ct);
+        }
+
+        async Task<int> CountLiberacionesCriticasAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return await db.LiberacionesCocinas
+                .Where(x => x.Fecha >= inicioHoy && x.Fecha < finHoy)
+                .Where(x => x.Detalles.Any(d => d.Estado.ToLower() == "no cumple"))
+                .CountAsync(ct);
+        }
+
+        async Task<int> CountLavadosAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return await db.LavadosBotasManos
+                .Where(x => x.Fecha >= inicioHoy && x.Fecha < finHoy)
+                .CountAsync(ct);
+        }
+
+        async Task<int> CountLavadosCriticosAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            // Como LavadoBotasManos no tiene detalle por ítem,
+            // usamos palabras clave en Novedades/Observaciones como "estado de falla".
+            return await db.LavadosBotasManos
+                .Where(x => x.Fecha >= inicioHoy && x.Fecha < finHoy)
+                .Where(x =>
+                    (x.Novedades != null && (
+                        x.Novedades.ToLower().Contains("no cumple") ||
+                        x.Novedades.ToLower().Contains("falla") ||
+                        x.Novedades.ToLower().Contains("incumpl")))
+                    ||
+                    (x.Observaciones != null && (
+                        x.Observaciones.ToLower().Contains("no cumple") ||
+                        x.Observaciones.ToLower().Contains("falla") ||
+                        x.Observaciones.ToLower().Contains("incumpl"))))
+                .CountAsync(ct);
+        }
+
+        async Task<int> CountVerificacionesAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return await db.VerificacionesInstalaciones
+                .Where(x => x.Fecha >= inicioHoy && x.Fecha < finHoy)
+                .CountAsync(ct);
+        }
+
+        async Task<int> CountVerificacionesCriticasAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return await db.VerificacionesInstalaciones
+                .Where(x => x.Fecha >= inicioHoy && x.Fecha < finHoy)
+                // Calificacion == 1 => "No cumple" (según UI/validator 1|2)
+                .Where(x => x.Detalles.Any(d => d.Calificacion == 1))
+                .CountAsync(ct);
+        }
+
+        async Task<List<NovedadRecienteDto>> GetHistorialLiberacionesAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            return await db.LiberacionesCocinas
+                .OrderByDescending(x => x.Fecha)
+                .Take(5)
+                .AsNoTracking()
+                .Select(x => new NovedadRecienteDto
+                {
+                    Titulo = x.Cocina,
+                    Fecha = x.Fecha,
+                    Responsable = x.NombreResponsable,
+                    TipoFormulario = "Liberación"
+                })
+                .ToListAsync(ct);
+        }
+
+        async Task<List<NovedadRecienteDto>> GetHistorialLavadosAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            return await db.LavadosBotasManos
+                .OrderByDescending(x => x.Fecha)
+                .Take(5)
+                .AsNoTracking()
+                .Select(x => new NovedadRecienteDto
+                {
+                    Titulo = x.Turno,
+                    Fecha = x.Fecha,
+                    Responsable = x.NombreResponsable,
+                    TipoFormulario = "Lavado de Botas y Manos"
+                })
+                .ToListAsync(ct);
+        }
+
+        async Task<List<NovedadRecienteDto>> GetHistorialVerificacionesAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            return await db.VerificacionesInstalaciones
+                .OrderByDescending(x => x.Fecha)
+                .Take(5)
+                .AsNoTracking()
+                .Select(x => new NovedadRecienteDto
+                {
+                    Titulo = x.Zona,
+                    Fecha = x.Fecha,
+                    Responsable = x.Usuario.Nombre,
+                    TipoFormulario = "Verificación de Instalaciones"
+                })
+                .ToListAsync(ct);
+        }
+
+        var inspeccionesLiberacionTask = CountLiberacionesAsync();
+        var inspeccionesLiberacionCriticasTask = CountLiberacionesCriticasAsync();
+
+        var inspeccionesLavadoTask = CountLavadosAsync();
+        var inspeccionesLavadoCriticasTask = CountLavadosCriticosAsync();
+
+        var inspeccionesVerificacionTask = CountVerificacionesAsync();
+        var inspeccionesVerificacionCriticasTask = CountVerificacionesCriticasAsync();
+
+        var historialLiberacionesTask = GetHistorialLiberacionesAsync();
+        var historialLavadosTask = GetHistorialLavadosAsync();
+        var historialVerificacionesTask = GetHistorialVerificacionesAsync();
+
+        await Task.WhenAll(
+            inspeccionesLiberacionTask,
+            inspeccionesLiberacionCriticasTask,
+            inspeccionesLavadoTask,
+            inspeccionesLavadoCriticasTask,
+            inspeccionesVerificacionTask,
+            inspeccionesVerificacionCriticasTask,
+            historialLiberacionesTask,
+            historialLavadosTask,
+            historialVerificacionesTask);
+
+        var inspeccionesHoy =
+            inspeccionesLiberacionTask.Result +
+            inspeccionesLavadoTask.Result +
+            inspeccionesVerificacionTask.Result;
+
+        var alertasCriticas =
+            inspeccionesLiberacionCriticasTask.Result +
+            inspeccionesLavadoCriticasTask.Result +
+            inspeccionesVerificacionCriticasTask.Result;
+
+        // PorcentajeCumplimiento = (Exitosas / Total) * 100
+        var exitosas = Math.Max(0, inspeccionesHoy - alertasCriticas);
+        var porcentajeCumplimiento = inspeccionesHoy == 0
+            ? 0m
+            : (exitosas * 100m) / inspeccionesHoy;
+
+        // "Turnos Pendientes": número de procesos (Liberación, Lavado, Verificación)
+        // para los que aún no hay registros de inspección en el día.
+        var turnosPendientes =
+            3 - (
+                (inspeccionesLiberacionTask.Result > 0 ? 1 : 0) +
+                (inspeccionesLavadoTask.Result > 0 ? 1 : 0) +
+                (inspeccionesVerificacionTask.Result > 0 ? 1 : 0)
+            );
+
+        var historial = historialLiberacionesTask.Result
+            .Concat(historialLavadosTask.Result)
+            .Concat(historialVerificacionesTask.Result)
+            .OrderByDescending(x => x.Fecha)
+            .Take(5)
+            .ToList();
+
+        var dto = new DashboardCalidadDto
+        {
+            InspeccionesHoy = inspeccionesHoy,
+            PorcentajeCumplimiento = porcentajeCumplimiento,
+            AlertasCriticas = alertasCriticas,
+            TurnosPendientes = turnosPendientes,
+            HistorialNovedades = historial
+        };
+
+        return Ok(dto);
+    }
+
     [HttpPost("verificacion-instalaciones")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -111,6 +324,7 @@ public sealed class CalidadController : BaseController
     }
 
     [HttpPost("liberacion-cocinas")]
+    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RegistrarLiberacionCocina(

@@ -52,7 +52,9 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+
+        ClockSkew = TimeSpan.FromMinutes(5)
     };
 });
 
@@ -110,8 +112,8 @@ app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseCors("Dev");
 app.UseAuthentication();
-app.UseMiddleware<UsuarioMiddleware>();
 app.UseAuthorization();
+app.UseMiddleware<UsuarioMiddleware>();
 
 app.MapControllers();
 //app.MapFallbackToFile("index.html");

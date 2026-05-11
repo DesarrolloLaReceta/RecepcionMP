@@ -181,46 +181,6 @@ public static class DataSeeder
             await db.SaveChangesAsync();
         }
 
-        // ── OC de prueba ─────────────────────────────────────────────────────────
-        if (!await db.OrdenesCompra.AnyAsync())
-        {
-            var ocId = Guid.Parse("e1000000-0000-0000-0000-000000000001");
-
-            // 1. Insertar OC sin detalles
-            var oc = new OrdenCompra
-            {
-                Id                   = ocId,
-                NumeroOC             = "OC-2026-0001",
-                ProveedorId          = Guid.Parse("c1000000-0000-0000-0000-000000000001"),
-                FechaEmision         = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
-                FechaEntregaEsperada = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2)),
-                Estado               = EstadoOrdenCompra.Abierta,
-                CreadoPor            = devUserId,
-                CreadoEn             = DateTime.UtcNow,
-            };
-            db.OrdenesCompra.Add(oc);
-            await db.SaveChangesAsync();
-
-            // 2. Insertar detalles por separado
-            db.DetallesOrdenCompra.AddRange(
-                new DetalleOrdenCompra
-                {
-                    OrdenCompraId      = ocId,
-                    ItemId             = Guid.Parse("b1000000-0000-0000-0000-000000000001"),
-                    CantidadSolicitada = 500,
-                    UnidadMedida       = "Kg",
-                    PrecioUnitario     = 12800,
-                },
-                new DetalleOrdenCompra
-                {
-                    OrdenCompraId      = ocId,
-                    ItemId             = Guid.Parse("b1000000-0000-0000-0000-000000000002"),
-                    CantidadSolicitada = 300,
-                    UnidadMedida       = "Kg",
-                    PrecioUnitario     = 8500,
-                }
-            );
-            await db.SaveChangesAsync();
-        }
+        
     }
 }

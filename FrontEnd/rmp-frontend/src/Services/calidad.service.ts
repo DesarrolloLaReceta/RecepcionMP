@@ -48,6 +48,23 @@ export interface RegistrarLiberacionCocinaPayload {
   }[];
 }
 
+// ─── DTOs Dashboard de Calidad ─────────────────────────────────────────────
+
+export interface NovedadRecienteDto {
+  titulo: string;
+  fecha: string;
+  responsable: string;
+  tipoFormulario: string;
+}
+
+export interface DashboardCalidadDto {
+  inspeccionesHoy: number;
+  porcentajeCumplimiento: number;
+  alertasCriticas: number;
+  turnosPendientes: number;
+  historialNovedades: NovedadRecienteDto[];
+}
+
 export const calidadService = {
   async guardarVerificacionInstalaciones(
     payload: GuardarVerificacionPayload,
@@ -99,7 +116,12 @@ export const calidadService = {
     payload: RegistrarLiberacionCocinaPayload
   ): Promise<{ id: string }> {
     // Al enviar el objeto directo, axios lo manda como application/json por defecto
-    const { data } = await apiClient.post("/api/Calidad/RegistrarLiberacionCocina", payload);
+    const { data } = await apiClient.post("/api/Calidad/liberacion-cocinas", payload);
+    return data;
+  },
+
+  async getDashboardStats(): Promise<DashboardCalidadDto> {
+    const { data } = await apiClient.get<DashboardCalidadDto>("/api/Calidad/stats");
     return data;
   },
 };
