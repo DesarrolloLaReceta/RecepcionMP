@@ -109,7 +109,7 @@ export default function LiberacionCocinaPage() {
         <button
           type="button"
           className="lc-historial-link"
-          onClick={() => navigate(ROUTES.HISTORIAL_LIBERACION_COCINA)}
+          onClick={() => navigate(ROUTES.HISTORIAL_CALIDAD)}
         >
           Ver Historial →
         </button>

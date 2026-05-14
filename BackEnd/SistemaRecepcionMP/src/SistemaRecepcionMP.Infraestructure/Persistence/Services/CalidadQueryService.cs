@@ -189,6 +189,8 @@ public sealed class CalidadQueryService : ICalidadQueryService
                 Id = x.Id,
                 Fecha = x.Fecha,
                 Turno = x.Turno,
+                Piso = x.Piso,
+                Entrada = x.Entrada,
                 NombreResponsable = x.NombreResponsable,
                 TieneFallas =
                     (x.Novedades != null && (

@@ -5,6 +5,8 @@ public sealed class LavadoManosListItemDto
     public Guid Id { get; set; }
     public DateTime Fecha { get; set; }
     public string Turno { get; set; } = string.Empty;
+    public string Piso { get; set; } = string.Empty;
+    public string Entrada { get; set; } = string.Empty;
     public string NombreResponsable { get; set; } = string.Empty;
     public bool TieneFallas { get; set; }
 }

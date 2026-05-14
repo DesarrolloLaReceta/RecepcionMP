@@ -1,0 +1,113 @@
+/* Historial unificado — Calidad (tabla + búsqueda + paginación táctil) */
+
+.hc-page .nr-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.hc-toolbar {
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.hc-search-wrap {
+  position: relative;
+  max-width: 28rem;
+}
+
+.hc-search-wrap svg {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.hc-search-input {
+  width: 100%;
+  height: 2.75rem;
+  padding: 0 0.75rem 0 2.35rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.hc-search-input::placeholder {
+  color: var(--text-ghost);
+}
+
+.hc-search-input:focus {
+  outline: none;
+  border-color: var(--border-focus-primary);
+  box-shadow: 0 0 0 3px rgba(223, 97, 41, 0.12);
+}
+
+.hc-table-wrap {
+  padding: 0 0 0.75rem;
+  background: var(--bg-card);
+}
+
+.hc-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.hc-pagination-info {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+}
+
+.hc-pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hc-page-btn {
+  min-height: 44px;
+  min-width: 7.5rem;
+  padding: 0 1.25rem;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  font-weight: 700;
+  border: 1px solid var(--border-default);
+  background: var(--bg-card-dim);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.hc-page-btn:hover:not(:disabled) {
+  background: var(--bg-item-hover);
+  border-color: var(--border-focus-primary);
+  color: var(--brand-orange);
+}
+
+.hc-page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.hc-badge-tipo {
+  white-space: nowrap;
+}

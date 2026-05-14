@@ -76,6 +76,48 @@ export interface LiberacionCocinaHistorialItem {
   tieneFallas: boolean;
 }
 
+/** Listado API — Verificación de instalaciones */
+export interface VerificacionInstalacionHistorialItem {
+  id: string;
+  fecha: string;
+  zona: string;
+  nombreResponsable: string;
+  cargoResponsable: string;
+  cumplimientoTotal: number;
+  tieneFallas: boolean;
+}
+
+export interface VerificacionInstalacionDetalleLinea {
+  aspectoId: string;
+  aspectoNombre: string;
+  calificacion: number;
+  hallazgo?: string | null;
+  planAccion?: string | null;
+  responsable?: string | null;
+  fotoUrls: string[];
+}
+
+export interface VerificacionInstalacionDetalle {
+  id: string;
+  fecha: string;
+  zona: string;
+  cumplimientoTotal: number;
+  nombreResponsable: string;
+  cargoResponsable: string;
+  detalles: VerificacionInstalacionDetalleLinea[];
+}
+
+/** Listado API — Lavado de botas y manos */
+export interface LavadoManosHistorialItem {
+  id: string;
+  fecha: string;
+  turno: string;
+  piso: string;
+  entrada: string;
+  nombreResponsable: string;
+  tieneFallas: boolean;
+}
+
 export interface LiberacionCocinaDetalleInspeccion {
   item: string;
   estado: string;
@@ -91,6 +133,20 @@ export interface LiberacionCocinaDetalle {
   observacionesInspeccion: string;
   observacionesGenerales: string;
   detalles: LiberacionCocinaDetalleInspeccion[];
+}
+
+export interface LavadoManosDetalle {
+  id: string;
+  fecha: string;
+  turno: string;
+  piso: string;
+  entrada: string;
+  personasRevisadas: number;
+  novedades?: string | null;
+  observaciones?: string | null;
+  nombreResponsable: string;
+  cargoResponsable: string;
+  fotoUrl?: string | null;
 }
 
 export const calidadService = {
@@ -159,6 +215,30 @@ export const calidadService = {
     const { data } = await apiClient.get<LiberacionCocinaHistorialItem[]>(
       "/api/LiberacionCocina"
     );
+    return data;
+  },
+
+  async getVerificacionesInstalacionesHistorial(): Promise<VerificacionInstalacionHistorialItem[]> {
+    const { data } = await apiClient.get<VerificacionInstalacionHistorialItem[]>(
+      "/api/VerificacionInstalaciones"
+    );
+    return data;
+  },
+
+  async getVerificacionInstalacionById(id: string): Promise<VerificacionInstalacionDetalle> {
+    const { data } = await apiClient.get<VerificacionInstalacionDetalle>(
+      `/api/VerificacionInstalaciones/${id}`
+    );
+    return data;
+  },
+
+  async getLavadosManosHistorial(): Promise<LavadoManosHistorialItem[]> {
+    const { data } = await apiClient.get<LavadoManosHistorialItem[]>("/api/LavadoManos");
+    return data;
+  },
+
+  async getLavadoManosById(id: string): Promise<LavadoManosDetalle> {
+    const { data } = await apiClient.get<LavadoManosDetalle>(`/api/LavadoManos/${id}`);
     return data;
   },
 

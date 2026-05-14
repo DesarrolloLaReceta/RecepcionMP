@@ -224,7 +224,7 @@ const CalidadDashboard = () => {
         <Panel
           title="Historial Reciente de Novedades"
           count={stats?.historialNovedades?.length ?? 0}
-          onMore={() => navigate(ROUTES.HISTORIAL_LIBERACION_COCINA)}
+          onMore={() => navigate(ROUTES.HISTORIAL_CALIDAD)}
           moreLabel="Ver Historial →"
         >
           {loading ? (

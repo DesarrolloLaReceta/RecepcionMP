@@ -1,8 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { AuthProvider } from "./Auth/AuthContext";
 import { AD_GROUPS } from "./Auth/adGroups";
-import { ROUTES } from "./Constants/routes";
+import { LEGACY_ROUTE_HISTORIAL_LIBERACION_COCINA, ROUTES } from "./Constants/routes";
 import { AppShell } from "./Components/Layout/AppShell";
 import { ProtectedRoute } from "./Components/ProtectedRoute";
 
@@ -81,7 +81,11 @@ export default function App() {
                 <Route path="/calidad/verificacion-instalaciones" element={<VerificacionInstalacionesPage />} />
                 <Route path="/calidad/lavado-botas-manos" element={<LavadoBotasManosPage />} />
                 <Route path={ROUTES.LIBERACION_COCINA} element={<LiberacionCocinaPage />} />
-                <Route path={ROUTES.HISTORIAL_LIBERACION_COCINA} element={<HistorialLiberacionPage />} />
+                <Route path={ROUTES.HISTORIAL_CALIDAD} element={<HistorialLiberacionPage />} />
+                <Route
+                  path={LEGACY_ROUTE_HISTORIAL_LIBERACION_COCINA}
+                  element={<Navigate to={ROUTES.HISTORIAL_CALIDAD} replace />}
+                />
               </Route>
 
               {/* Calidad + Admin + Auditor */}

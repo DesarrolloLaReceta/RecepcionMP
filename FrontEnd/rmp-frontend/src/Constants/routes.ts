@@ -20,8 +20,9 @@ export const ROUTES = {
   LIBERACION:       "/liberacion",
   NO_CONFORMIDADES: "/no-conformidades",
   GESTION_CALIDAD: "/calidad",
-  LIBERACION_COCINA:    "/calidad/liberacion-cocina",
-  HISTORIAL_LIBERACION_COCINA: "/calidad/liberacion-cocina/historial",
+  LIBERACION_COCINA: "/calidad/liberacion-cocina",
+  /** Historial unificado (liberación cocina, verificación instalaciones, lavado botas/manos) */
+  HISTORIAL_CALIDAD: "/calidad/historial",
 
   // Órdenes de compra
   ORDENES_COMPRA:        "/ordenes-compra",
@@ -33,6 +34,10 @@ export const ROUTES = {
   CHECKLISTS:       "/maestros/checklists",
 } as const;
 
+/** Ruta previa del historial unificado (compatibilidad: redirige en `App.tsx`). */
+export const LEGACY_ROUTE_HISTORIAL_LIBERACION_COCINA =
+  "/calidad/liberacion-cocina/historial" as const;
+
 // ─── ETIQUETAS PARA BREADCRUMB ────────────────────────────────────────────────
 
 export const ROUTE_LABELS: Record<string, string> = {
@@ -42,10 +47,11 @@ export const ROUTE_LABELS: Record<string, string> = {
   "/lotes":                 "Lotes",
   "/liberacion":            "Liberación de lotes",
   "/no-conformidades":      "No conformidades",
+  "/calidad": "Calidad",
   "/calidad/verificacion-instalaciones": "Verificación instalaciones",
   "/calidad/lavado-botas-manos": "Lavado botas y manos",
   "/calidad/liberacion-cocina": "Liberación de cocina",
-  "/calidad/liberacion-cocina/historial": "Historial liberación cocina",
+  "/calidad/historial": "Historial unificado calidad",
   "/ordenes-compra":        "Órdenes de Compra",
   "/maestros":              "Maestros",
   "/maestros/proveedores":  "Proveedores",

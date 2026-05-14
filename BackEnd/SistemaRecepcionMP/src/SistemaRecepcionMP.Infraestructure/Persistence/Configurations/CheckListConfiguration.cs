@@ -97,10 +97,13 @@ public sealed class ResultadoChecklistConfiguration : IEntityTypeConfiguration<R
         // Un lote solo tiene un resultado por ítem de checklist
         builder.HasIndex(r => new { r.LoteRecibidoId, r.ItemChecklistId }).IsUnique();
 
-        // HasOne configurado desde LoteRecibidoConfiguration vía HasMany.
-        // Aquí solo se configura el lado ItemChecklist para evitar ItemChecklistId1.
+        builder.HasOne(r => r.Checklist)
+            .WithMany(c => c.Resultados)
+            .HasForeignKey(r => r.ChecklistId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasOne(r => r.ItemChecklist)
-            .WithMany()
+            .WithMany(i => i.Resultados)
             .HasForeignKey(r => r.ItemChecklistId)
             .OnDelete(DeleteBehavior.Restrict);
 

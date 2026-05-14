@@ -38,11 +38,15 @@ public sealed class RecepcionConfiguration : IEntityTypeConfiguration<Recepcion>
 
         builder.HasIndex(r => r.NumeroRecepcion).IsUnique();
 
+        // Solo existe la factura singular (Factura). La colección Facturas no se usa en el dominio
+        // y provocaría una segunda FK sombra (RecepcionId1) si EF la mapeara.
+        builder.Ignore(r => r.Facturas);
+
         builder.Property(r => r.OrdenCompraId)
             .IsRequired();
 
         builder.HasOne(r => r.OrdenCompra)
-            .WithMany()
+            .WithMany(o => o.Recepciones)
             .HasForeignKey(r => r.OrdenCompraId)
             .OnDelete(DeleteBehavior.Restrict);
 
@@ -94,11 +98,7 @@ public class FacturaConfiguration : IEntityTypeConfiguration<Factura>
         builder.Property(f => f.FechaFactura).IsRequired();
         builder.Property(f => f.ValorTotal).HasColumnType("decimal(18,2)");
 
-        // Relación con Recepcion
-        builder.HasOne(f => f.Recepcion)
-            .WithMany()
-            .HasForeignKey(f => f.RecepcionId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // La relación 1:1 con Recepcion se define en RecepcionConfiguration (evita RecepcionId1).
     }
 }
 

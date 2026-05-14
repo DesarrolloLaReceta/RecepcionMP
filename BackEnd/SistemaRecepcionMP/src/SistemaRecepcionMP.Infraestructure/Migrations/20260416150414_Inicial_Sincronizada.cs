@@ -11,7 +11,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            /*migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "CategoriasItem",
                 columns: table => new
                 {
@@ -327,8 +327,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     CreadoPorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreadoEn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ActualizadoEn = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    FechaFinalizacion = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    OrdenCompraId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    FechaFinalizacion = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -339,11 +338,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         principalTable: "OrdenesCompra",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Recepciones_OrdenesCompra_OrdenCompraId1",
-                        column: x => x.OrdenCompraId1,
-                        principalTable: "OrdenesCompra",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Recepciones_Proveedores_ProveedorId",
                         column: x => x.ProveedorId,
@@ -369,8 +363,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     ValorTotal = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 4, nullable: false),
                     AdjuntoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NotaCreditoNumero = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NotaCreditoValor = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: true),
-                    RecepcionId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    NotaCreditoValor = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -381,11 +374,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         principalTable: "Recepciones",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Facturas_Recepciones_RecepcionId1",
-                        column: x => x.RecepcionId1,
-                        principalTable: "Recepciones",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -468,7 +456,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     NumeroLoteProveedor = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CodigoLoteInterno = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     FechaFabricacion = table.Column<DateOnly>(type: "date", nullable: true),
-                    FechaVencimiento = table.Column<DateOnly>(type: "date", nullable: true),
+                    FechaVencimiento = table.Column<DateOnly>(type: "date", nullable: false),
                     CantidadRecibida = table.Column<decimal>(type: "decimal(12,3)", precision: 18, scale: 4, nullable: false),
                     CantidadRechazada = table.Column<decimal>(type: "decimal(12,3)", precision: 18, scale: 4, nullable: false, defaultValue: 0m),
                     UnidadMedida = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
@@ -481,7 +469,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     CodigoQr = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     RegistradoPor = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LoteRecibido_FechaVencimiento = table.Column<DateOnly>(type: "date", nullable: false),
                     DetalleOrdenCompraId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -705,8 +692,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                     Resultado = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Observacion = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
                     RegistradoPor = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ItemChecklistId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -723,11 +709,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                         principalTable: "ItemsChecklist",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_ResultadosChecklist_ItemsChecklist_ItemChecklistId1",
-                        column: x => x.ItemChecklistId1,
-                        principalTable: "ItemsChecklist",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_ResultadosChecklist_LotesRecibidos_LoteRecibidoId",
                         column: x => x.LoteRecibidoId,
@@ -899,11 +880,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Facturas_RecepcionId1",
-                table: "Facturas",
-                column: "RecepcionId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_InspeccionesVehiculo_RecepcionId",
                 table: "InspeccionesVehiculo",
                 column: "RecepcionId",
@@ -1011,11 +987,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 column: "OrdenCompraId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Recepciones_OrdenCompraId1",
-                table: "Recepciones",
-                column: "OrdenCompraId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Recepciones_ProveedorId",
                 table: "Recepciones",
                 column: "ProveedorId");
@@ -1061,11 +1032,6 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 column: "ItemChecklistId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ResultadosChecklist_ItemChecklistId1",
-                table: "ResultadosChecklist",
-                column: "ItemChecklistId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ResultadosChecklist_LoteRecibidoId_ItemChecklistId",
                 table: "ResultadosChecklist",
                 columns: new[] { "LoteRecibidoId", "ItemChecklistId" },
@@ -1079,13 +1045,13 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_TiposDocumentoExigidoCategoria_CategoriaId",
                 table: "TiposDocumentoExigidoCategoria",
-                column: "CategoriaId");*/
+                column: "CategoriaId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            /*migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "AccionesCorrectivas");
 
             migrationBuilder.DropTable(
@@ -1161,7 +1127,7 @@ namespace SistemaRecepcionMP.Infraestructure.Migrations
                 name: "Proveedores");
 
             migrationBuilder.DropTable(
-                name: "Usuarios");*/
+                name: "Usuarios");
         }
     }
 }
