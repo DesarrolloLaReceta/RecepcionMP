@@ -4,12 +4,9 @@
 
 
 /* ===== PICKER NATIVO ===== */
-/*
-   Fuerza el calendario/reloj nativo a tema oscuro
-   para que contraste con el fondo de la app.
-*/
+/* Picker nativo alineado con inputs claros */
 .field-date {
-  color-scheme: dark;
+  color-scheme: light;
   color: var(--text-primary);
 }
 

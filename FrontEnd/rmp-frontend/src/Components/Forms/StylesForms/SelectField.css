@@ -17,7 +17,7 @@
 
 /* Color del valor seleccionado real */
 .field-select:not([data-empty="true"]) {
-  color: var(--text-faintest); /* #CBD5E1 — igual que los inputs de texto */
+  color: var(--text-primary);
 }
 
 

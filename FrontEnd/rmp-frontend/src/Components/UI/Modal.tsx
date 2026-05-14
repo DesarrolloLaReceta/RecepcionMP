@@ -69,7 +69,7 @@ export function ModalFooter({
       <div>{leftSlot}</div>
       <div className="modal-footer-actions">
         {onCancel && (
-          <Button variant="ghost" size="sm" onClick={onCancel} disabled={loading}>
+          <Button variant="neutral" size="sm" onClick={onCancel} disabled={loading}>
             {cancelLabel}
           </Button>
         )}

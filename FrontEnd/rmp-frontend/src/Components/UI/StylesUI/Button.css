@@ -119,6 +119,22 @@
 }
 
 
+/* ===== VARIANTE: NEUTRAL (cancelar — no compite con el primario) ===== */
+.btn-neutral {
+  background:   #f3f4f6;
+  color:        var(--text-secondary);
+  border-color: var(--border-default);
+}
+.btn-neutral:hover:not(:disabled) {
+  background:   #e5e7eb;
+  border-color: var(--border-medium);
+  color:        var(--text-primary);
+}
+.btn-neutral:disabled {
+  opacity: 0.55;
+}
+
+
 /* ===== VARIANTE: DANGER ===== */
 .btn-danger {
   background:   var(--danger-bg);

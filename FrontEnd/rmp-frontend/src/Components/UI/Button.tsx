@@ -4,7 +4,7 @@ import "./StylesUI/Button.css";
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "neutral" | "danger" | "success";
 export type ButtonSize    = "xs" | "sm" | "md" | "lg";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
