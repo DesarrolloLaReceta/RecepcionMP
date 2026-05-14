@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState, useEffect, type ChangeEvent } from "react";
+import { useMemo, useRef, useState, useEffect, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Auth/AuthContext";
 import { Button } from "../../Components/UI/Index";
-import { SelectField, TextAreaField } from "../../Components/Forms/Index";
+import { SelectField, TextAreaField, TextField } from "../../Components/Forms/Index";
 import { ROUTES } from "../../Constants/routes";
 import { ZONAS_CALIDAD } from "../../Constants/zonasCalidad";
 import { calidadService, type GuardarVerificacionPayload } from "../../Services/calidad.service";
@@ -77,6 +77,36 @@ const SECCIONES_BASE: Seccion[] = [
   },
 ];
 
+function monthYearValue(d = new Date()): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function clearErrorsForKeys(
+  setFieldErrors: Dispatch<SetStateAction<Record<string, string[]>>>,
+  ...keys: string[]
+) {
+  setFieldErrors((prev) => {
+    const next = { ...prev };
+    for (const k of keys) delete next[k];
+    delete next.General;
+    return next;
+  });
+}
+
+function clearErrorsByPrefix(
+  setFieldErrors: Dispatch<SetStateAction<Record<string, string[]>>>,
+  prefix: string
+) {
+  setFieldErrors((prev) => {
+    const next = { ...prev };
+    for (const k of Object.keys(next)) {
+      if (k.startsWith(prefix)) delete next[k];
+    }
+    delete next.General;
+    return next;
+  });
+}
+
 function calcCumplimiento(filas: ItemFila[]): number {
   if (filas.length === 0) return 0;
   const suma = filas.reduce((acc, fila) => acc + fila.calificacion, 0);
@@ -91,7 +121,21 @@ export default function VerificacionInstalaciones() {
   const [observacionesGenerales, setObservacionesGenerales] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [periodoMesAnio, setPeriodoMesAnio] = useState(monthYearValue);
+  const [nombreResponsable, setNombreResponsable] = useState("");
+  const [cargoResponsable, setCargoResponsable] = useState("");
+  const responsableInicializado = useRef(false);
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  useEffect(() => {
+    if (responsableInicializado.current) return;
+    const nom = displayName?.trim();
+    const cargo = roles?.[0]?.trim();
+    if (!nom && !cargo) return;
+    if (nom) setNombreResponsable(nom);
+    if (cargo) setCargoResponsable(cargo);
+    responsableInicializado.current = true;
+  }, [displayName, roles]);
 
   // --- ESTADOS DEL STEPPER Y CHECKLIST ---
   const [currentStep, setCurrentStep] = useState(0);
@@ -124,6 +168,7 @@ export default function VerificacionInstalaciones() {
   }, [secciones]);
 
   const actualizarFila = (seccionId: string, filaId: string, key: keyof ItemFila, value: string | Calificacion | File[]) => {
+    clearErrorsByPrefix(setFieldErrors, "Secciones");
     setSecciones((prev) =>
       prev.map((seccion) =>
         seccion.id !== seccionId
@@ -153,6 +198,28 @@ export default function VerificacionInstalaciones() {
       setFieldErrors({ Zona: ["Selecciona una zona para registrar la verificación."] });
       return;
     }
+    if (!nombreResponsable.trim() || !cargoResponsable.trim()) {
+      const err: Record<string, string[]> = {};
+      if (!nombreResponsable.trim()) {
+        err.NombreResponsable = ["El nombre del responsable es obligatorio."];
+      }
+      if (!cargoResponsable.trim()) {
+        err.CargoResponsable = ["El cargo del responsable es obligatorio."];
+      }
+      setFieldErrors(err);
+      return;
+    }
+    const periodoParts = periodoMesAnio.split("-");
+    if (periodoParts.length !== 2) {
+      setFieldErrors({ PeriodoMesAnio: ["Selecciona un mes y año válidos."] });
+      return;
+    }
+    const periodoAnio = Number(periodoParts[0]);
+    const periodoMes = Number(periodoParts[1]);
+    if (!periodoAnio || periodoMes < 1 || periodoMes > 12) {
+      setFieldErrors({ PeriodoMesAnio: ["Selecciona un mes y año válidos."] });
+      return;
+    }
 
     setSubmitting(true);
     setFieldErrors({});
@@ -160,11 +227,14 @@ export default function VerificacionInstalaciones() {
     try {
       const payload: GuardarVerificacionPayload = {
         zona,
+        periodoAnio,
+        periodoMes,
         cumplimientoTotal,
         secciones: secciones.map((seccion) => ({
           seccion: seccion.titulo,
           cumplimiento: calcCumplimiento(seccion.filas),
           filas: seccion.filas.map((fila) => ({
+            aspectoId: fila.id,
             item: fila.item,
             calificacion: fila.calificacion,
             hallazgos: fila.hallazgos,
@@ -172,12 +242,14 @@ export default function VerificacionInstalaciones() {
           })),
         })),
         observacionesGenerales: observacionesGenerales || undefined,
-        nombreResponsable: displayName || "Usuario AD",
-        cargoResponsable: roles[0] || "No especificado",
+        nombreResponsable: nombreResponsable.trim(),
+        cargoResponsable: cargoResponsable.trim(),
       };
 
-      const fotos = secciones.flatMap((seccion) => seccion.filas.flatMap((fila) => fila.fotos));
-      await calidadService.guardarVerificacionInstalaciones(payload, fotos);
+      const fotosPorAspecto = secciones.flatMap((seccion) =>
+        seccion.filas.flatMap((fila) => fila.fotos.map((file) => ({ aspectoId: fila.id, file })))
+      );
+      await calidadService.guardarVerificacionInstalaciones(payload, fotosPorAspecto);
       
       // Marcar como completada en la lista visual
       setProgresoZonas(prev => prev.map(z => z.nombre === zona ? { ...z, completada: true } : z));
@@ -247,7 +319,10 @@ export default function VerificacionInstalaciones() {
                 <button
                   key={i}
                   type="button"
-                  onClick={() => setZona(item.nombre)}
+                  onClick={() => {
+                    setZona(item.nombre);
+                    clearErrorsForKeys(setFieldErrors, "Zona");
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -276,6 +351,47 @@ export default function VerificacionInstalaciones() {
               );
             })}
           </div>
+
+            <div className="nr-form-grid-1" style={{ marginTop: "1.25rem" }}>
+              <label className="field-label">Periodo de inspección (mes y año)</label>
+              <input
+                className="nr-search-input"
+                type="month"
+                value={periodoMesAnio}
+                onChange={(e) => {
+                  setPeriodoMesAnio(e.target.value);
+                  clearErrorsForKeys(setFieldErrors, "PeriodoMesAnio");
+                }}
+              />
+              {fieldErrors.PeriodoMesAnio?.[0] && (
+                <p style={{ color: "#ff6b6b", fontSize: "12px", marginTop: "6px" }}>{fieldErrors.PeriodoMesAnio[0]}</p>
+              )}
+            </div>
+
+            <div className="nr-form-grid-2" style={{ marginTop: "1rem" }}>
+              <TextField
+                label="Nombre del responsable"
+                required
+                placeholder="Quién firma la verificación"
+                value={nombreResponsable}
+                onChange={(e) => {
+                  setNombreResponsable(e.target.value);
+                  clearErrorsForKeys(setFieldErrors, "NombreResponsable");
+                }}
+                error={fieldErrors.NombreResponsable?.[0]}
+              />
+              <TextField
+                label="Cargo del responsable"
+                required
+                placeholder="Ej. Analista de Calidad"
+                value={cargoResponsable}
+                onChange={(e) => {
+                  setCargoResponsable(e.target.value);
+                  clearErrorsForKeys(setFieldErrors, "CargoResponsable");
+                }}
+                error={fieldErrors.CargoResponsable?.[0]}
+              />
+            </div>
 
             {/* Mensaje de validación visual */}
             {!zona && (
@@ -372,7 +488,10 @@ export default function VerificacionInstalaciones() {
               rows={4}
               placeholder="Observaciones finales de la verificación..."
               value={observacionesGenerales}
-              onChange={(e) => setObservacionesGenerales(e.target.value)}
+              onChange={(e) => {
+                setObservacionesGenerales(e.target.value);
+                clearErrorsForKeys(setFieldErrors, "ObservacionesGenerales");
+              }}
               error={fieldErrors.ObservacionesGenerales?.[0]}
             />
             <div className="vi-total" style={{ marginTop: '2rem' }}>

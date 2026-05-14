@@ -3,6 +3,8 @@ using SistemaRecepcionMP.Domain.Services;
 using SistemaRecepcionMP.Domain.Interfaces;
 using SistemaRecepcionMP.Infrastructure.ExternalServices;
 using SistemaRecepcionMP.Infrastructure.FileStorage;
+using SistemaRecepcionMP.Infraestructure.Persistence.Services;
+using SistemaRecepcionMP.Infraestructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -50,6 +52,10 @@ public static class DependencyInjection
             services.AddScoped<IFileStorageService, AzureBlobStorageService>();
         else
             services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
+        services.AddScoped<ICalidadEvidenciaFileStorage, CalidadEvidenciaFileStorage>();
+        services.AddScoped<ICalidadEvidenciaUrlResolver, CalidadEvidenciaUrlResolver>();
+        services.AddScoped<ICalidadQueryService, CalidadQueryService>();
 
         // ── Servicios externos ────────────────────────────────────────────────
         services.AddScoped<IQrCodeService, QrCodeService>();

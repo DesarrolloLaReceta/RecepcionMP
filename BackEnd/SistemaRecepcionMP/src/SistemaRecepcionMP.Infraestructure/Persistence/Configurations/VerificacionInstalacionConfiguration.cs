@@ -23,6 +23,14 @@ public sealed class VerificacionInstalacionConfiguration : IEntityTypeConfigurat
             .HasPrecision(5, 2)
             .IsRequired();
 
+        builder.Property(x => x.NombreResponsable)
+            .IsRequired()
+            .HasMaxLength(150);
+
+        builder.Property(x => x.CargoResponsable)
+            .IsRequired()
+            .HasMaxLength(100);
+
         builder.HasOne(x => x.Usuario)
             .WithMany()
             .HasForeignKey(x => x.UsuarioId)

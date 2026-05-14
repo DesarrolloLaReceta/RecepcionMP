@@ -34,6 +34,15 @@ export default function LavadoBotasManosPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const clearFieldErrors = (...keys: string[]) => {
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      for (const k of keys) delete next[k];
+      delete next.General;
+      return next;
+    });
+  };
+
   const onGuardar = async () => {
     // Validación local: Aseguramos que los nuevos campos no estén vacíos
     if (!turno || !piso || !entrada || !nombreResponsable || !cargoResponsable) {
@@ -107,7 +116,10 @@ export default function LavadoBotasManosPage() {
               className="nr-search-input"
               type="date"
               value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
+              onChange={(e) => {
+                setFecha(e.target.value);
+                clearFieldErrors("Fecha");
+              }}
             />
           </div>
 
@@ -116,7 +128,10 @@ export default function LavadoBotasManosPage() {
             required
             placeholder="Selecciona turno"
             value={turno}
-            onChange={(e) => setTurno(e.target.value)}
+            onChange={(e) => {
+              setTurno(e.target.value);
+              clearFieldErrors("Turno");
+            }}
             options={TURNOS.map((t) => ({ value: t, label: t }))}
             error={fieldErrors.Turno?.[0]}
           />
@@ -128,7 +143,10 @@ export default function LavadoBotasManosPage() {
             required
             placeholder="Selecciona piso"
             value={piso}
-            onChange={(e) => setPiso(e.target.value)}
+            onChange={(e) => {
+              setPiso(e.target.value);
+              clearFieldErrors("Piso");
+            }}
             options={PISOS.map((p) => ({ value: p, label: p }))}
             error={fieldErrors.Piso?.[0]}
           />
@@ -137,7 +155,10 @@ export default function LavadoBotasManosPage() {
             required
             placeholder="Selecciona entrada"
             value={entrada}
-            onChange={(e) => setEntrada(e.target.value)}
+            onChange={(e) => {
+              setEntrada(e.target.value);
+              clearFieldErrors("Entrada");
+            }}
             options={ENTRADAS.map((ent) => ({ value: ent, label: ent }))}
             error={fieldErrors.Entrada?.[0]}
           />
@@ -150,7 +171,10 @@ export default function LavadoBotasManosPage() {
             required
             placeholder="Quién realiza la inspección"
             value={nombreResponsable}
-            onChange={(e) => setNombreResponsable(e.target.value)}
+            onChange={(e) => {
+              setNombreResponsable(e.target.value);
+              clearFieldErrors("NombreResponsable");
+            }}
             error={fieldErrors.NombreResponsable?.[0]}
           />
           <TextField
@@ -158,7 +182,10 @@ export default function LavadoBotasManosPage() {
             required
             placeholder="Ej. Analista de Calidad"
             value={cargoResponsable}
-            onChange={(e) => setCargoResponsable(e.target.value)}
+            onChange={(e) => {
+              setCargoResponsable(e.target.value);
+              clearFieldErrors("CargoResponsable");
+            }}
             error={fieldErrors.CargoResponsable?.[0]}
           />
         </div>
@@ -169,7 +196,10 @@ export default function LavadoBotasManosPage() {
             required
             min={0}
             value={personasRevisadas}
-            onChange={(e) => setPersonasRevisadas(e.target.value)}
+            onChange={(e) => {
+              setPersonasRevisadas(e.target.value);
+              clearFieldErrors("PersonasRevisadas");
+            }}
             error={fieldErrors.PersonasRevisadas?.[0]}
           />
         </div>
@@ -179,7 +209,10 @@ export default function LavadoBotasManosPage() {
           rows={3}
           placeholder="Describe si hubo incumplimientos..."
           value={novedades}
-          onChange={(e) => setNovedades(e.target.value)}
+          onChange={(e) => {
+            setNovedades(e.target.value);
+            clearFieldErrors("Novedades");
+          }}
           error={fieldErrors.Novedades?.[0]}
         />
 
@@ -188,7 +221,10 @@ export default function LavadoBotasManosPage() {
           rows={3}
           placeholder="Notas generales de la jornada..."
           value={observaciones}
-          onChange={(e) => setObservaciones(e.target.value)}
+          onChange={(e) => {
+            setObservaciones(e.target.value);
+            clearFieldErrors("Observaciones");
+          }}
           error={fieldErrors.Observaciones?.[0]}
         />
 

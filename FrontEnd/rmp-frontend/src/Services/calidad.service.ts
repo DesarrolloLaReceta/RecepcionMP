@@ -1,6 +1,7 @@
 import { apiClient } from "./apiClient";
 
 export interface VerificacionFilaPayload {
+  aspectoId: string;
   item: string;
   calificacion: 1 | 2;
   hallazgos: string;
@@ -15,6 +16,8 @@ export interface VerificacionSeccionPayload {
 
 export interface GuardarVerificacionPayload {
   zona: string;
+  periodoAnio: number;
+  periodoMes: number;
   cumplimientoTotal: number;
   secciones: VerificacionSeccionPayload[];
   observacionesGenerales?: string;
@@ -93,22 +96,24 @@ export interface LiberacionCocinaDetalle {
 export const calidadService = {
   async guardarVerificacionInstalaciones(
     payload: GuardarVerificacionPayload,
-    fotos: File[]
+    fotosPorAspecto: { aspectoId: string; file: File }[]
   ): Promise<{ id: string }> {
     const form = new FormData();
     form.append("Zona", payload.zona);
     form.append("CumplimientoTotal", String(payload.cumplimientoTotal));
     form.append("DataJson", JSON.stringify(payload));
+    form.append("NombreResponsable", payload.nombreResponsable.trim());
+    form.append("CargoResponsable", payload.cargoResponsable.trim());
 
     if (payload.observacionesGenerales?.trim()) {
       form.append("ObservacionesGenerales", payload.observacionesGenerales.trim());
     }
 
-    fotos.forEach((foto) => {
-      form.append("Fotos", foto);
-    });
+    for (const { aspectoId, file } of fotosPorAspecto) {
+      form.append(`Fotos__${aspectoId}`, file);
+    }
 
-    const { data } = await apiClient.post("/api/Calidad/verificacion-instalaciones", form, {
+    const { data } = await apiClient.post("/api/VerificacionInstalaciones", form, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
@@ -131,7 +136,7 @@ export const calidadService = {
     if (payload.observaciones?.trim()) form.append("Observaciones", payload.observaciones.trim());
     if (fotoEvidencia) form.append("FotoEvidencia", fotoEvidencia);
 
-    const { data } = await apiClient.post("/api/Calidad/lavado-botas-manos", form, {
+    const { data } = await apiClient.post("/api/LavadoManos", form, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return data;
@@ -141,25 +146,25 @@ export const calidadService = {
     payload: RegistrarLiberacionCocinaPayload
   ): Promise<{ id: string }> {
     // Al enviar el objeto directo, axios lo manda como application/json por defecto
-    const { data } = await apiClient.post("/api/Calidad/liberacion-cocinas", payload);
+    const { data } = await apiClient.post("/api/LiberacionCocina", payload);
     return data;
   },
 
   async getDashboardStats(): Promise<DashboardCalidadDto> {
-    const { data } = await apiClient.get<DashboardCalidadDto>("/api/Calidad/stats");
+    const { data } = await apiClient.get<DashboardCalidadDto>("/api/CalidadDashboard/stats");
     return data;
   },
 
   async getLiberacionesCocinasHistorial(): Promise<LiberacionCocinaHistorialItem[]> {
     const { data } = await apiClient.get<LiberacionCocinaHistorialItem[]>(
-      "/api/Calidad/liberacion-cocinas"
+      "/api/LiberacionCocina"
     );
     return data;
   },
 
   async getLiberacionCocinaById(id: number): Promise<LiberacionCocinaDetalle> {
     const { data } = await apiClient.get<LiberacionCocinaDetalle>(
-      `/api/Calidad/liberacion-cocinas/${id}`
+      `/api/LiberacionCocina/${id}`
     );
     return data;
   },

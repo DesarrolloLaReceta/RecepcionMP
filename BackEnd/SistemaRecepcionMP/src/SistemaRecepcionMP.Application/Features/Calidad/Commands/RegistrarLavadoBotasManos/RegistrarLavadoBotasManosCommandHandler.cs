@@ -8,29 +8,28 @@ namespace SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarLava
 public sealed class RegistrarLavadoBotasManosCommandHandler : IRequestHandler<RegistrarLavadoBotasManosCommand, Guid>
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IFileStorageService _fileStorageService;
+    private readonly ICalidadEvidenciaFileStorage _calidadFotos;
     private readonly ICurrentUserService _currentUserService;
 
     public RegistrarLavadoBotasManosCommandHandler(
         IUnitOfWork unitOfWork,
-        IFileStorageService fileStorageService,
+        ICalidadEvidenciaFileStorage calidadFotos,
         ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _fileStorageService = fileStorageService;
+        _calidadFotos = calidadFotos;
         _currentUserService = currentUserService;
     }
 
     public async Task<Guid> Handle(RegistrarLavadoBotasManosCommand request, CancellationToken cancellationToken)
     {
-        string? rutaFoto = null;
-        if (request.FotoContenido is { Length: > 0 } && !string.IsNullOrWhiteSpace(request.FotoNombreArchivo))
+        string? nombreArchivoFoto = null;
+        if (request.FotoContenido is { Length: > 0 })
         {
-            var nombre = $"lavado-botas-manos/{DateTime.UtcNow:yyyyMMdd}/{Guid.NewGuid()}_{request.FotoNombreArchivo}";
-            rutaFoto = await _fileStorageService.SubirArchivoAsync(
+            var ext = Path.GetExtension(request.FotoNombreArchivo ?? string.Empty);
+            nombreArchivoFoto = await _calidadFotos.GuardarFotoAsync(
                 request.FotoContenido,
-                nombre,
-                "documentos-recepcion",
+                string.IsNullOrEmpty(ext) ? ".bin" : ext,
                 cancellationToken);
         }
 
@@ -42,7 +41,7 @@ public sealed class RegistrarLavadoBotasManosCommandHandler : IRequestHandler<Re
             request.PersonasRevisadas,
             request.Novedades,
             request.Observaciones,
-            rutaFoto,
+            nombreArchivoFoto,
             _currentUserService.UserId,
             request.NombreResponsable.Trim(), // Ahora sí está dentro del constructor
             request.CargoResponsable.Trim()    // Sin coma aquí porque es el último parámetro

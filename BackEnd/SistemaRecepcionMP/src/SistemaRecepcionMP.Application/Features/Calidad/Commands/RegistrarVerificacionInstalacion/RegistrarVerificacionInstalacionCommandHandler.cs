@@ -10,16 +10,16 @@ public sealed class RegistrarVerificacionInstalacionCommandHandler
     : IRequestHandler<RegistrarVerificacionInstalacionCommand, Guid>
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IFileStorageService _fileStorageService;
+    private readonly ICalidadEvidenciaFileStorage _calidadFotos;
     private readonly ICurrentUserService _currentUserService;
 
     public RegistrarVerificacionInstalacionCommandHandler(
         IUnitOfWork unitOfWork,
-        IFileStorageService fileStorageService,
+        ICalidadEvidenciaFileStorage calidadFotos,
         ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _fileStorageService = fileStorageService;
+        _calidadFotos = calidadFotos;
         _currentUserService = currentUserService;
     }
 
@@ -29,23 +29,24 @@ public sealed class RegistrarVerificacionInstalacionCommandHandler
     {
         var cabecera = new VerificacionInstalacion(
             request.Zona.Trim(),
-            DateTime.UtcNow,
+            request.FechaPeriodo,
             _currentUserService.UserId,
-            request.CumplimientoTotal);
+            request.CumplimientoTotal,
+            request.NombreResponsable.Trim(),
+            request.CargoResponsable.Trim());
 
         foreach (var detalleRequest in request.Detalles)
         {
-            var rutasFotos = new List<string>();
+            var nombresFotos = new List<string>();
             foreach (var foto in detalleRequest.Fotos)
             {
                 if (foto.Contenido.Length == 0) continue;
-                var nombre = $"verificaciones-instalaciones/{cabecera.Id}/{detalleRequest.AspectoId}/{Guid.NewGuid()}_{foto.NombreArchivo}";
-                var ruta = await _fileStorageService.SubirArchivoAsync(
+                var ext = Path.GetExtension(foto.NombreArchivo);
+                var guardado = await _calidadFotos.GuardarFotoAsync(
                     foto.Contenido,
-                    nombre,
-                    "documentos-recepcion",
+                    string.IsNullOrEmpty(ext) ? ".bin" : ext,
                     cancellationToken);
-                rutasFotos.Add(ruta);
+                nombresFotos.Add(guardado);
             }
 
             var detalle = new VerificacionInstalacionDetalle(
@@ -56,7 +57,7 @@ public sealed class RegistrarVerificacionInstalacionCommandHandler
                 detalleRequest.Hallazgo,
                 detalleRequest.PlanAccion,
                 detalleRequest.Responsable,
-                rutasFotos.Count == 0 ? null : JsonSerializer.Serialize(rutasFotos));
+                nombresFotos.Count == 0 ? null : JsonSerializer.Serialize(nombresFotos));
 
             cabecera.AgregarDetalle(detalle);
         }

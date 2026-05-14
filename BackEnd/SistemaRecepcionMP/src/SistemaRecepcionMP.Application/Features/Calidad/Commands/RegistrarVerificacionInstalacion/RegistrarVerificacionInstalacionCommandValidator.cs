@@ -10,6 +10,18 @@ public sealed class RegistrarVerificacionInstalacionCommandValidator : AbstractV
             .NotEmpty()
             .MaximumLength(100);
 
+        RuleFor(x => x.FechaPeriodo)
+            .Must(d => d.Day == 1 && d.TimeOfDay == TimeSpan.Zero)
+            .WithMessage("La fecha de periodo debe ser el primer día del mes.");
+
+        RuleFor(x => x.NombreResponsable)
+            .NotEmpty()
+            .MaximumLength(150);
+
+        RuleFor(x => x.CargoResponsable)
+            .NotEmpty()
+            .MaximumLength(100);
+
         RuleFor(x => x.CumplimientoTotal)
             .InclusiveBetween(0, 100);
 

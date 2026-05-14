@@ -6,8 +6,12 @@ namespace SistemaRecepcionMP.Application.Features.Calidad.Commands.RegistrarVeri
 public sealed class RegistrarVerificacionInstalacionCommand : IRequest<Guid>, IAuditableCommand
 {
     public string Zona { get; set; } = string.Empty;
+    /// <summary>Primer día del mes de inspección (solo mes/año en UI).</summary>
+    public DateTime FechaPeriodo { get; set; }
     public decimal CumplimientoTotal { get; set; }
     public string? ObservacionesGenerales { get; set; }
+    public string NombreResponsable { get; set; } = string.Empty;
+    public string CargoResponsable { get; set; } = string.Empty;
     public List<RegistrarVerificacionInstalacionDetalleDto> Detalles { get; set; } = new();
 
     public string EntidadAfectada => "VerificacionInstalacion";

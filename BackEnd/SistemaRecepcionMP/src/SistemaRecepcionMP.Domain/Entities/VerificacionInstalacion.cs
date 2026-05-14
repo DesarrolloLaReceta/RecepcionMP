@@ -6,6 +6,8 @@ public sealed class VerificacionInstalacion : BaseEntity
     public DateTime Fecha { get; private set; }
     public Guid UsuarioId { get; private set; }
     public decimal CumplimientoTotal { get; private set; }
+    public string NombreResponsable { get; private set; } = string.Empty;
+    public string CargoResponsable { get; private set; } = string.Empty;
 
     public Usuario Usuario { get; private set; } = null!;
 
@@ -18,12 +20,16 @@ public sealed class VerificacionInstalacion : BaseEntity
         string zona,
         DateTime fecha,
         Guid usuarioId,
-        decimal cumplimientoTotal)
+        decimal cumplimientoTotal,
+        string nombreResponsable,
+        string cargoResponsable)
     {
         Zona = zona;
         Fecha = fecha;
         UsuarioId = usuarioId;
         CumplimientoTotal = cumplimientoTotal;
+        NombreResponsable = nombreResponsable;
+        CargoResponsable = cargoResponsable;
     }
 
     public void AgregarDetalle(VerificacionInstalacionDetalle detalle)
